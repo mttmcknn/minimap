@@ -1,3 +1,6 @@
+mod locking;
+pub use locking::OperationLock;
+
 use anyhow::{Context, Result};
 use minimap_schemas::{
     canonical_json, AppProfile, Edge, MinimapConfig, Place, CONFIG_SCHEMA_VERSION,
@@ -31,12 +34,10 @@ pub const LEGACY_MINIMAP_MESSAGE: &str = "this project has an incompatible pre-l
 
 pub const INCOMPLETE_MINIMAP_MESSAGE: &str = "this project has a partial lean v1 `.minimap/` layout. Run `minimap init` again to non-destructively create the missing config and graph directories.";
 
-// Canonical skill text. `init` and the Claude Code plugin must install the same
-// source, so embed the plugin's SKILL.md directly (see
-// docs/MINIMAP_V1_LEAN_DESIGN.md skill-source invariant). The skill-equality
-// test below guards against drift.
-pub const APP_NAVIGATION_SKILL_BODY: &str =
-    include_str!("../../../plugins/minimap-claude-code/skills/minimap-app-navigation/SKILL.md");
+// The plugin's SKILL.md is canonical. Bundle an exact copy inside this crate
+// so registry packages are self-contained; the workspace test below rejects
+// drift between the packaged copy and the plugin.
+pub const APP_NAVIGATION_SKILL_BODY: &str = include_str!("../skills/minimap-app-navigation.md");
 
 #[derive(Debug, Clone, Serialize)]
 pub struct InitChange {
@@ -272,10 +273,36 @@ pub fn load_config(root: &Path) -> Result<MinimapConfig> {
 
 pub fn load_graph(root: &Path) -> Result<Graph> {
     reject_legacy_layout(root)?;
-    Ok(Graph {
+    let mut graph = Graph {
         places: load_objects(root.join(".minimap/graph/places"), PLACE_SCHEMA_VERSION)?,
         edges: load_objects(root.join(".minimap/graph/edges"), EDGE_SCHEMA_VERSION)?,
-    })
+    };
+    for edge in graph.edges.values_mut() {
+        edge.validate()
+            .with_context(|| format!("invalid recipe in edge {}", edge.id))?;
+        for endpoint in [&mut edge.from, &mut edge.to] {
+            if let Some(place) = graph.places.get(&endpoint.id) {
+                endpoint.slug = place.slug.clone();
+            }
+        }
+    }
+    Ok(graph)
+}
+
+pub fn find_root(start: &Path) -> Result<PathBuf> {
+    if start.join(".minimap/config.json").is_file() {
+        return Ok(start.to_path_buf());
+    }
+    let absolute = start.canonicalize()?;
+    for path in absolute.ancestors() {
+        if path.join(".minimap/config.json").is_file() {
+            return Ok(path.to_path_buf());
+        }
+        if path.join(".git").exists() {
+            break;
+        }
+    }
+    Ok(start.to_path_buf())
 }
 
 fn reject_legacy_layout(root: &Path) -> Result<()> {
@@ -306,7 +333,12 @@ where
         if path.extension().and_then(|ext| ext.to_str()) != Some("json") {
             continue;
         }
-        let value = read_json(&path)?;
+        let mut value = read_json(&path)?;
+        // Read v1 recipes without rewriting a checkout. New writes use v2 so
+        // older clients reject fallback metadata they do not understand.
+        if schema == EDGE_SCHEMA_VERSION && value["schema_version"] == "minimap.edge.v1" {
+            value["schema_version"] = json!(EDGE_SCHEMA_VERSION);
+        }
         let actual = value.get("schema_version").and_then(Value::as_str);
         if actual != Some(schema) {
             anyhow::bail!(
@@ -404,36 +436,20 @@ pub fn write_json(path: &Path, value: &Value) -> Result<()> {
 /// of a truncated one that would fail the whole graph load.
 fn write_atomic(path: &Path, bytes: &[u8]) -> Result<()> {
     use std::io::Write;
-
-    let tmp = tmp_sibling_path(path);
-    // Scope the file handle so it is closed before the rename.
-    {
-        let mut file = fs::File::create(&tmp)
-            .with_context(|| format!("create temp file {}", tmp.display()))?;
-        if let Err(error) = file.write_all(bytes).and_then(|()| file.sync_all()) {
-            // Best-effort cleanup so a failed write never leaves a temp file behind.
-            let _ = fs::remove_file(&tmp);
-            return Err(error).with_context(|| format!("write temp file {}", tmp.display()));
-        }
+    if fs::read(path).ok().as_deref() == Some(bytes) {
+        return Ok(());
     }
-    if let Err(error) = fs::rename(&tmp, path) {
-        let _ = fs::remove_file(&tmp);
-        return Err(error)
-            .with_context(|| format!("rename {} -> {}", tmp.display(), path.display()));
-    }
+    let parent = path.parent().context("JSON path has no parent")?;
+    let mut temporary = tempfile::NamedTempFile::new_in(parent)?;
+    temporary.write_all(bytes)?;
+    temporary.as_file().sync_all()?;
+    temporary
+        .persist(path)
+        .map_err(|error| error.error)
+        .with_context(|| format!("replace {}", path.display()))?;
+    #[cfg(unix)]
+    fs::File::open(parent)?.sync_all()?;
     Ok(())
-}
-
-fn tmp_sibling_path(path: &Path) -> PathBuf {
-    let mut name = path
-        .file_name()
-        .map(|n| n.to_os_string())
-        .unwrap_or_default();
-    name.push(".tmp");
-    match path.parent() {
-        Some(parent) => parent.join(name),
-        None => PathBuf::from(name),
-    }
 }
 
 pub fn commit_place(root: &Path, place: &Place) -> Result<PathBuf> {
@@ -443,6 +459,7 @@ pub fn commit_place(root: &Path, place: &Place) -> Result<PathBuf> {
 }
 
 pub fn commit_edge(root: &Path, edge: &Edge) -> Result<PathBuf> {
+    edge.validate()?;
     let path = edge_path(root, &edge.id);
     write_json(&path, &serde_json::to_value(edge)?)?;
     Ok(path)
@@ -497,6 +514,19 @@ pub fn validate_graph(root: &Path) -> Vec<Value> {
         }
     };
     if config.is_some() {
+        let mut identities = BTreeMap::new();
+        let mut duplicate_identity = None;
+        for place in graph.places.values() {
+            for baseline in std::iter::once(&place.baseline).chain(&place.variants) {
+                if identities
+                    .insert(&baseline.identity_hash, &place.id)
+                    .is_some_and(|id| id != &place.id)
+                {
+                    duplicate_identity = Some(baseline.identity_hash.clone());
+                }
+            }
+        }
+        checks.push(json!({"name":"unique_identities", "status": if duplicate_identity.is_none() {"pass"} else {"fail"}, "detail":duplicate_identity}));
         let mut slugs = BTreeSet::new();
         let mut duplicate = None;
         for place in graph.places.values() {
@@ -549,8 +579,15 @@ mod tests {
 
     #[test]
     fn claude_skill_text_matches_plugin_skill_file() {
-        let skill_md = Path::new(env!("CARGO_MANIFEST_DIR"))
+        let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+        let skill_md = manifest_dir
             .join("../../plugins/minimap-claude-code/skills/minimap-app-navigation/SKILL.md");
+        if !skill_md.exists() && manifest_dir.join(".cargo_vcs_info.json").is_file() {
+            // Registry archives contain the bundled skill, but not the plugin
+            // tree. The workspace test checks the canonical copy before release.
+            assert!(!APP_NAVIGATION_SKILL_BODY.trim().is_empty());
+            return;
+        }
         let contents = fs::read_to_string(&skill_md)
             .unwrap_or_else(|err| panic!("read {}: {err}", skill_md.display()));
         assert_eq!(
@@ -645,8 +682,8 @@ mod tests {
             fs::read_to_string(&path).unwrap(),
             canonical_json(&json!({"v": 2}))
         );
-        // The temp sibling used for staging must not survive a successful write.
-        assert!(!tmp_sibling_path(&path).exists());
+        // Successful writes leave only the destination, regardless of staging name.
+        assert_eq!(fs::read_dir(temp.path()).unwrap().count(), 1);
     }
 
     // FIX 2: duplicate ids and filename/id mismatch.

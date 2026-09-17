@@ -1,0 +1,6 @@
+# Keep recorded benchmark bytes stable across Git's platform EOL settings.
+evals/results/** -text
+# Matplotlib SVG paths contain trailing spaces; the CSV writer emits CRLF.
+evals/results/**/*.svg whitespace=-blank-at-eol linguist-generated=true
+evals/results/**/*.csv whitespace=cr-at-eol linguist-generated=true
+evals/results/**/*.json linguist-generated=true

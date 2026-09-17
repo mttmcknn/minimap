@@ -1,3 +1,8 @@
+mod budget;
+mod navigation;
+mod observation;
+use observation::{observe_after_action, observe_layout};
+
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use minimap_android::{
@@ -8,10 +13,10 @@ use minimap_core::{
     detect_overlay, fingerprint_layout, fingerprint_usable, match_place, normalize_label,
     place_id_for_slug, redact_layout,
 };
-use minimap_graph::{exit_code_for_status, resolve_path};
+use minimap_graph::exit_code_for_status;
 use minimap_repo::{
-    commit_edge, commit_place, edge_path, load_config, load_graph, remove_place_file, run_init,
-    validate_graph, Graph, InitOptions,
+    commit_edge, commit_place, load_config, load_graph, run_init, validate_graph, Graph,
+    InitOptions,
 };
 use minimap_schemas::{
     canonical_json, ActionStep, Edge, EdgeEndpoint, MinimapResult, Place, PlaceBaseline, Point,
@@ -21,7 +26,6 @@ use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::Command as ProcessCommand;
 use std::thread;
 use std::time::{Duration, SystemTime};
 
@@ -35,6 +39,9 @@ const LAYOUT_CACHE_TTL_SECS: u64 = 30;
 #[command(version)]
 #[command(about = "Android navigation memory for AI agents.")]
 struct Cli {
+    /// Indent JSON for human inspection; compact JSON is the agent default.
+    #[arg(long, global = true)]
+    pretty: bool,
     #[arg(long)]
     json: bool,
     #[arg(long)]
@@ -44,6 +51,9 @@ struct Cli {
     /// Android device serial to target when more than one device is attached.
     #[arg(long, global = true, env = "ANDROID_SERIAL")]
     serial: Option<String>,
+    /// Continue a goal using the token returned in data.recovery.
+    #[arg(long, global = true)]
+    recovery: Option<String>,
     #[command(subcommand)]
     command: Commands,
 }
@@ -62,11 +72,24 @@ enum Commands {
         refresh_skills: bool,
         #[arg(long = "no-skills")]
         no_skills: bool,
+        /// Bind this graph to one Android application package.
+        #[arg(long)]
+        package: Option<String>,
     },
     /// Check repo graph health and Android device readiness.
-    Doctor,
+    Doctor {
+        /// Validate the shared graph without Android tools or a device (for CI).
+        #[arg(long)]
+        repo_only: bool,
+    },
     /// Identify the current semantic place from one Android layout observation.
     Whereami {
+        /// Explicit host confirmation of a changed screen after UI/source verification.
+        #[arg(long, conflicts_with = "label")]
+        confirm_place: Option<String>,
+        /// Bypass the recent observation cache.
+        #[arg(long)]
+        fresh: bool,
         #[arg(long)]
         label: Option<String>,
         /// If the label slug collides with a different known place, append the
@@ -76,7 +99,19 @@ enum Commands {
         allow_duplicate_label: bool,
     },
     /// Navigate to a known place through verified graph edges.
-    Go { target: String },
+    Go {
+        target: String,
+        /// Verify instance/state anchors in the fresh destination; repeat for AND.
+        #[arg(long = "expect")]
+        expectations: Vec<String>,
+        /// Prefer a verified replacement while retaining this edge as a fallback.
+        #[arg(long)]
+        supersede: Option<String>,
+        #[arg(long, default_value_t = 32, value_parser = clap::value_parser!(u32).range(1..=256))]
+        max_actions: u32,
+        #[arg(long, default_value_t = 60, value_parser = clap::value_parser!(u64).range(1..=300))]
+        recovery_seconds: u64,
+    },
     /// Tap by selector, coordinate, or screenshot label; --label names the destination.
     Tap {
         #[arg(long)]
@@ -107,6 +142,8 @@ enum Commands {
     /// Return redacted Android layout plus read-only Minimap orientation metadata.
     Layout {
         #[arg(long)]
+        fresh: bool,
+        #[arg(long)]
         diff: bool,
     },
 }
@@ -121,7 +158,7 @@ struct Orientation {
     changed_files: Vec<PathBuf>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Deserialize)]
 struct PendingTransition {
     source: EdgeEndpoint,
     recipe: Vec<ActionStep>,
@@ -129,7 +166,7 @@ struct PendingTransition {
     intent: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Deserialize)]
 struct SessionPlace {
     place: EdgeEndpoint,
     baseline: PlaceBaseline,
@@ -149,152 +186,355 @@ struct TapRequest<'a> {
 
 fn main() {
     let cli = Cli::parse();
+    let pretty = cli.pretty;
     let code = match run(cli) {
         Ok(code) => code,
         Err(error) => {
-            let result = MinimapResult::new(
-                "config_error",
-                error.to_string(),
-                json!({"error": {"message": error.to_string()}}),
-            );
-            print_json(&serde_json::to_value(result).expect("error json"));
-            7
+            let status = if error.chain().any(|e| e.is::<budget::Exhausted>()) {
+                "recovery_exhausted"
+            } else if error
+                .chain()
+                .any(|e| e.is::<minimap_android::DriverError>())
+                || error
+                    .downcast_ref::<std::io::Error>()
+                    .is_some_and(|e| e.kind() == std::io::ErrorKind::WouldBlock)
+            {
+                "environment_error"
+            } else {
+                "config_error"
+            };
+            let mut data = json!({"error": {"message": error.to_string()}});
+            if let Some(failure) = error.downcast_ref::<budget::Failure>() {
+                data["recovery"] = failure.recovery.clone();
+            }
+            let result = MinimapResult::new(status, error.to_string(), data);
+            print_json(&serde_json::to_value(result).expect("error json"), pretty);
+            exit_code_for_status(status)
         }
     };
     std::process::exit(code);
 }
 
-fn run(cli: Cli) -> Result<i32> {
-    let root = PathBuf::from(".");
+fn run(mut cli: Cli) -> Result<i32> {
+    if let Commands::Go { expectations, .. } = &mut cli.command {
+        for expectation in expectations {
+            let (kind, value) = parse_selector(expectation)?;
+            *expectation = format!("{kind}={value}");
+        }
+    }
+    let root = if matches!(cli.command, Commands::Init { .. }) {
+        PathBuf::from(".")
+    } else {
+        minimap_repo::find_root(Path::new("."))?
+    };
+    let deadline = match &cli.command {
+        Commands::Go {
+            recovery_seconds, ..
+        } => Some(std::time::Instant::now() + Duration::from_secs(*recovery_seconds)),
+        _ => None,
+    };
+    let runner = || {
+        let mut runner = SubprocessRunner::default();
+        if let Some(deadline) = deadline {
+            runner.set_deadline(deadline);
+        }
+        runner
+    };
+    let lock_timeout = || {
+        deadline
+            .map(|d| {
+                d.saturating_duration_since(std::time::Instant::now())
+                    .min(Duration::from_secs(2))
+            })
+            .unwrap_or(Duration::from_secs(2))
+    };
     let serial = cli.serial;
-    match cli.command {
-        Commands::Init {
-            dry_run,
-            agents,
-            force,
-            refresh_skills,
-            no_skills,
-        } => {
-            let result = run_init(
-                &root,
-                InitOptions {
-                    dry_run,
-                    agents: &agents,
-                    force,
-                    refresh_skills,
-                    no_skills,
-                },
-            )?;
-            print_json(&serde_json::to_value(result)?);
-            Ok(0)
+    // Device first, repository second is the global lock order. OS locks are
+    // released on error or process death and never enter the committed graph.
+    let device_key = if matches!(cli.command, Commands::Init { .. } | Commands::Doctor { .. }) {
+        None
+    } else {
+        Some(Adb::new(runner(), serial.clone()).serial()?)
+    };
+    let _device_lock = device_key
+        .as_deref()
+        .map(|key| minimap_repo::OperationLock::device(key, lock_timeout()))
+        .transpose()?;
+    let _repo_lock = minimap_repo::OperationLock::repository(&root, lock_timeout())?;
+    let serial = serial.or(device_key);
+    let budget = if let Some(token) = &cli.recovery {
+        Some(budget::Recovery::load(
+            &root,
+            serial
+                .as_deref()
+                .context("recovery requires a device command")?,
+            token,
+        )?)
+    } else if let Commands::Go {
+        target,
+        expectations,
+        max_actions,
+        ..
+    } = &cli.command
+    {
+        Some(budget::Recovery::create(
+            &root,
+            serial.as_deref().unwrap(),
+            target,
+            expectations,
+            *max_actions,
+            deadline.unwrap(),
+        )?)
+    } else {
+        None
+    };
+    let deadline = budget
+        .as_ref()
+        .map(|b| {
+            let end = b.borrow().deadline();
+            deadline.map_or(end, |d| d.min(end))
+        })
+        .or(deadline);
+    let runner = || budget::Runner::new(deadline, budget.clone());
+    let print = |result: &Value| {
+        print_json(
+            &budget::decorate(result.clone(), budget.as_ref()),
+            cli.pretty,
+        )
+    };
+    let result = (|| {
+        if let Some(budget) = &budget {
+            budget.borrow().check_time()?;
         }
-        Commands::Doctor => {
-            let result = doctor(&root, serial.as_deref());
-            let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
-            print_json(&result);
-            Ok(code)
-        }
-        Commands::Whereami {
-            label,
-            allow_duplicate_label,
-        } => {
-            let mut android = AndroidCli::new(SubprocessRunner, serial.clone());
-            let mut adb = Adb::new(SubprocessRunner, serial);
-            let result = whereami_result(
-                &root,
-                &mut android,
-                &mut adb,
-                label.as_deref(),
+        match cli.command {
+            Commands::Init {
+                dry_run,
+                agents,
+                force,
+                refresh_skills,
+                no_skills,
+                package,
+            } => {
+                if let Some(package) = &package {
+                    anyhow::ensure!(
+                        package.contains('.')
+                            && package
+                                .chars()
+                                .all(|c| c.is_ascii_alphanumeric() || c == '.' || c == '_'),
+                        "invalid Android package"
+                    );
+                    if root.join(".minimap/config.json").exists() && !force {
+                        let config = load_config(&root)?;
+                        let current = &config
+                            .app_profiles
+                            .get(&config.active_app_profile)
+                            .context("missing active app profile")?
+                            .android_package;
+                        anyhow::ensure!(
+                            current == package || load_graph(&root)?.places.is_empty(),
+                            "cannot rebind a populated graph to another app"
+                        );
+                    }
+                }
+                let mut result = run_init(
+                    &root,
+                    InitOptions {
+                        dry_run,
+                        agents: &agents,
+                        force,
+                        refresh_skills,
+                        no_skills,
+                    },
+                )?;
+                if let Some(package) = package {
+                    if !dry_run {
+                        let mut config = load_config(&root)?;
+                        config
+                            .app_profiles
+                            .get_mut(&config.active_app_profile)
+                            .context("missing active app profile")?
+                            .android_package = package;
+                        minimap_repo::write_json(
+                            &root.join(".minimap/config.json"),
+                            &serde_json::to_value(config)?,
+                        )?;
+                    }
+                    result.changes.push(minimap_repo::InitChange {
+                        kind: "app_binding".into(),
+                        path: ".minimap/config.json".into(),
+                        status: if dry_run { "planned" } else { "bound" }.into(),
+                    });
+                }
+                print(&serde_json::to_value(result)?);
+                Ok(0)
+            }
+            Commands::Doctor { repo_only } => {
+                let result = doctor(&root, serial.as_deref(), repo_only);
+                let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
+                print(&result);
+                Ok(code)
+            }
+            Commands::Whereami {
+                confirm_place,
+                fresh,
+                label,
                 allow_duplicate_label,
-                true,
-            )?;
-            let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
-            print_json(&result);
-            Ok(code)
-        }
-        Commands::Go { target } => {
-            let mut android = AndroidCli::new(SubprocessRunner, serial.clone());
-            let mut adb = Adb::new(SubprocessRunner, serial);
-            let result = go_result(&root, &mut android, &mut adb, &target)?;
-            let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
-            print_json(&result);
-            Ok(code)
-        }
-        Commands::Tap {
-            selector,
-            point,
-            screenshot_label,
-            screenshot,
-            label,
-            reason,
-            allow_duplicate_label,
-        } => {
-            let mut android = AndroidCli::new(SubprocessRunner, serial.clone());
-            let mut adb = Adb::new(SubprocessRunner, serial);
-            let result = tap_result(
-                &root,
-                &mut android,
-                &mut adb,
-                TapRequest {
-                    selector: selector.as_deref(),
-                    point: point.as_deref(),
-                    screenshot_label,
-                    screenshot: screenshot.as_deref(),
-                    label: label.as_deref(),
-                    reason: reason.as_deref(),
+            } => {
+                let mut android = AndroidCli::new(runner(), serial.clone());
+                let mut adb = configured_adb(&root, serial, deadline, budget.clone())?;
+                if let Some(id) = confirm_place {
+                    let result = confirm_place_result(&root, &mut android, &mut adb, &id)?;
+                    let code =
+                        exit_code_for_status(result["status"].as_str().unwrap_or("config_error"));
+                    print(&result);
+                    return Ok(code);
+                }
+                if fresh {
+                    clear_session_place(&root, &mut adb)?;
+                }
+                let result = whereami_result(
+                    &root,
+                    &mut android,
+                    &mut adb,
+                    label.as_deref(),
                     allow_duplicate_label,
-                },
-            )?;
-            let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
-            print_json(&result);
-            Ok(code)
+                    true,
+                )?;
+                let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
+                print(&result);
+                Ok(code)
+            }
+            Commands::Go {
+                target,
+                mut expectations,
+                supersede,
+                max_actions,
+                recovery_seconds,
+            } => {
+                let mut android = AndroidCli::new(runner(), serial.clone());
+                let mut adb = configured_adb(&root, serial, deadline, budget.clone())?;
+                if let Some(budget) = &budget {
+                    expectations.extend(budget.borrow().expectations_for(&target));
+                    expectations.sort();
+                    expectations.dedup();
+                }
+                let result = navigation::go_result(
+                    &root,
+                    &mut android,
+                    &mut adb,
+                    &target,
+                    navigation::Options {
+                        expectations: &expectations,
+                        supersede: supersede.as_deref(),
+                        max_actions: budget.as_ref().map_or(max_actions, |b| {
+                            max_actions.min(b.borrow().remaining_actions())
+                        }),
+                        excluded: budget
+                            .as_ref()
+                            .map(|b| b.borrow().excluded_edges())
+                            .unwrap_or_default(),
+                        timeout: deadline
+                            .map(|d| d.saturating_duration_since(std::time::Instant::now()))
+                            .unwrap_or(Duration::from_secs(recovery_seconds)),
+                    },
+                )?;
+                if let Some(budget) = &budget {
+                    budget.borrow_mut().record_go(&target, &result)?;
+                }
+                let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
+                print(&result);
+                Ok(code)
+            }
+            Commands::Tap {
+                selector,
+                point,
+                screenshot_label,
+                screenshot,
+                label,
+                reason,
+                allow_duplicate_label,
+            } => {
+                let mut android = AndroidCli::new(runner(), serial.clone());
+                let mut adb = configured_adb(&root, serial, deadline, budget.clone())?;
+                let result = tap_result(
+                    &root,
+                    &mut android,
+                    &mut adb,
+                    TapRequest {
+                        selector: selector.as_deref(),
+                        point: point.as_deref(),
+                        screenshot_label,
+                        screenshot: screenshot.as_deref(),
+                        label: label.as_deref(),
+                        reason: reason.as_deref(),
+                        allow_duplicate_label,
+                    },
+                )?;
+                let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
+                print(&result);
+                Ok(code)
+            }
+            Commands::Scroll { direction } => {
+                let mut android = AndroidCli::new(runner(), serial.clone());
+                let mut adb = configured_adb(&root, serial, deadline, budget.clone())?;
+                let result = scroll_result(&root, &mut android, &mut adb, &direction)?;
+                let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
+                print(&result);
+                Ok(code)
+            }
+            Commands::Back => {
+                let mut android = AndroidCli::new(runner(), serial.clone());
+                let mut adb = configured_adb(&root, serial, deadline, budget.clone())?;
+                let result = back_result(&root, &mut android, &mut adb)?;
+                let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
+                print(&result);
+                Ok(code)
+            }
+            Commands::Layout { diff, fresh } => {
+                let mut android = AndroidCli::new(runner(), serial.clone());
+                let mut adb = configured_adb(&root, serial, deadline, budget.clone())?;
+                if fresh {
+                    clear_session_place(&root, &mut adb)?;
+                }
+                let result = layout_result(&root, &mut android, &mut adb, diff)?;
+                print(&result);
+                Ok(0)
+            }
         }
-        Commands::Scroll { direction } => {
-            let mut android = AndroidCli::new(SubprocessRunner, serial.clone());
-            let mut adb = Adb::new(SubprocessRunner, serial);
-            let result = scroll_result(&root, &mut android, &mut adb, &direction)?;
-            let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
-            print_json(&result);
-            Ok(code)
+    })();
+    result.map_err(|cause| match &budget {
+        Some(budget) => budget::Failure {
+            cause,
+            recovery: budget.borrow().context(),
         }
-        Commands::Back => {
-            let mut android = AndroidCli::new(SubprocessRunner, serial.clone());
-            let mut adb = Adb::new(SubprocessRunner, serial);
-            let result = back_result(&root, &mut android, &mut adb)?;
-            let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
-            print_json(&result);
-            Ok(code)
-        }
-        Commands::Layout { diff } => {
-            let mut android = AndroidCli::new(SubprocessRunner, serial.clone());
-            let mut adb = Adb::new(SubprocessRunner, serial);
-            let result = layout_result(&root, &mut android, &mut adb, diff)?;
-            print_json(&result);
-            Ok(0)
-        }
-    }
+        .into(),
+        None => cause,
+    })
 }
 
-fn observe_layout<R: CommandRunner>(android: &mut AndroidCli<R>, diff: bool) -> Result<Value> {
-    let command = android.layout(diff)?;
-    Ok(serde_json::from_str::<Value>(&command.stdout).unwrap_or(Value::String(command.stdout)))
-}
-
-fn observe_after_action<R: CommandRunner>(
-    android: &mut AndroidCli<R>,
-    previous: Option<&PlaceBaseline>,
-) -> Result<Value> {
-    let first = observe_layout(android, false)?;
-    let first_baseline = fingerprint_layout(&first);
-    let unchanged = previous
-        .map(|baseline| baseline.identity_hash == first_baseline.identity_hash)
-        .unwrap_or(false);
-    if fingerprint_usable(&first_baseline) && !unchanged {
-        return Ok(first);
-    }
-    let settle = action_settle_ms();
-    thread::sleep(Duration::from_millis(settle));
-    observe_layout(android, false)
+fn configured_adb(
+    root: &Path,
+    serial: Option<String>,
+    deadline: Option<std::time::Instant>,
+    budget: Option<budget::Handle>,
+) -> Result<Adb<budget::Runner>> {
+    let config = load_config(root)?;
+    anyhow::ensure!(
+        config.app_profiles.len() == 1,
+        "one app profile per graph is supported; use separate roots for different apps"
+    );
+    let package = &config
+        .app_profiles
+        .get(&config.active_app_profile)
+        .context("missing active app profile")?
+        .android_package;
+    anyhow::ensure!(!package.is_empty(), "bind the app first: minimap init --package <applicationId> (for a legacy graph, set its existing app package in .minimap/config.json)");
+    let runner = budget::Runner::new(deadline, budget);
+    let mut adb = Adb::new(runner, serial);
+    adb.bind_package(package.clone());
+    adb.ensure_foreground()?;
+    adb.capture_cache_context()?;
+    Ok(adb)
 }
 
 fn action_settle_ms() -> u64 {
@@ -302,6 +542,60 @@ fn action_settle_ms() -> u64 {
         .ok()
         .and_then(|value| value.parse::<u64>().ok())
         .unwrap_or(DEFAULT_ACTION_SETTLE_MS)
+        .min(2_000)
+}
+
+fn confirm_place_result<AR: CommandRunner, DR: CommandRunner>(
+    root: &Path,
+    android: &mut AndroidCli<AR>,
+    adb: &mut Adb<DR>,
+    id: &str,
+) -> Result<Value> {
+    let layout = observe_layout(android, false)?;
+    adb.ensure_foreground()?;
+    let baseline = fingerprint_layout(&layout);
+    let graph = load_graph(root)?;
+    let matched = match_place(&baseline, graph.places.values().cloned());
+    anyhow::ensure!(
+        fingerprint_usable(&baseline) && detect_overlay(&layout).is_none(),
+        "cannot confirm a blank screen or blocking overlay"
+    );
+    anyhow::ensure!(
+        matched.status != "ambiguous"
+            && (matched.status == "unknown" || matched.place_id.as_deref() == Some(id)),
+        "confirmation conflicts with another known place"
+    );
+    let mut place = graph
+        .places
+        .get(id)
+        .context("confirmed place ID does not exist")?
+        .clone();
+    let mut changed = Vec::new();
+    if baseline.identity_hash != place.baseline.identity_hash
+        && !place
+            .variants
+            .iter()
+            .any(|v| v.identity_hash == baseline.identity_hash)
+    {
+        anyhow::ensure!(
+            place.variants.len() < 16,
+            "place variant limit reached; review existing variants before confirming more"
+        );
+        place.variants.push(baseline.clone());
+        place
+            .variants
+            .sort_by(|a, b| a.identity_hash.cmp(&b.identity_hash));
+        changed.push(commit_place(root, &place)?);
+    }
+    if let Some(path) = commit_pending_edge_for_place(root, adb, &graph, &place, &baseline)? {
+        changed.push(path);
+    }
+    save_session_place(root, adb, &endpoint_for_place(&place), &baseline, &layout)?;
+    Ok(result_with_data(
+        "ok",
+        "agent-confirmed observation attached to existing place",
+        json!({"place": {"id": place.id, "slug": place.slug}, "changed_graph": !changed.is_empty(), "changed_files": changed_files_json(&changed), "confirmation": "host_agent"}),
+    ))
 }
 
 fn whereami_result<AR: CommandRunner, DR: CommandRunner>(
@@ -312,6 +606,9 @@ fn whereami_result<AR: CommandRunner, DR: CommandRunner>(
     allow_duplicate_label: bool,
     allow_write: bool,
 ) -> Result<Value> {
+    if let Some(label) = label {
+        require_graph_text(label)?;
+    }
     if label.is_none() {
         if let Some(session) =
             load_recent_session_place(root, adb, Duration::from_secs(LAYOUT_CACHE_TTL_SECS))?
@@ -328,6 +625,7 @@ fn whereami_result<AR: CommandRunner, DR: CommandRunner>(
     }
 
     let layout = observe_layout(android, false)?;
+    adb.ensure_foreground()?;
     let orientation = orient_layout(
         root,
         &layout,
@@ -353,7 +651,7 @@ fn orient_layout<DR: CommandRunner>(
     let matched = match_place(&baseline, graph.places.values().cloned());
     let mut changed_files = Vec::new();
     let mut status = matched.status.clone();
-    let mut matched_place = if matched.status == "unknown" {
+    let mut matched_place = if matches!(matched.status.as_str(), "unknown" | "ambiguous") {
         None
     } else {
         matched
@@ -362,6 +660,22 @@ fn orient_layout<DR: CommandRunner>(
             .and_then(|id| graph.places.get(id))
             .cloned()
     };
+
+    if matched.status == "ambiguous" || detect_overlay(layout).is_some() {
+        return Ok(Orientation {
+            status: if matched.status == "ambiguous" {
+                "ambiguous"
+            } else {
+                "blocked_by_overlay"
+            }
+            .into(),
+            baseline,
+            matched_place: None,
+            confidence: matched.confidence,
+            hash_matched: false,
+            changed_files,
+        });
+    }
 
     if let Some(label) = label {
         // normalize_label always yields a non-empty pure-ASCII slug (Tranche C),
@@ -420,7 +734,7 @@ fn orient_layout<DR: CommandRunner>(
                 // suffixed place under --allow-duplicate-label.
                 if allow_write && allow_duplicate_label && fingerprint_usable(&baseline) {
                     let unique = unique_label(&graph, label, &slug);
-                    let place = place_from_label(&unique, &baseline);
+                    let place = new_place(&graph, &unique, &baseline);
                     changed_files.push(commit_place(root, &place)?);
                     commit_pending_edge_for_place(root, adb, &graph, &place, &baseline)?
                         .into_iter()
@@ -440,7 +754,7 @@ fn orient_layout<DR: CommandRunner>(
             }
             (None, None) => {
                 if allow_write && fingerprint_usable(&baseline) {
-                    let place = place_from_label(label, &baseline);
+                    let place = new_place(&graph, label, &baseline);
                     changed_files.push(commit_place(root, &place)?);
                     commit_pending_edge_for_place(root, adb, &graph, &place, &baseline)?
                         .into_iter()
@@ -656,12 +970,30 @@ fn layout_result<AR: CommandRunner, DR: CommandRunner>(
         "minimap": minimap,
         "cache": {"hit": cache_hit},
         "metrics": {
-            "layout_calls_total": 1,
+            "layout_calls_total": android.layout_calls(),
             "layout_json_returned_to_agent": true
         },
         "changed_graph": false,
         "changed_files": []
     }))
+}
+
+fn action_outcome<DR: CommandRunner>(
+    root: &Path,
+    adb: &mut Adb<DR>,
+    result: Result<Value>,
+) -> Result<Value> {
+    let status = result
+        .as_ref()
+        .ok()
+        .and_then(|value| value["status"].as_str());
+    if !matches!(status, Some("ok" | "known" | "known_changed")) {
+        let _ = clear_session_place(root, adb);
+        if status != Some("needs_label") {
+            let _ = clear_pending(root, adb);
+        }
+    }
+    result
 }
 
 fn tap_result<AR: CommandRunner, DR: CommandRunner>(
@@ -670,6 +1002,19 @@ fn tap_result<AR: CommandRunner, DR: CommandRunner>(
     adb: &mut Adb<DR>,
     request: TapRequest<'_>,
 ) -> Result<Value> {
+    let result = record_tap(root, android, adb, request);
+    action_outcome(root, adb, result)
+}
+
+fn record_tap<AR: CommandRunner, DR: CommandRunner>(
+    root: &Path,
+    android: &mut AndroidCli<AR>,
+    adb: &mut Adb<DR>,
+    request: TapRequest<'_>,
+) -> Result<Value> {
+    for text in [request.label, request.reason].into_iter().flatten() {
+        require_graph_text(text)?;
+    }
     let action_count = request.selector.is_some() as u8
         + request.point.is_some() as u8
         + request.screenshot_label.is_some() as u8;
@@ -686,11 +1031,12 @@ fn tap_result<AR: CommandRunner, DR: CommandRunner>(
         parse_point(point)?;
     }
     if let Some(selector) = request.selector {
-        parse_selector(selector)?;
+        let (_, value) = parse_selector(selector)?;
+        require_graph_text(&value)?;
     }
 
     let pre_layout = observe_layout(android, false)?;
-    let pre_orientation = orient_layout(root, &pre_layout, None, false, true, adb)?;
+    let pre_orientation = orient_layout(root, &pre_layout, None, false, false, adb)?;
     let pre_pending = load_pending(root, adb)?;
     let source_place = match pre_orientation.matched_place.clone() {
         Some(place) => place,
@@ -762,10 +1108,31 @@ fn tap_result<AR: CommandRunner, DR: CommandRunner>(
             .and_then(|pending| pending.intent.as_deref())
     });
     let post_layout = observe_after_action(android, Some(&pre_orientation.baseline))?;
+    adb.ensure_foreground()?;
     let post_baseline = fingerprint_layout(&post_layout);
+    if let Some(reason) = detect_overlay(&post_layout) {
+        clear_pending(root, adb)?;
+        clear_session_place(root, adb)?;
+        return Ok(result_with_data(
+            "blocked_by_overlay",
+            &reason,
+            json!({"reason": reason, "changed_graph": !pre_orientation.changed_files.is_empty(),
+                   "changed_files": changed_files_json(&pre_orientation.changed_files)}),
+        ));
+    }
     let mut graph = load_graph(root)?;
     let post_match = match_place(&post_baseline, graph.places.values().cloned());
-    let matched_post = if post_match.status == "unknown" {
+    let mut changed_files = Vec::new();
+    if post_match.status == "ambiguous" {
+        clear_pending(root, adb)?;
+        clear_session_place(root, adb)?;
+        return Ok(result_with_data(
+            "ambiguous",
+            "destination matches multiple places; inspect fresh UI before learning",
+            json!({"changed_graph": !changed_files.is_empty(), "changed_files": changed_files_json(&changed_files)}),
+        ));
+    }
+    let matched_post = if matches!(post_match.status.as_str(), "unknown" | "ambiguous") {
         None
     } else {
         post_match
@@ -774,14 +1141,22 @@ fn tap_result<AR: CommandRunner, DR: CommandRunner>(
             .and_then(|id| graph.places.get(id))
             .cloned()
     };
-    let mut changed_files = Vec::new();
 
     if matched_post
         .as_ref()
         .map(|place| place.id == source_place.id)
         .unwrap_or(false)
     {
-        clear_pending(root, adb)?;
+        save_pending(
+            root,
+            adb,
+            &PendingTransition {
+                source: edge_source.clone(),
+                recipe: recipe.clone(),
+                destination: post_baseline.clone(),
+                intent: edge_intent.map(str::to_string),
+            },
+        )?;
         save_session_place(
             root,
             adb,
@@ -791,7 +1166,7 @@ fn tap_result<AR: CommandRunner, DR: CommandRunner>(
         )?;
         return Ok(result_with_data(
             "ok",
-            "tap stayed on the same known place; no navigation edge recorded",
+            "tap retained in the pending transition; destination unchanged",
             json!({
                 "source": source_place.slug,
                 "changed_graph": false,
@@ -867,7 +1242,7 @@ fn tap_result<AR: CommandRunner, DR: CommandRunner>(
                         ));
                     }
                     let unique = unique_label(&graph, label, &slug);
-                    let place = place_from_label(&unique, &post_baseline);
+                    let place = new_place(&graph, &unique, &post_baseline);
                     changed_files.push(commit_place(root, &place)?);
                     graph.places.insert(place.id.clone(), place.clone());
                     place
@@ -893,7 +1268,7 @@ fn tap_result<AR: CommandRunner, DR: CommandRunner>(
                             json!({"changed_graph": false, "changed_files": []}),
                         ));
                     }
-                    let place = place_from_label(label, &post_baseline);
+                    let place = new_place(&graph, label, &post_baseline);
                     changed_files.push(commit_place(root, &place)?);
                     graph.places.insert(place.id.clone(), place.clone());
                     place
@@ -945,7 +1320,7 @@ fn tap_result<AR: CommandRunner, DR: CommandRunner>(
         recipe,
         edge_intent,
     );
-    changed_files.push(commit_edge(root, &edge)?);
+    changed_files.extend(persist_edge(root, &edge)?);
     clear_pending(root, adb)?;
     save_session_place(
         root,
@@ -992,6 +1367,10 @@ fn build_and_execute_tap_action<AR: CommandRunner, DR: CommandRunner>(
             Ok(point) => point,
             Err(error) => return Ok(TapActionOutcome::SelectorNotFound(error.to_string())),
         };
+        anyhow::ensure!(
+            resolve_selector_point(&redact_layout(pre_layout), selector).ok() == Some(tap_point),
+            "selector refers to private or editable content; use a stable control identifier"
+        );
         adb.tap(tap_point)?;
         let (kind, value) = parse_selector(selector)?;
         return Ok(TapActionOutcome::Recorded(ActionStep {
@@ -1004,10 +1383,14 @@ fn build_and_execute_tap_action<AR: CommandRunner, DR: CommandRunner>(
     }
     if let Some(point) = point {
         let (x, y) = parse_point(point)?;
-        adb.tap(TapPoint { x, y })?;
         let Some(viewport) = adb.display_size().ok() else {
             return Ok(TapActionOutcome::ViewportUnavailable);
         };
+        anyhow::ensure!(
+            x >= 0 && y >= 0 && x < viewport.width && y < viewport.height,
+            "tap point is outside the device viewport"
+        );
+        adb.tap(TapPoint { x, y })?;
         return Ok(TapActionOutcome::Recorded(ActionStep {
             kind: "tap".to_string(),
             selector: None,
@@ -1021,10 +1404,17 @@ fn build_and_execute_tap_action<AR: CommandRunner, DR: CommandRunner>(
     android.screen_capture(screenshot, true)?;
     let resolved = android.screen_resolve(screenshot, &format!("input tap #{label}"))?;
     let tap_point = parse_input_tap(&resolved.stdout)?;
-    adb.tap(tap_point)?;
     let Some(viewport) = adb.display_size().ok() else {
         return Ok(TapActionOutcome::ViewportUnavailable);
     };
+    anyhow::ensure!(
+        tap_point.x >= 0
+            && tap_point.y >= 0
+            && tap_point.x < viewport.width
+            && tap_point.y < viewport.height,
+        "tap point is outside the device viewport"
+    );
+    adb.tap(tap_point)?;
     Ok(TapActionOutcome::Recorded(ActionStep {
         kind: "tap".to_string(),
         selector: None,
@@ -1043,17 +1433,46 @@ fn scroll_result<AR: CommandRunner, DR: CommandRunner>(
     adb: &mut Adb<DR>,
     direction: &str,
 ) -> Result<Value> {
+    anyhow::ensure!(
+        ["up", "down", "left", "right"].contains(&direction),
+        "unsupported scroll direction"
+    );
+    let result = record_scroll(root, android, adb, direction);
+    action_outcome(root, adb, result)
+}
+
+fn record_scroll<AR: CommandRunner, DR: CommandRunner>(
+    root: &Path,
+    android: &mut AndroidCli<AR>,
+    adb: &mut Adb<DR>,
+    direction: &str,
+) -> Result<Value> {
     let pre_layout = observe_layout(android, false)?;
-    let pre_orientation = orient_layout(root, &pre_layout, None, false, true, adb)?;
-    let source = pre_orientation.matched_place.clone();
-    let viewport = adb.display_size().ok().unwrap_or(Viewport {
-        width: 1080,
-        height: 2400,
+    let pre_orientation = orient_layout(root, &pre_layout, None, false, false, adb)?;
+    let pending = load_pending(root, adb)?.filter(|pending| {
+        pending.destination.identity_hash == pre_orientation.baseline.identity_hash
     });
+    let graph = load_graph(root)?;
+    let source = pending
+        .as_ref()
+        .and_then(|pending| graph.places.get(&pending.source.id).cloned())
+        .or_else(|| pre_orientation.matched_place.clone());
+    let viewport = adb.display_size()?;
     let (sx, sy, ex, ey) = swipe_for_direction(direction, viewport);
     adb.swipe(sx, sy, ex, ey, 350)?;
     let post_layout = observe_after_action(android, Some(&pre_orientation.baseline))?;
+    adb.ensure_foreground()?;
     let post_orientation = orient_layout(root, &post_layout, None, false, true, adb)?;
+    if matches!(
+        post_orientation.status.as_str(),
+        "ambiguous" | "blocked_by_overlay"
+    ) {
+        return Ok(result_with_data(
+            &post_orientation.status,
+            "fresh observation requires agent recovery",
+            json!({"changed_graph": false, "changed_files": []}),
+        ));
+    }
     let step = ActionStep {
         kind: "scroll".to_string(),
         selector: None,
@@ -1061,6 +1480,8 @@ fn scroll_result<AR: CommandRunner, DR: CommandRunner>(
         viewport: None,
         direction: Some(direction.to_string()),
     };
+    let mut recipe = pending.map(|pending| pending.recipe).unwrap_or_default();
+    recipe.push(step);
     if let Some(source) = source.clone() {
         if let Some(dest) = post_orientation
             .matched_place
@@ -1070,10 +1491,12 @@ fn scroll_result<AR: CommandRunner, DR: CommandRunner>(
             let edge = edge_from_parts(
                 &endpoint_for_place(&source),
                 &endpoint_for_place(&dest),
-                vec![step],
+                recipe.clone(),
                 Some("scroll"),
             );
-            let path = commit_edge(root, &edge)?;
+            let mut paths = post_orientation.changed_files.clone();
+            paths.extend(persist_edge(root, &edge)?);
+            clear_pending(root, adb)?;
             save_session_place(
                 root,
                 adb,
@@ -1088,8 +1511,8 @@ fn scroll_result<AR: CommandRunner, DR: CommandRunner>(
                     "from": source.slug,
                     "to": dest.slug,
                     "edge": edge.id,
-                    "changed_graph": true,
-                    "changed_files": changed_files_json(&[path])
+                    "changed_graph": !paths.is_empty(),
+                    "changed_files": changed_files_json(&paths)
                 }),
             ));
         }
@@ -1098,7 +1521,7 @@ fn scroll_result<AR: CommandRunner, DR: CommandRunner>(
             adb,
             &PendingTransition {
                 source: endpoint_for_place(&source),
-                recipe: vec![step],
+                recipe: recipe.clone(),
                 destination: post_orientation.baseline.clone(),
                 intent: Some("scroll".to_string()),
             },
@@ -1121,11 +1544,32 @@ fn back_result<AR: CommandRunner, DR: CommandRunner>(
     android: &mut AndroidCli<AR>,
     adb: &mut Adb<DR>,
 ) -> Result<Value> {
+    let result = record_back(root, android, adb);
+    action_outcome(root, adb, result)
+}
+
+fn record_back<AR: CommandRunner, DR: CommandRunner>(
+    root: &Path,
+    android: &mut AndroidCli<AR>,
+    adb: &mut Adb<DR>,
+) -> Result<Value> {
+    clear_pending(root, adb)?;
     let pre_layout = observe_layout(android, false)?;
-    let pre_orientation = orient_layout(root, &pre_layout, None, false, true, adb)?;
+    let pre_orientation = orient_layout(root, &pre_layout, None, false, false, adb)?;
     adb.back()?;
     let post_layout = observe_after_action(android, Some(&pre_orientation.baseline))?;
+    adb.ensure_foreground()?;
     let post_orientation = orient_layout(root, &post_layout, None, false, true, adb)?;
+    if matches!(
+        post_orientation.status.as_str(),
+        "ambiguous" | "blocked_by_overlay"
+    ) {
+        return Ok(result_with_data(
+            &post_orientation.status,
+            "fresh observation requires agent recovery",
+            json!({"changed_graph": false, "changed_files": []}),
+        ));
+    }
     if let (Some(source), Some(dest)) = (
         pre_orientation.matched_place.clone(),
         post_orientation.matched_place.clone(),
@@ -1143,7 +1587,8 @@ fn back_result<AR: CommandRunner, DR: CommandRunner>(
                 }],
                 Some("press back"),
             );
-            let path = commit_edge(root, &edge)?;
+            let mut paths = post_orientation.changed_files.clone();
+            paths.extend(persist_edge(root, &edge)?);
             save_session_place(
                 root,
                 adb,
@@ -1158,8 +1603,8 @@ fn back_result<AR: CommandRunner, DR: CommandRunner>(
                     "from": source.slug,
                     "to": dest.slug,
                     "edge": edge.id,
-                    "changed_graph": true,
-                    "changed_files": changed_files_json(&[path])
+                    "changed_graph": !paths.is_empty(),
+                    "changed_files": changed_files_json(&paths)
                 }),
             ));
         }
@@ -1176,183 +1621,26 @@ fn back_result<AR: CommandRunner, DR: CommandRunner>(
     ))
 }
 
-fn go_result<AR: CommandRunner, DR: CommandRunner>(
-    root: &Path,
-    android: &mut AndroidCli<AR>,
-    adb: &mut Adb<DR>,
-    target: &str,
-) -> Result<Value> {
-    let graph = load_graph(root)?;
-    let session = load_session_place(root, adb)?;
-    let mut session_used = false;
-    let (mut current_layout, current_place, orientation_changes) = if let Some(session) = session {
-        if let Some(place) = graph
-            .places
-            .get(&session.place.id)
-            .cloned()
-            .filter(|place| {
-                place.baseline.identity_hash == session.baseline.identity_hash
-                    || place
-                        .variants
-                        .iter()
-                        .any(|variant| variant.identity_hash == session.baseline.identity_hash)
-            })
-        {
-            session_used = true;
-            (session.layout, place, Vec::new())
-        } else {
-            clear_session_place(root, adb)?;
-            let layout = observe_layout(android, false)?;
-            let orientation = orient_layout(root, &layout, None, false, true, adb)?;
-            let Some(place) = orientation.matched_place.clone() else {
-                return Ok(result_with_data(
-                    "unknown",
-                    "current place is unknown; label it before using go",
-                    json!({
-                        "whereami": orientation_json(root, &orientation, false),
-                        "changed_graph": false,
-                        "changed_files": []
-                    }),
-                ));
-            };
-            (layout, place, orientation.changed_files.clone())
-        }
-    } else {
-        let layout = observe_layout(android, false)?;
-        let orientation = orient_layout(root, &layout, None, false, true, adb)?;
-        let Some(place) = orientation.matched_place.clone() else {
-            return Ok(result_with_data(
-                "unknown",
-                "current place is unknown; label it before using go",
-                json!({
-                    "whereami": orientation_json(root, &orientation, false),
-                    "changed_graph": false,
-                    "changed_files": []
-                }),
-            ));
-        };
-        (layout, place, orientation.changed_files.clone())
-    };
-    let viewport = adb.display_size().ok();
-    let viewport_used = viewport.is_some();
-    let plan = resolve_path(&graph, target, &current_place.id, viewport);
-    if plan.status != "ok" {
-        return Ok(result_with_data(
-            &plan.status,
-            "no executable known UI path",
-            json!({"plan": plan.to_json(), "changed_graph": false, "changed_files": []}),
-        ));
-    }
-    let mut executed = Vec::new();
-    let mut changed_files = orientation_changes;
-    let mut last_place = current_place.clone();
-    for edge in &plan.edges {
-        if let Err(error) = execute_recipe(android, adb, &edge.recipe, Some(&current_layout)) {
-            return Ok(result_with_data(
-                "action_failed",
-                &error.to_string(),
-                json!({
-                    "edge": edge.id,
-                    "changed_graph": false,
-                    "changed_files": []
-                }),
-            ));
-        }
-        let previous_baseline = fingerprint_layout(&current_layout);
-        let post_layout = observe_after_action(android, Some(&previous_baseline))?;
-        let post_baseline = fingerprint_layout(&post_layout);
-        let graph = load_graph(root)?;
-        let post_match = match_place(&post_baseline, graph.places.values().cloned());
-        let observed = if post_match.status == "unknown" {
-            None
-        } else {
-            post_match
-                .place_id
-                .as_deref()
-                .and_then(|id| graph.places.get(id))
-                .cloned()
-        };
-        match observed {
-            Some(mut place) if place.id == edge.to.id => {
-                if remember_place_observation(&mut place, &post_baseline) {
-                    changed_files.push(commit_place(root, &place)?);
-                }
-                last_place = place.clone();
-                executed.push(json!({"edge": edge.id, "to": edge.to.slug, "status": "ok"}));
-            }
-            Some(place) => {
-                return Ok(result_with_data(
-                    "label_mismatch",
-                    "edge reached a different known place",
-                    json!({
-                        "edge": edge.id,
-                        "expected": edge.to.slug,
-                        "observed": place.slug,
-                        "executed": executed,
-                        "changed_graph": !changed_files.is_empty(),
-                        "changed_files": changed_files_json(&changed_files)
-                    }),
-                ));
-            }
-            None => {
-                if let Some(reason) = detect_overlay(&post_layout) {
-                    return Ok(result_with_data(
-                        "blocked_by_overlay",
-                        "a blocking overlay (e.g. a permission dialog) intercepted the transition; no edge recorded",
-                        json!({
-                            "reason": reason,
-                            "changed_graph": false,
-                            "changed_files": []
-                        }),
-                    ));
-                }
-                return Ok(result_with_data(
-                    "unknown",
-                    "edge reached an unknown layout; graph unchanged",
-                    json!({
-                        "edge": edge.id,
-                        "expected": edge.to.slug,
-                        "executed": executed,
-                        "changed_graph": !changed_files.is_empty(),
-                        "changed_files": changed_files_json(&changed_files)
-                    }),
-                ));
-            }
-        }
-        current_layout = post_layout;
-    }
-    let current_baseline = fingerprint_layout(&current_layout);
-    save_session_place(
-        root,
-        adb,
-        &endpoint_for_place(&last_place),
-        &current_baseline,
-        &current_layout,
-    )?;
-    Ok(result_with_data(
-        "ok",
-        "navigation completed",
-        json!({
-            "target": normalize_label(target),
-            "planned_path": plan.edges.iter().map(|edge| edge.id.clone()).collect::<Vec<_>>(),
-            "executed_steps": executed,
-            "start_source": if session_used { "session" } else { "layout" },
-            "viewport_used": viewport_used,
-            "changed_graph": !changed_files.is_empty(),
-            "changed_files": changed_files_json(&changed_files)
-        }),
-    ))
-}
-
 fn execute_recipe<AR: CommandRunner, DR: CommandRunner>(
     android: &mut AndroidCli<AR>,
     adb: &mut Adb<DR>,
     recipe: &[ActionStep],
     initial_layout: Option<&Value>,
+    deadline: std::time::Instant,
 ) -> Result<()> {
     let mut cached_layout = initial_layout.cloned();
     let current_display_size = adb.display_size().ok();
-    for step in recipe {
+    for (index, step) in recipe.iter().enumerate() {
+        anyhow::ensure!(
+            std::time::Instant::now() < deadline,
+            "navigation deadline exhausted"
+        );
+        if index > 0 {
+            thread::sleep(
+                Duration::from_millis(action_settle_ms())
+                    .min(deadline.saturating_duration_since(std::time::Instant::now())),
+            );
+        }
         match step.kind.as_str() {
             "tap" => {
                 if let Some(selector) = &step.selector {
@@ -1383,10 +1671,7 @@ fn execute_recipe<AR: CommandRunner, DR: CommandRunner>(
                 cached_layout = None;
             }
             "scroll" => {
-                let viewport = adb.display_size().ok().unwrap_or(Viewport {
-                    width: 1080,
-                    height: 2400,
-                });
+                let viewport = adb.display_size()?;
                 let direction = step.direction.as_deref().unwrap_or("down");
                 let (sx, sy, ex, ey) = swipe_for_direction(direction, viewport);
                 adb.swipe(sx, sy, ex, ey, 350)?;
@@ -1402,9 +1687,30 @@ fn execute_recipe<AR: CommandRunner, DR: CommandRunner>(
     Ok(())
 }
 
-fn doctor(root: &Path, serial: Option<&str>) -> Value {
-    let repo_checks = validate_graph(root);
+fn doctor(root: &Path, serial: Option<&str>, repo_only: bool) -> Value {
+    let mut repo_checks = validate_graph(root);
+    if let Ok(graph) = load_graph(root) {
+        let unsafe_metadata = graph
+            .places
+            .values()
+            .any(|place| !minimap_core::safe_graph_text(&place.label))
+            || graph.edges.values().any(|edge| {
+                edge.intent
+                    .as_deref()
+                    .is_some_and(|text| !minimap_core::safe_graph_text(text))
+                    || edge
+                        .recipe
+                        .iter()
+                        .filter_map(|step| step.selector.as_ref())
+                        .any(|selector| !minimap_core::safe_graph_text(&selector.value))
+            });
+        repo_checks.push(json!({"name":"graph_privacy", "status":if unsafe_metadata {"fail"} else {"pass"},
+            "detail":if unsafe_metadata {Some("Review sensitive labels, intents, or action selectors before sharing the graph")} else {None}}));
+    }
     let repo_ok = repo_checks.iter().all(|check| check["status"] == "pass");
+    if repo_only {
+        return json!({"schema_version": RESULT_SCHEMA_VERSION, "status": if repo_ok { "ok" } else { "config_error" }, "ok": repo_ok, "repo_ok": repo_ok, "checks": {"repo": repo_checks}});
+    }
     let android_ok = command_on_path("android");
     let adb_ok = command_on_path("adb");
     // With no serial resolved, two or more attached devices make every bare
@@ -1447,31 +1753,41 @@ fn command_on_path(name: &str) -> bool {
 }
 
 fn adb_device_ready(serial: Option<&str>) -> bool {
-    let mut command = ProcessCommand::new("adb");
+    let mut args = vec!["adb".to_string()];
     if let Some(serial) = serial {
-        command.args(["-s", serial]);
+        args.extend(["-s".into(), serial.into()]);
     }
-    let output = command.arg("get-state").output();
-    matches!(output, Ok(output) if output.status.success() && String::from_utf8_lossy(&output.stdout).trim() == "device")
+    args.push("get-state".into());
+    SubprocessRunner::default()
+        .run(&args, &[])
+        .is_ok_and(|out| out.status == 0 && out.stdout.trim() == "device")
 }
 
-/// Count attached devices in the `device` state from `adb devices` output
-/// (lines after the header look like `emulator-5554\tdevice`).
 fn adb_devices_in_device_state() -> usize {
-    let Ok(output) = ProcessCommand::new("adb").arg("devices").output() else {
+    let Ok(output) = SubprocessRunner::default().run(&["adb".into(), "devices".into()], &[]) else {
         return 0;
     };
-    if !output.status.success() {
+    if output.status != 0 {
         return 0;
     }
-    String::from_utf8_lossy(&output.stdout)
+    output
+        .stdout
         .lines()
         .skip(1)
-        .filter(|line| {
-            let mut fields = line.split_whitespace();
-            fields.next().is_some() && fields.next() == Some("device")
-        })
+        .filter(|line| line.split_whitespace().nth(1) == Some("device"))
         .count()
+}
+
+fn new_place(graph: &Graph, label: &str, baseline: &PlaceBaseline) -> Place {
+    let mut place = place_from_label(label, baseline);
+    if graph.places.contains_key(&place.id) {
+        place.id = format!(
+            "{}_{}",
+            place.id,
+            baseline.identity_hash.trim_start_matches("sha256:")
+        );
+    }
+    place
 }
 
 fn place_from_label(label: &str, baseline: &PlaceBaseline) -> Place {
@@ -1507,6 +1823,15 @@ fn unique_label(graph: &Graph, label: &str, slug: &str) -> String {
 /// If a pending transition lands on `place` (its destination hash matches and its
 /// source is a known place), commit the edge and clear the pending state.
 /// Returns the committed edge file path (if any) so the caller can record it.
+fn persist_edge(root: &Path, edge: &Edge) -> Result<Vec<PathBuf>> {
+    let path = minimap_repo::edge_path(root, &edge.id);
+    let expected = canonical_json(&serde_json::to_value(edge)?);
+    if fs::read_to_string(&path).ok().as_deref() == Some(expected.as_str()) {
+        return Ok(Vec::new());
+    }
+    Ok(vec![commit_edge(root, edge)?])
+}
+
 fn commit_pending_edge_for_place<DR: CommandRunner>(
     root: &Path,
     adb: &mut Adb<DR>,
@@ -1524,9 +1849,9 @@ fn commit_pending_edge_for_place<DR: CommandRunner>(
                 pending.recipe.split_off(0),
                 pending.intent.as_deref(),
             );
-            let file = commit_edge(root, &edge)?;
+            let files = persist_edge(root, &edge)?;
             clear_pending(root, adb)?;
-            return Ok(Some(file));
+            return Ok(files.into_iter().next());
         }
     }
     Ok(None)
@@ -1548,6 +1873,15 @@ fn remember_place_observation(place: &mut Place, baseline: &PlaceBaseline) -> bo
         place.baseline = baseline.clone();
         return true;
     }
+    // Bound graph growth and prevent a chain of fuzzy variants drifting away
+    // from the original semantic place.
+    let mut original = place.clone();
+    original.variants.clear();
+    if place.variants.len() >= 16
+        || match_place(baseline, std::iter::once(original)).status == "unknown"
+    {
+        return false;
+    }
     place.variants.push(baseline.clone());
     place
         .variants
@@ -1568,38 +1902,12 @@ fn relabel_place(
     label: &str,
     baseline: &PlaceBaseline,
 ) -> Result<(Place, Vec<PathBuf>)> {
-    let graph = load_graph(root)?;
-    let mut changed = Vec::new();
-    let new_slug = normalize_label(label);
-    let mut new_place = place.clone();
-    let old_id = new_place.id.clone();
-    new_place.slug = new_slug.clone();
-    new_place.label = label.trim().to_string();
-    new_place.id = place_id_for_slug(&new_slug);
-    remember_place_observation(&mut new_place, baseline);
-    remove_place_file(root, &old_id)?;
-    changed.push(commit_place(root, &new_place)?);
-    for edge in graph.edges.values() {
-        let mut updated = edge.clone();
-        let mut touched = false;
-        if updated.from.id == old_id {
-            updated.from = endpoint_for_place(&new_place);
-            touched = true;
-        }
-        if updated.to.id == old_id {
-            updated.to = endpoint_for_place(&new_place);
-            touched = true;
-        }
-        if touched {
-            let old_path = edge_path(root, &updated.id);
-            if old_path.exists() {
-                fs::remove_file(old_path)?;
-            }
-            updated.id = edge_id(&updated.from, &updated.to, &updated.recipe);
-            changed.push(commit_edge(root, &updated)?);
-        }
-    }
-    Ok((new_place, changed))
+    let mut updated = place.clone();
+    updated.slug = normalize_label(label);
+    updated.label = label.trim().to_string();
+    remember_place_observation(&mut updated, baseline);
+    let path = commit_place(root, &updated)?;
+    Ok((updated, vec![path]))
 }
 
 fn edge_from_parts(
@@ -1609,6 +1917,7 @@ fn edge_from_parts(
     intent: Option<&str>,
 ) -> Edge {
     Edge {
+        superseded_by: Vec::new(),
         schema_version: EDGE_SCHEMA_VERSION.to_string(),
         id: edge_id(from, to, &recipe),
         from: from.clone(),
@@ -1623,21 +1932,25 @@ fn edge_id(from: &EdgeEndpoint, to: &EdgeEndpoint, recipe: &[ActionStep]) -> Str
         .first()
         .map(action_fingerprint)
         .unwrap_or_else(|| "action".to_string());
-    let readable = format!("edge_{}__{}__{}", from.slug, to.slug, primary);
-    let slug = sanitize_id(&readable);
-    if slug.len() <= 96 {
-        slug
-    } else {
-        // The readable form is too long, so derive a stable, collision-resistant
-        // id from the recipe digest. Keep a char-boundary-truncated readable
-        // prefix for legibility, then append the full fixed-length hex digest.
-        let digest = format!(
-            "{:x}",
-            Sha256::digest(canonical_json(&serde_json::to_value(recipe).unwrap()).as_bytes())
-        );
-        let prefix: String = slug.chars().take(32).collect();
-        sanitize_id(&format!("{prefix}__{digest}"))
-    }
+    // Readable prefixes must be stable too: a mutable label otherwise creates
+    // a second filename for the exact same endpoint IDs and action recipe.
+    let from_name = from.id.strip_prefix("place_").unwrap_or(&from.id);
+    let to_name = to.id.strip_prefix("place_").unwrap_or(&to.id);
+    let prefix = sanitize_id(&format!("edge_{from_name}__{to_name}__{primary}"));
+    let digest = format!(
+        "{:x}",
+        Sha256::digest(
+            canonical_json(&json!({
+                "from": from.id, "to": to.id, "recipe": recipe
+            }))
+            .as_bytes()
+        )
+    );
+    format!(
+        "{}__{}",
+        prefix.chars().take(64).collect::<String>(),
+        digest
+    )
 }
 
 fn action_fingerprint(step: &ActionStep) -> String {
@@ -1676,7 +1989,28 @@ fn parse_selector(selector: &str) -> Result<(String, String)> {
     let (kind, value) = selector
         .split_once('=')
         .ok_or_else(|| anyhow::anyhow!("selector must use kind=value syntax"))?;
-    Ok((kind.trim().to_string(), value.trim().to_string()))
+    let kind = match kind.trim() {
+        "id" | "resourceId" | "resource-id" => "resource_id",
+        "testTag" | "test-tag" => "test_tag",
+        "desc" | "content_description" | "contentDesc" | "contentDescription" | "content-desc" => {
+            "content_desc"
+        }
+        other => other,
+    }
+    .to_string();
+    let value = value.trim().to_string();
+    Selector {
+        kind: kind.clone(),
+        value: value.clone(),
+    }
+    .validate()?;
+    Ok((kind, value))
+}
+
+fn require_graph_text(text: &str) -> Result<()> {
+    anyhow::ensure!(minimap_core::safe_graph_text(text),
+        "value cannot be stored safely in the shared graph; use a stable non-sensitive label or selector");
+    Ok(())
 }
 
 fn parse_point(point: &str) -> Result<(i64, i64)> {
@@ -1757,12 +2091,15 @@ fn pending_path<DR: CommandRunner>(root: &Path, adb: &mut Adb<DR>) -> Result<Opt
         })
         .filter(|package| !package.is_empty())
         .unwrap_or_else(|| "default-package".to_string());
+    let context = adb.cache_context().unwrap_or("unbound");
+    let context_hash = format!("{:x}", Sha256::digest(context.as_bytes()));
     Ok(Some(
         std::env::temp_dir()
             .join("minimap")
             .join(&repo_hash[..16])
             .join(sanitize_id(&serial))
             .join(sanitize_id(&package))
+            .join(&context_hash[..16])
             .join("pending-transition.json"),
     ))
 }
@@ -1813,7 +2150,7 @@ fn save_session_place<DR: CommandRunner>(
         "baseline": baseline,
         "layout": redact_layout(layout)
     });
-    fs::write(&path, canonical_json(&value))?;
+    minimap_repo::write_json(&path, &value)?;
     restrict_cache_file_permissions(&path);
     Ok(())
 }
@@ -1840,12 +2177,7 @@ fn load_session_place<DR: CommandRunner>(
             }
         }
     }
-    let value: Value = serde_json::from_str(&fs::read_to_string(&path)?)?;
-    Ok(Some(SessionPlace {
-        place: serde_json::from_value(value["place"].clone())?,
-        baseline: serde_json::from_value(value["baseline"].clone())?,
-        layout: value["layout"].clone(),
-    }))
+    Ok(read_runtime_cache(&path))
 }
 
 fn load_recent_session_place<DR: CommandRunner>(
@@ -1868,12 +2200,7 @@ fn load_recent_session_place<DR: CommandRunner>(
     if !fresh {
         return Ok(None);
     }
-    let value: Value = serde_json::from_str(&fs::read_to_string(&path)?)?;
-    Ok(Some(SessionPlace {
-        place: serde_json::from_value(value["place"].clone())?,
-        baseline: serde_json::from_value(value["baseline"].clone())?,
-        layout: value["layout"].clone(),
-    }))
+    Ok(read_runtime_cache(&path))
 }
 
 fn graph_place_for_session(graph: &Graph, session: &SessionPlace) -> Option<Place> {
@@ -1905,6 +2232,10 @@ fn save_pending<DR: CommandRunner>(
     adb: &mut Adb<DR>,
     pending: &PendingTransition,
 ) -> Result<()> {
+    anyhow::ensure!(
+        pending.recipe.len() <= 32,
+        "pending transition exceeds 32 actions; orient and resume from a verified place"
+    );
     let Some(path) = pending_path(root, adb)? else {
         return Ok(());
     };
@@ -1918,7 +2249,7 @@ fn save_pending<DR: CommandRunner>(
         "destination": pending.destination,
         "intent": pending.intent
     });
-    fs::write(&path, canonical_json(&value))?;
+    minimap_repo::write_json(&path, &value)?;
     restrict_cache_file_permissions(&path);
     Ok(())
 }
@@ -1945,13 +2276,17 @@ fn load_pending<DR: CommandRunner>(
             }
         }
     }
-    let value: Value = serde_json::from_str(&fs::read_to_string(&path)?)?;
-    Ok(Some(PendingTransition {
-        source: serde_json::from_value(value["source"].clone())?,
-        recipe: serde_json::from_value(value["recipe"].clone())?,
-        destination: serde_json::from_value(value["destination"].clone())?,
-        intent: value["intent"].as_str().map(str::to_string),
-    }))
+    Ok(read_runtime_cache(&path))
+}
+
+fn read_runtime_cache<T: serde::de::DeserializeOwned>(path: &Path) -> Option<T> {
+    let value = fs::read(path)
+        .ok()
+        .and_then(|bytes| serde_json::from_slice(&bytes).ok());
+    if value.is_none() {
+        let _ = fs::remove_file(path);
+    }
+    value
 }
 
 fn clear_pending<DR: CommandRunner>(root: &Path, adb: &mut Adb<DR>) -> Result<()> {
@@ -1998,8 +2333,12 @@ fn restrict_cache_file_permissions(path: &Path) {
 #[cfg(not(unix))]
 fn restrict_cache_file_permissions(_path: &Path) {}
 
-fn print_json(value: &Value) {
-    print!("{}", canonical_json(value));
+fn print_json(value: &Value, pretty: bool) {
+    if pretty {
+        print!("{}", canonical_json(value));
+    } else {
+        println!("{}", serde_json::to_string(value).expect("result JSON"));
+    }
 }
 
 #[cfg(test)]

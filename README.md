@@ -7,9 +7,9 @@ under `.minimap/`. Later agents can ask where they are, go to known places, and
 extend the graph as they navigate instead of rediscovering the same layout state
 from scratch.
 
-Minimap is deliberately narrow. It is not a crawler, assertion framework, source
-analyzer, telemetry system, or app launcher. Agents still build, install, launch,
-and verify business behavior. Minimap remembers navigation.
+Minimap keeps navigation deterministic and agent-independent. Agents build,
+install, launch, inspect source, and decide what the task requires. Minimap
+remembers navigation and checks the visible destination they request.
 
 ## Install
 
@@ -19,10 +19,12 @@ From a checkout:
 cargo build -p minimap-cli --bin minimap
 ```
 
+Building requires Rust 1.89 or newer.
+
 From source after publication:
 
 ```bash
-cargo install --git https://github.com/himattm/minimap minimap-cli
+cargo install --git https://github.com/mttmcknn/minimap minimap-cli
 ```
 
 ## Basic Workflow
@@ -30,7 +32,7 @@ cargo install --git https://github.com/himattm/minimap minimap-cli
 Initialize the repo and install agent skills:
 
 ```bash
-minimap init --agents all
+minimap init --agents all --package com.example.myapp
 minimap doctor
 ```
 
@@ -49,8 +51,7 @@ minimap tap --selector "text=SEARCH" --label search --reason "open search"
 Reuse the graph:
 
 ```bash
-minimap go search
-minimap layout
+minimap go search --expect "text=Categories"
 ```
 
 Use raw layout only when the agent needs details Minimap does not model:
@@ -63,6 +64,54 @@ minimap layout
 Unlabeled `whereami` returns compact orientation. If either immediately follows a
 fresh verified observation, Minimap can serve the cached session state instead
 of paying for another Android layout capture.
+Use `layout --fresh` or `whereami --fresh` after external changes and for current
+product assertions. Every `go` observes the real starting screen, even when the
+graph suggests that it is already at the destination.
+Repeat `--expect` for every required visible anchor. Each must match exactly one
+visible element, including for an already-at-target request. A missing anchor
+returns `goal_mismatch`; reaching a generic screen does not prove the right item
+or account. A successful check avoids a separate full-layout read when it
+covers the task's verification needs.
+
+## Self-healing navigation
+
+Minimap replans from observed destinations, excludes failing edges, and tries
+other verified routes within an action/time budget. Unfamiliar changes return
+a compact recovery handoff to the host agent. The installed skill directs the
+agent to inspect fresh UI and matching source, learn a replacement, verify it,
+and resume the task quietly. A mismatch alone is not a product defect.
+
+The first `go` returns `data.recovery.token`. Continue the same goal with
+`--recovery <token>` on every discovery/replay command. The token retains the
+original goal checks, failed edges, and budget across processes and time spent
+in the agent. Defaults are 32 inputs and 60 seconds; set `--max-actions` and
+`--recovery-seconds` on the initial request if needed. Retries cannot extend
+that token's budget. The host must carry it forward instead of starting a new
+goal for each retry.
+
+After verifying a changed screen, the agent can explicitly attach its new
+appearance with `whereami --confirm-place <existing-place-id>`. From an obsolete
+edge's original source, `go <destination> --supersede <edge-id>` prefers a
+replacement only after it reaches the same destination and passes the goal
+checks. The old route remains a fallback for other builds or supported states.
+Critical product bugs are escalated with reproduction and code evidence.
+
+Device and repo locks serialize Minimap operations. Writes are atomic, place
+IDs survive relabeling, and runtime caches are scoped to the repo, device,
+package, process, and installed build. Commit `.minimap/` for teammates to reuse;
+run `minimap doctor --repo-only` in CI without an emulator.
+Recipes are validated before any input, and post-action learning requires stable UI.
+Editable/password content is redacted before caching and fingerprinting;
+obvious sensitive labels, intents, and selectors are rejected. Unmarked personal
+text still needs agent judgment.
+
+Current boundaries: one app per graph, screen-level identity, and explicit UI
+return routes for reusable navigation. Generic detail screens do not prove a
+particular item was reached, and the planner does not replay Back recipes
+without history it can verify. New edges use `minimap.edge.v2` for fallback
+preferences; existing lean v1 edge records load without rewriting files, and older clients reject
+v2 rather than silently ignoring its meaning. Upgrade teammates together.
+Token savings still need measured agent trials.
 
 ## Commands
 
@@ -79,8 +128,8 @@ minimap back
 minimap layout
 ```
 
-All commands return JSON by default. Graph changes are reported with
-`changed_graph: true` and `changed_files`.
+All commands return compact JSON by default; use `--pretty` for indented output.
+Graph changes are reported with `changed_graph: true` and `changed_files`.
 
 ## Graph State
 
@@ -105,7 +154,7 @@ marketplace.
 From Claude Code, add the marketplace:
 
 ```text
-/plugin marketplace add himattm/minimap
+/plugin marketplace add mttmcknn/minimap
 ```
 
 Then install the plugin:
@@ -140,6 +189,13 @@ minimap go search
 If more than one device or emulator is attached, pass `--serial <SERIAL>` on
 any command (or set `ANDROID_SERIAL`) so every `adb` and `android` call targets
 a single device; `minimap doctor` flags ambiguous multi-device setups.
+
+For controlled raw navigation, first-use learning, graph reuse, and recovery
+comparisons, see [Evaluations](evals/README.md) and the
+[90-trial controlled results](evals/results/2026-09-16-controlled.md) and
+[benchmark graphs](evals/results/2026-09-17-benchmarks/README.md).
+The next development steps and release gates are in the
+[hardening plan](docs/MINIMAP_HARDENING_PLAN.md).
 
 For broader manual validation, clone the public
 [Android Compose samples](https://github.com/android/compose-samples) and build

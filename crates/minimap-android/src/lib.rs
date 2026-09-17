@@ -4,7 +4,7 @@ use serde::Serialize;
 use serde_json::{json, Value};
 use std::fs;
 use std::path::Path;
-use std::process::Command;
+use std::time::Instant;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CommandResult {
@@ -15,34 +15,24 @@ pub struct CommandResult {
 }
 
 pub trait CommandRunner {
+    fn deadline(&self) -> Option<Instant> {
+        None
+    }
+    fn set_deadline(&mut self, _deadline: Instant) {}
     fn run(&mut self, args: &[String], env: &[(String, String)]) -> Result<CommandResult>;
 }
 
-#[derive(Default)]
-pub struct SubprocessRunner;
+mod subprocess;
+pub use subprocess::SubprocessRunner;
 
-impl CommandRunner for SubprocessRunner {
-    fn run(&mut self, args: &[String], env: &[(String, String)]) -> Result<CommandResult> {
-        let (program, rest) = args.split_first().context("empty command")?;
-        let mut command = Command::new(program);
-        command.args(rest);
-        for (key, value) in env {
-            command.env(key, value);
-        }
-        let output = command.output().with_context(|| {
-            format!(
-                "failed to execute {}",
-                args.first().cloned().unwrap_or_default()
-            )
-        })?;
-        Ok(CommandResult {
-            args: args.to_vec(),
-            status: output.status.code().unwrap_or(-1),
-            stdout: String::from_utf8(output.stdout)?,
-            stderr: String::from_utf8(output.stderr)?,
-        })
+#[derive(Debug)]
+pub struct DriverError(pub String);
+impl std::fmt::Display for DriverError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.0)
     }
 }
+impl std::error::Error for DriverError {}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub struct TapPoint {
@@ -76,6 +66,7 @@ pub struct AndroidCli<R> {
     runner: R,
     android_bin: String,
     serial: Option<String>,
+    layout_calls: u32,
 }
 
 impl<R: CommandRunner> AndroidCli<R> {
@@ -84,6 +75,7 @@ impl<R: CommandRunner> AndroidCli<R> {
             runner,
             android_bin: "android".to_string(),
             serial,
+            layout_calls: 0,
         }
     }
 
@@ -97,7 +89,31 @@ impl<R: CommandRunner> AndroidCli<R> {
             .collect()
     }
 
+    pub fn set_deadline(&mut self, deadline: Instant) {
+        self.runner.set_deadline(deadline);
+    }
+
+    pub fn layout_calls(&self) -> u32 {
+        self.layout_calls
+    }
+
+    pub fn pause(&self, duration: std::time::Duration) -> Result<()> {
+        let duration = self.runner.deadline().map_or(duration, |deadline| {
+            duration.min(deadline.saturating_duration_since(Instant::now()))
+        });
+        if self
+            .runner
+            .deadline()
+            .is_some_and(|deadline| Instant::now() >= deadline)
+        {
+            return Err(DriverError("Navigation deadline exhausted".into()).into());
+        }
+        std::thread::sleep(duration);
+        Ok(())
+    }
+
     pub fn layout(&mut self, diff: bool) -> Result<CommandResult> {
+        self.layout_calls += 1;
         let mut args = vec![self.android_bin.clone(), "layout".to_string()];
         if diff {
             args.push("--diff".to_string());
@@ -142,6 +158,8 @@ pub struct Adb<R> {
     runner: R,
     adb_bin: String,
     serial: Option<String>,
+    expected_package: Option<String>,
+    cache_context: Option<String>,
 }
 
 impl<R: CommandRunner> Adb<R> {
@@ -150,7 +168,56 @@ impl<R: CommandRunner> Adb<R> {
             runner,
             adb_bin: "adb".to_string(),
             serial,
+            expected_package: None,
+            cache_context: None,
         }
+    }
+
+    pub fn bind_package(&mut self, package: String) {
+        self.expected_package = Some(package);
+    }
+
+    /// Runtime caches cannot survive an app restart or reinstall. PID plus the
+    /// package's install metadata scopes them without putting device data in git.
+    pub fn capture_cache_context(&mut self) -> Result<()> {
+        let Some(package) = self.expected_package.clone() else {
+            return Ok(());
+        };
+        let mut args = self.base_args();
+        args.extend(["shell".into(), "pidof".into(), package.clone()]);
+        let pid = run_checked(&mut self.runner, args, &[])?.stdout;
+        let mut args = self.base_args();
+        args.extend(["shell".into(), "dumpsys".into(), "package".into(), package]);
+        let installed = run_checked(&mut self.runner, args, &[])?.stdout;
+        let version = installed
+            .lines()
+            .filter(|line| line.contains("versionCode=") || line.contains("lastUpdateTime="))
+            .map(str::trim)
+            .collect::<Vec<_>>()
+            .join(";");
+        if pid.trim().is_empty() || version.is_empty() {
+            return Err(DriverError("Cannot establish app process/build context".into()).into());
+        }
+        self.cache_context = Some(format!("{};{version}", pid.trim()));
+        Ok(())
+    }
+
+    pub fn cache_context(&self) -> Option<&str> {
+        self.cache_context.as_deref()
+    }
+
+    pub fn ensure_foreground(&mut self) -> Result<()> {
+        let Some(expected) = self.expected_package.clone() else {
+            return Ok(());
+        };
+        let mut args = self.base_args();
+        args.extend(["shell".into(), "dumpsys".into(), "window".into()]);
+        let output = run_checked(&mut self.runner, args, &[])?;
+        let actual = foreground_package(&output.stdout);
+        if actual.as_deref() != Some(expected.as_str()) {
+            return Err(DriverError(format!("Expected foreground app {expected}; observed {}. Restore the intended app before continuing.", actual.as_deref().unwrap_or("unknown"))).into());
+        }
+        Ok(())
     }
 
     /// The adb invocation prefix: the binary plus `-s <serial>` when a serial
@@ -165,6 +232,7 @@ impl<R: CommandRunner> Adb<R> {
     }
 
     pub fn tap(&mut self, point: TapPoint) -> Result<CommandResult> {
+        self.ensure_foreground()?;
         let mut args = self.base_args();
         args.extend([
             "shell".to_string(),
@@ -177,6 +245,7 @@ impl<R: CommandRunner> Adb<R> {
     }
 
     pub fn back(&mut self) -> Result<CommandResult> {
+        self.ensure_foreground()?;
         let mut args = self.base_args();
         args.extend([
             "shell".to_string(),
@@ -195,6 +264,7 @@ impl<R: CommandRunner> Adb<R> {
         end_y: i64,
         duration_ms: i64,
     ) -> Result<CommandResult> {
+        self.ensure_foreground()?;
         let mut args = self.base_args();
         args.extend([
             "shell".to_string(),
@@ -209,6 +279,10 @@ impl<R: CommandRunner> Adb<R> {
         run_checked(&mut self.runner, args, &[])
     }
 
+    pub fn set_deadline(&mut self, deadline: Instant) {
+        self.runner.set_deadline(deadline);
+    }
+
     pub fn serial(&mut self) -> Result<String> {
         // An explicitly configured serial is authoritative; `adb get-serialno`
         // would fail outright with more than one device attached.
@@ -218,7 +292,13 @@ impl<R: CommandRunner> Adb<R> {
         let mut args = self.base_args();
         args.push("get-serialno".to_string());
         let result = run_checked(&mut self.runner, args, &[])?;
-        Ok(result.stdout.trim().to_string())
+        let serial = result.stdout.trim();
+        if serial.is_empty() || serial == "unknown" || serial.split_whitespace().count() != 1 {
+            return Err(
+                DriverError("No unique ready Android device; choose --serial".into()).into(),
+            );
+        }
+        Ok(serial.to_string())
     }
 
     pub fn display_size(&mut self) -> Result<Viewport> {
@@ -227,6 +307,20 @@ impl<R: CommandRunner> Adb<R> {
         let result = run_checked(&mut self.runner, args, &[])?;
         parse_wm_size(&result.stdout)
     }
+}
+
+pub fn foreground_package(output: &str) -> Option<String> {
+    let focus = output
+        .lines()
+        .find(|line| line.contains("mCurrentFocus="))?;
+    focus.split_whitespace().find_map(|word| {
+        let (package, _) = word.split_once('/')?;
+        (!package.is_empty()
+            && package
+                .chars()
+                .all(|ch| ch.is_ascii_alphanumeric() || ch == '.' || ch == '_'))
+        .then(|| package.to_string())
+    })
 }
 
 /// Parse `adb shell wm size` output. When `Override size:` is present it wins
@@ -252,7 +346,7 @@ fn parse_size_value(value: &str) -> Option<Viewport> {
     let (w, h) = value.split_once('x')?;
     let width = w.trim().parse().ok()?;
     let height = h.trim().parse().ok()?;
-    Some(Viewport { width, height })
+    (width > 0 && height > 0).then_some(Viewport { width, height })
 }
 
 fn run_checked<R: CommandRunner>(
@@ -262,20 +356,46 @@ fn run_checked<R: CommandRunner>(
 ) -> Result<CommandResult> {
     let result = runner.run(&args, env)?;
     if result.status != 0 {
-        bail!(
-            "command failed: {} (status {}, stderr: {})",
-            result.args.join(" "),
+        return Err(DriverError(format!(
+            "{} failed (status {}): {}",
+            result.args[0],
             result.status,
-            result.stderr
-        );
+            result.stderr.chars().take(512).collect::<String>()
+        ))
+        .into());
     }
     Ok(result)
 }
 
+/// Accept the documented flat list and legacy object trees; never fingerprint
+/// a command's log output, JSON string, or unrelated JSON envelope as a screen.
+pub fn parse_layout(stdout: &str) -> Result<Value> {
+    let value: Value = serde_json::from_str(stdout)
+        .map_err(|_| DriverError("Android layout returned invalid JSON".into()))?;
+    let valid = match &value {
+        Value::Array(nodes) => nodes.iter().all(Value::is_object),
+        Value::Object(node) => [
+            "nodes",
+            "children",
+            "class",
+            "text",
+            "testTag",
+            "resource-id",
+            "resourceId",
+        ]
+        .iter()
+        .any(|key| node.contains_key(*key)),
+        _ => false,
+    };
+    if !valid {
+        return Err(DriverError("Unsupported Android layout shape".into()).into());
+    }
+    Ok(value)
+}
+
 pub fn layout_result<R: CommandRunner>(android: &mut AndroidCli<R>, diff: bool) -> Result<Value> {
     let command = android.layout(diff)?;
-    let layout =
-        serde_json::from_str::<Value>(&command.stdout).unwrap_or(Value::String(command.stdout));
+    let layout = parse_layout(&command.stdout)?;
     let mut result = json!({
         "status": "ok",
         "kind": if diff { "android_layout_diff" } else { "android_layout" },
@@ -401,35 +521,84 @@ fn capture_viewport<R: CommandRunner>(adb: &mut Adb<R>) -> Option<Viewport> {
 }
 
 pub fn resolve_selector_point(layout: &Value, selector: &str) -> Result<TapPoint> {
+    let matches = selector_nodes(layout, selector)?;
+    let matches: Vec<_> = matches
+        .into_iter()
+        .filter(|node| node.get("enabled").and_then(Value::as_bool) != Some(false))
+        .collect();
+    match matches.as_slice() {
+        [node] => center_of(node)
+            .filter(|p| p.x >= 0 && p.y >= 0)
+            .context("matched node has no usable tap bounds"),
+        [] => bail!("Selector not found or not actionable: {selector}"),
+        _ => bail!(
+            "Ambiguous selector ({selector}) matches {} visible nodes",
+            matches.len()
+        ),
+    }
+}
+
+/// Assertions inspect visible content, including non-clickable headers. They
+/// do not require tap coordinates and never persist the requested instance.
+pub fn verify_expectations(layout: &Value, expectations: &[String]) -> Result<()> {
+    for (index, selector) in expectations.iter().enumerate() {
+        anyhow::ensure!(
+            selector_nodes(layout, selector)?.len() == 1,
+            "expectation {} must match exactly one visible element",
+            index + 1
+        );
+    }
+    Ok(())
+}
+
+fn selector_nodes<'a>(
+    layout: &'a Value,
+    selector: &str,
+) -> Result<Vec<&'a serde_json::Map<String, Value>>> {
     let (key, expected) = selector
         .split_once('=')
         .context("selectors must use key=value syntax")?;
     // `android layout` emits hyphenated keys (content-desc, resource-id); legacy
     // UIAutomator dumps use camelCase. Try both so we don't break either shape.
     let candidates: Vec<&str> = match key.trim() {
-        "content_desc" | "content_description" | "desc" => {
-            vec!["content-desc", "contentDescription"]
+        "content_desc"
+        | "content_description"
+        | "desc"
+        | "contentDesc"
+        | "contentDescription"
+        | "content-desc" => {
+            vec![
+                "content-desc",
+                "contentDescription",
+                "contentDesc",
+                "content_description",
+            ]
         }
-        "id" | "resource_id" => vec!["resource-id", "resourceId"],
-        "test_tag" => vec!["testTag", "test-tag"],
+        "id" | "resource_id" | "resourceId" | "resource-id" => {
+            vec!["resource-id", "resourceId", "resource_id", "id"]
+        }
+        "test_tag" | "testTag" | "test-tag" => vec!["testTag", "test-tag"],
         other => vec![other],
     };
     let expected = expected.trim();
-    for node in walk_nodes(layout) {
-        for k in &candidates {
-            if node.get(*k).and_then(Value::as_str) == Some(expected) {
-                return center_of(node).context("matched node has no tap bounds");
-            }
-        }
-    }
-    bail!("Selector not found: {selector}")
+    let matches: Vec<_> = walk_nodes(layout)
+        .into_iter()
+        .filter(|node| {
+            candidates
+                .iter()
+                .any(|key| node.get(*key).and_then(Value::as_str) == Some(expected))
+                && node.get("off-screen").and_then(Value::as_bool) != Some(true)
+                && node.get("visible").and_then(Value::as_bool) != Some(false)
+        })
+        .collect();
+    Ok(matches)
 }
 
 fn walk_nodes(value: &Value) -> Vec<&serde_json::Map<String, Value>> {
     let mut nodes = Vec::new();
     if let Value::Object(map) = value {
         nodes.push(map);
-        for key in ["children", "nodes"] {
+        for key in ["children", "nodes", "elements"] {
             if let Some(Value::Array(children)) = map.get(key) {
                 for child in children {
                     nodes.extend(walk_nodes(child));
@@ -467,6 +636,9 @@ fn bounds_center(node: &serde_json::Map<String, Value>) -> Option<TapPoint> {
                 let height = number(bounds, &["height"])?;
                 Some(top + height)
             })?;
+            if right <= left || bottom <= top {
+                return None;
+            }
             Some(TapPoint {
                 x: ((left + right) / 2.0).round() as i64,
                 y: ((top + bottom) / 2.0).round() as i64,
@@ -477,6 +649,9 @@ fn bounds_center(node: &serde_json::Map<String, Value>) -> Option<TapPoint> {
             let top = values[1].as_f64()?;
             let right = values[2].as_f64()?;
             let bottom = values[3].as_f64()?;
+            if right <= left || bottom <= top {
+                return None;
+            }
             Some(TapPoint {
                 x: ((left + right) / 2.0).round() as i64,
                 y: ((top + bottom) / 2.0).round() as i64,
@@ -515,6 +690,40 @@ pub fn write_fake_executable(path: &Path, body: &str) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn selector_requires_a_unique_visible_enabled_node() {
+        let layout = json!([
+            {"contentDesc": "Next", "center": "[10,20]"},
+            {"contentDesc": "Next", "center": "[20,20]", "off-screen": true},
+            {"contentDesc": "Next", "center": "[30,20]", "enabled": false}
+        ]);
+        assert_eq!(
+            resolve_selector_point(&layout, "content_desc=Next").unwrap(),
+            TapPoint { x: 10, y: 20 }
+        );
+        let duplicate =
+            json!([{"text": "Next", "center": "[10,20]"}, {"text": "Next", "center": "[20,20]"}]);
+        assert!(resolve_selector_point(&duplicate, "text=Next")
+            .unwrap_err()
+            .to_string()
+            .contains("Ambiguous"));
+    }
+
+    #[test]
+    fn parser_rejects_non_layout_responses() {
+        for text in [
+            "starting adb...",
+            "null",
+            "42",
+            "[1]",
+            "{\"error\":\"offline\"}",
+        ] {
+            assert!(parse_layout(text).is_err(), "{text}");
+        }
+        assert!(parse_layout("[]").is_ok());
+        assert!(parse_layout("{\"nodes\": []}").is_ok());
+    }
 
     #[derive(Default)]
     struct FakeRunner {
@@ -572,10 +781,7 @@ mod tests {
 
     #[test]
     fn layout_diff_uses_android_in_session_scope() {
-        let mut android = AndroidCli::new(
-            FakeRunner::new(vec![ok(&["android"], r#"{"changed":[]}"#)]),
-            None,
-        );
+        let mut android = AndroidCli::new(FakeRunner::new(vec![ok(&["android"], r#"[]"#)]), None);
         let result = layout_result(&mut android, true).unwrap();
         assert_eq!(result["kind"], "android_layout_diff");
         assert_eq!(result["diff_scope"], "android_in_session");

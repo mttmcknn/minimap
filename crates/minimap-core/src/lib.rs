@@ -8,6 +8,7 @@ const TEXT_KEYS: &[&str] = &[
     "label",
     "title",
     "contentDescription",
+    "contentDesc",
     "content_description",
     "content-desc",
     "hint",
@@ -83,25 +84,34 @@ pub fn place_id_for_slug(slug: &str) -> String {
 }
 
 pub fn redact_layout(layout: &Value) -> Value {
-    redact_value(layout, None)
+    redact_value(layout, None, false)
 }
 
-fn redact_value(value: &Value, key: Option<&str>) -> Value {
+fn redact_value(value: &Value, key: Option<&str>, private_content: bool) -> Value {
     if key.map(is_sensitive_key).unwrap_or(false) {
         return Value::String("<redacted>".to_string());
     }
     match value {
         Value::Object(map) => {
+            let private_content = private_content || is_private_input(map);
             let mut redacted = Map::new();
             for (key, value) in map {
-                redacted.insert(key.clone(), redact_value(value, Some(key)));
+                let value = if private_content
+                    && (TEXT_KEYS.contains(&key.as_str())
+                        || matches!(key.as_str(), "value" | "valueText" | "editableText"))
+                {
+                    json!({"redacted": true, "reason": "private_input"})
+                } else {
+                    redact_value(value, Some(key), private_content)
+                };
+                redacted.insert(key.clone(), value);
             }
             Value::Object(redacted)
         }
         Value::Array(values) => Value::Array(
             values
                 .iter()
-                .map(|value| redact_value(value, None))
+                .map(|value| redact_value(value, None, private_content))
                 .collect(),
         ),
         // Real `android layout` output encodes geometry as STRINGS (e.g.
@@ -136,6 +146,37 @@ fn redact_value(value: &Value, key: Option<&str>) -> Value {
         },
         _ => value.clone(),
     }
+}
+
+fn is_private_input(map: &Map<String, Value>) -> bool {
+    let truthy = |key| map.get(key).is_some_and(|v| v == true || v == "true");
+    truthy("password")
+        || truthy("editable")
+        || ["class", "className", "role", "type"].iter().any(|key| {
+            map.get(*key).and_then(Value::as_str).is_some_and(|v| {
+                let value = v.to_ascii_lowercase();
+                value.contains("edittext")
+                    || matches!(value.as_str(), "textfield" | "textbox" | "password")
+            })
+        })
+        || map
+            .get("interactions")
+            .and_then(Value::as_array)
+            .is_some_and(|values| {
+                values
+                    .iter()
+                    .filter_map(Value::as_str)
+                    .any(|v| matches!(v, "password" | "editable" | "setText" | "set_text"))
+            })
+}
+
+/// Reject recognizably sensitive free text before it enters labels, intents,
+/// or recipes. Unmarked personal names cannot be inferred from arbitrary UI.
+pub fn safe_graph_text(text: &str) -> bool {
+    !text.trim().is_empty()
+        && text.len() <= 512
+        && !text.chars().any(char::is_control)
+        && sensitive_text_reason(text).is_none()
 }
 
 fn is_sensitive_key(key: &str) -> bool {
@@ -363,7 +404,12 @@ fn collect_selector(map: &Map<String, Value>, selectors: &mut BTreeSet<Selector>
         ),
         (
             "content_desc",
-            &["content-desc", "contentDescription", "content_description"][..],
+            &[
+                "content-desc",
+                "contentDescription",
+                "contentDesc",
+                "content_description",
+            ][..],
         ),
     ] {
         if let Some(value) = first_string(map, keys) {
@@ -494,61 +540,65 @@ pub fn match_place(baseline: &PlaceBaseline, places: impl Iterator<Item = Place>
             hash_matched: false,
         };
     }
-    let mut best: Option<(Place, f64, bool)> = None;
-    for place in places {
-        if place.baseline.identity_hash == baseline.identity_hash
-            || place
-                .variants
-                .iter()
-                .any(|variant| variant.identity_hash == baseline.identity_hash)
-        {
-            return PlaceMatch {
-                status: "known".to_string(),
-                place_id: Some(place.id),
-                slug: Some(place.slug),
-                confidence: 1.0,
-                hash_matched: true,
+    let mut ranked: Vec<(Place, f64, bool)> = places
+        .map(|place| {
+            let exact = place.baseline.identity_hash == baseline.identity_hash
+                || place
+                    .variants
+                    .iter()
+                    .any(|v| v.identity_hash == baseline.identity_hash);
+            let score = if exact {
+                1.0
+            } else {
+                std::iter::once(&place.baseline)
+                    .chain(&place.variants)
+                    .map(|v| similarity(&baseline.fingerprint, &v.fingerprint))
+                    .fold(0.0, f64::max)
             };
-        }
-        let mut score = similarity(&baseline.fingerprint, &place.baseline.fingerprint);
-        let mut variant_match = false;
-        for variant in &place.variants {
-            let variant_score = similarity(&baseline.fingerprint, &variant.fingerprint);
-            if variant_score > score {
-                score = variant_score;
-                variant_match = true;
-            }
-        }
-        if best
-            .as_ref()
-            .map(|(_, best_score, _)| score > *best_score)
-            .unwrap_or(true)
-        {
-            best = Some((place, score, variant_match));
-        }
-    }
-    match best {
-        Some((place, score, _)) if score >= KNOWN_CHANGED_THRESHOLD => PlaceMatch {
-            status: "known_changed".to_string(),
-            place_id: Some(place.id),
-            slug: Some(place.slug),
-            confidence: score,
-            hash_matched: false,
-        },
-        Some((place, score, _)) => PlaceMatch {
-            status: "unknown".to_string(),
-            place_id: Some(place.id),
-            slug: Some(place.slug),
-            confidence: score,
-            hash_matched: false,
-        },
-        None => PlaceMatch {
-            status: "unknown".to_string(),
+            (place, score, exact)
+        })
+        .collect();
+    ranked.sort_by(|a, b| {
+        b.2.cmp(&a.2)
+            .then_with(|| b.1.total_cmp(&a.1))
+            .then_with(|| a.0.id.cmp(&b.0.id))
+    });
+    let Some((place, score, exact)) = ranked.first() else {
+        return PlaceMatch {
+            status: "unknown".into(),
             place_id: None,
             slug: None,
             confidence: 0.0,
             hash_matched: false,
+        };
+    };
+    let ambiguous = ranked.get(1).is_some_and(|(_, second, second_exact)| {
+        (*exact && *second_exact)
+            || (!exact && *score >= KNOWN_CHANGED_THRESHOLD && score - second < 0.05)
+    });
+    PlaceMatch {
+        status: if ambiguous {
+            "ambiguous"
+        } else if *exact {
+            "known"
+        } else if *score >= KNOWN_CHANGED_THRESHOLD {
+            "known_changed"
+        } else {
+            "unknown"
+        }
+        .into(),
+        place_id: if ambiguous {
+            None
+        } else {
+            Some(place.id.clone())
         },
+        slug: if ambiguous {
+            None
+        } else {
+            Some(place.slug.clone())
+        },
+        confidence: *score,
+        hash_matched: *exact && !ambiguous,
     }
 }
 
@@ -575,6 +625,18 @@ fn similarity(left: &Fingerprint, right: &Fingerprint) -> f64 {
         .map(|text| tokenize_text(&text.value))
         .filter(|value| !value.is_empty())
         .collect();
+    // Shared navigation chrome cannot override contradictory page content.
+    // Descriptions already counted as selectors are not independent text evidence.
+    let chrome: BTreeSet<String> = left
+        .selectors
+        .iter()
+        .chain(&right.selectors)
+        .map(|selector| tokenize_text(&selector.value))
+        .collect();
+    let content_left: BTreeSet<_> = text_left.difference(&chrome).cloned().collect();
+    let content_right: BTreeSet<_> = text_right.difference(&chrome).cloned().collect();
+    let content_conflicts = (!content_left.is_empty() || !content_right.is_empty())
+        && content_left.is_disjoint(&content_right);
     // Roles ride the blended dimension as a presence SET of role names (count is
     // factored out into a separate count-similarity term below), so a role that
     // merely repeats more or fewer times does not split an otherwise-matching
@@ -615,7 +677,12 @@ fn similarity(left: &Fingerprint, right: &Fingerprint) -> f64 {
     if total_weight == 0.0 {
         0.0
     } else {
-        weighted / total_weight
+        let score = weighted / total_weight;
+        if content_conflicts {
+            score.min(KNOWN_CHANGED_THRESHOLD - 0.01)
+        } else {
+            score
+        }
     }
 }
 
@@ -672,6 +739,43 @@ fn role_count_similarity(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn shared_navigation_controls_do_not_make_profile_the_search_screen() {
+        let fixture: Value = serde_json::from_str(include_str!(
+            "../tests/fixtures/jetsnack-shared-navigation.json"
+        ))
+        .unwrap();
+        let search: PlaceBaseline =
+            serde_json::from_value(fixture["search_baseline"].clone()).unwrap();
+        let profile = fingerprint_layout(&fixture["profile_layout"]);
+        let result = match_place(&profile, std::iter::once(place("search", search, vec![])));
+        assert_eq!(
+            result.status, "unknown",
+            "sparse Profile was recognized as Search: {result:?}"
+        );
+    }
+
+    #[test]
+    fn identical_evidence_for_two_places_is_ambiguous_in_any_order() {
+        let baseline = fingerprint_layout(&json!({"text": "Settings", "testTag": "settings"}));
+        let one = Place {
+            schema_version: minimap_schemas::PLACE_SCHEMA_VERSION.into(),
+            id: "a".into(),
+            slug: "a".into(),
+            label: "a".into(),
+            baseline: baseline.clone(),
+            variants: vec![],
+        };
+        let mut two = one.clone();
+        two.id = "b".into();
+        two.slug = "b".into();
+        for places in [vec![one.clone(), two.clone()], vec![two, one]] {
+            let found = match_place(&baseline, places.into_iter());
+            assert_eq!(found.status, "ambiguous");
+            assert!(found.place_id.is_none());
+        }
+    }
 
     #[test]
     fn label_normalization_uses_kebab_case() {
@@ -1460,7 +1564,7 @@ mod tests {
             "class": "Row",
             "subtitle": "alice@example.com"
         });
-        let redacted = redact_value(&email_layout, None);
+        let redacted = redact_layout(&email_layout);
         assert_eq!(
             redacted["subtitle"],
             json!({"redacted": true, "reason": "email"})
@@ -1470,7 +1574,7 @@ mod tests {
             "class": "Row",
             "note": "SSN 123-45-6789 on file"
         });
-        let redacted = redact_value(&ssn_layout, None);
+        let redacted = redact_layout(&ssn_layout);
         assert_eq!(
             redacted["note"],
             json!({"redacted": true, "reason": "numeric_sensitive"})

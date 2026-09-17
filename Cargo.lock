@@ -353,6 +353,7 @@ name = "minimap-android"
 version = "0.2.0"
 dependencies = [
  "anyhow",
+ "libc",
  "minimap-schemas",
  "serde",
  "serde_json",
@@ -372,6 +373,7 @@ dependencies = [
  "minimap-repo",
  "minimap-schemas",
  "predicates",
+ "serde",
  "serde_json",
  "sha2",
  "tempfile",
@@ -408,6 +410,7 @@ dependencies = [
  "minimap-schemas",
  "serde",
  "serde_json",
+ "sha2",
  "tempfile",
 ]
 

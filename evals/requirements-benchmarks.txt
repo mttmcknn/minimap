@@ -1,0 +1,4 @@
+# Optional; product builds and evaluator contract tests do not need these.
+matplotlib==3.11.2
+numpy==2.3.5
+tiktoken==0.14.0

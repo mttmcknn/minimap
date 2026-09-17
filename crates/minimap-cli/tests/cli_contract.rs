@@ -4,6 +4,34 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 #[test]
+fn compact_and_pretty_output_have_the_same_json_contract() {
+    let temp = tempfile::tempdir().unwrap();
+    let compact = minimap(temp.path())
+        .args(["init", "--dry-run", "--no-skills"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let pretty = minimap(temp.path())
+        .args(["init", "--dry-run", "--no-skills", "--pretty"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    assert_eq!(
+        serde_json::from_slice::<Value>(&compact).unwrap(),
+        serde_json::from_slice::<Value>(&pretty).unwrap()
+    );
+    assert_eq!(
+        String::from_utf8(compact.clone()).unwrap().lines().count(),
+        1
+    );
+    assert!(compact.len() < pretty.len());
+}
+
+#[test]
 fn init_creates_minimal_layout_and_skill() {
     let temp = tempfile::tempdir().unwrap();
     let output = minimap(temp.path())
@@ -237,7 +265,10 @@ fn tap_existing_label_adds_variant_without_replacing_baseline() {
         .assert()
         .success();
     let bin = fake_bin(temp.path());
-    write_android_layout_script(&bin, &["home", "home", "search", "search", "home_changed"]);
+    write_android_layout_script(
+        &bin,
+        &["home", "home", "search", "search", "search", "home_changed"],
+    );
     write_adb_script(&bin);
 
     minimap(temp.path())
@@ -368,7 +399,10 @@ fn go_replays_known_selector_edge() {
         .assert()
         .success();
     let bin = fake_bin(temp.path());
-    write_android_layout_script(&bin, &["home", "home", "search", "home", "search"]);
+    write_android_layout_script(
+        &bin,
+        &["home", "home", "search", "search", "home", "home", "search"],
+    );
     write_adb_script(&bin);
 
     minimap(temp.path())
@@ -406,18 +440,16 @@ fn go_replays_known_selector_edge() {
     let payload: Value = serde_json::from_slice(&output).unwrap();
     assert_eq!(payload["status"], "ok");
     assert_eq!(payload["data"]["target"], "search");
-    assert_eq!(payload["data"]["start_source"], "session");
+    assert_eq!(payload["data"]["start_source"], "layout");
     assert_eq!(payload["data"]["executed_steps"][0]["to"], "search");
 }
 
 // REDACTION/GEOMETRY REGRESSION: real `android layout` output encodes geometry
 // as STRINGS ("center":"[540,2200]", "bounds":"[480,2100][600,2300]") whose
-// digit count trips the numeric-sensitive redaction screen. `go` seeds selector
-// resolution from the REDACTED session-cache layout, so if redaction destroys
-// the geometry strings, replay fails live with "matched node has no tap bounds"
-// (action_failed) even though the object-geometry fakes above stay green.
+// digit count can trip numeric-sensitive redaction. Replay must support the
+// real CLI shape while re-observing the source instead of trusting cached pixels.
 #[test]
-fn go_replays_selector_edge_from_string_geometry_session_cache() {
+fn go_replays_selector_edge_from_fresh_string_geometry_layout() {
     let temp = tempfile::tempdir().unwrap();
     minimap(temp.path())
         .args(["init", "--agents", "codex"])
@@ -430,6 +462,8 @@ fn go_replays_selector_edge_from_string_geometry_session_cache() {
             "home_geo",
             "home_geo",
             "search_geo",
+            "search_geo",
+            "home_geo",
             "home_geo",
             "search_geo",
         ],
@@ -455,7 +489,7 @@ fn go_replays_selector_edge_from_string_geometry_session_cache() {
         .assert()
         .success();
     // Re-orient onto home so the session cache holds the (redacted) home layout
-    // with its string geometry; `go` must resolve the tap point from it.
+    // with its string geometry; `go` must still capture a fresh source layout.
     minimap(temp.path())
         .env("PATH", prepend_path(&bin))
         .args(["whereami", "--label", "home"])
@@ -473,7 +507,7 @@ fn go_replays_selector_edge_from_string_geometry_session_cache() {
     let payload: Value = serde_json::from_slice(&output).unwrap();
     assert_eq!(payload["status"], "ok");
     assert_eq!(payload["data"]["target"], "search");
-    assert_eq!(payload["data"]["start_source"], "session");
+    assert_eq!(payload["data"]["start_source"], "layout");
     assert_eq!(payload["data"]["executed_steps"][0]["to"], "search");
 }
 
@@ -488,7 +522,7 @@ fn whereami_reports_known_exits_on_fresh_and_cached_paths() {
         .assert()
         .success();
     let bin = fake_bin(temp.path());
-    write_android_layout_script(&bin, &["home", "home", "search", "home"]);
+    write_android_layout_script(&bin, &["home", "home", "search", "search", "home"]);
     write_adb_script(&bin);
 
     minimap(temp.path())
@@ -559,7 +593,15 @@ fn whereami_reuses_fresh_verified_session_place() {
     let bin = fake_bin(temp.path());
     write_android_layout_script(
         &bin,
-        &["home", "home", "search", "home", "search", "home_changed"],
+        &[
+            "home",
+            "home",
+            "search",
+            "search",
+            "home",
+            "search",
+            "home_changed",
+        ],
     );
     write_adb_script(&bin);
 
@@ -593,7 +635,7 @@ fn whereami_reuses_fresh_verified_session_place() {
         .success();
 
     let count_after_go = fs::read_to_string(bin.join("android-count")).unwrap();
-    assert_eq!(count_after_go, "5");
+    assert_eq!(count_after_go, "6");
 
     let output = minimap(temp.path())
         .env("PATH", prepend_path(&bin))
@@ -609,7 +651,7 @@ fn whereami_reuses_fresh_verified_session_place() {
     assert_eq!(payload["cache"]["hit"], true);
     assert_eq!(payload["metrics"]["layout_calls_total"], 0);
     let count_after_whereami = fs::read_to_string(bin.join("android-count")).unwrap();
-    assert_eq!(count_after_whereami, "5");
+    assert_eq!(count_after_whereami, "6");
 }
 
 #[test]
@@ -622,7 +664,15 @@ fn layout_reuses_fresh_verified_session_layout() {
     let bin = fake_bin(temp.path());
     write_android_layout_script(
         &bin,
-        &["home", "home", "search", "home", "search", "home_changed"],
+        &[
+            "home",
+            "home",
+            "search",
+            "search",
+            "home",
+            "search",
+            "home_changed",
+        ],
     );
     write_adb_script(&bin);
 
@@ -656,7 +706,7 @@ fn layout_reuses_fresh_verified_session_layout() {
         .success();
 
     let count_after_go = fs::read_to_string(bin.join("android-count")).unwrap();
-    assert_eq!(count_after_go, "5");
+    assert_eq!(count_after_go, "6");
 
     let output = minimap(temp.path())
         .env("PATH", prepend_path(&bin))
@@ -674,7 +724,7 @@ fn layout_reuses_fresh_verified_session_layout() {
         .unwrap()
         .contains("Categories"));
     let count_after_layout = fs::read_to_string(bin.join("android-count")).unwrap();
-    assert_eq!(count_after_layout, "5");
+    assert_eq!(count_after_layout, "6");
 }
 
 #[test]
@@ -951,7 +1001,7 @@ fn go_refuses_geometry_edge_at_mismatched_viewport() {
         .assert()
         .success();
     let bin = fake_bin(temp.path());
-    write_android_layout_script(&bin, &["home", "home", "search", "home"]);
+    write_android_layout_script(&bin, &["home", "home", "search", "search", "home"]);
     write_adb_script_with_size(&bin, "1080x2400");
 
     minimap(temp.path())
@@ -1017,7 +1067,7 @@ fn tap_point_without_display_size_is_environment_error() {
 }
 
 #[test]
-fn whereami_relabel_preserves_baseline_and_repoints_edges() {
+fn whereami_relabel_preserves_identity_baseline_and_edges() {
     let temp = tempfile::tempdir().unwrap();
     minimap(temp.path())
         .args(["init", "--agents", "codex"])
@@ -1026,7 +1076,7 @@ fn whereami_relabel_preserves_baseline_and_repoints_edges() {
     let bin = fake_bin(temp.path());
     // alpha establishes the baseline; alpha_drift is a still-matching variant
     // observed during the relabel; beta is an edge destination off of alpha.
-    write_android_layout_script(&bin, &["alpha", "alpha", "beta", "alpha_drift"]);
+    write_android_layout_script(&bin, &["alpha", "alpha", "beta", "beta", "alpha_drift"]);
     write_adb_script(&bin);
 
     minimap(temp.path())
@@ -1061,16 +1111,10 @@ fn whereami_relabel_preserves_baseline_and_repoints_edges() {
         .assert()
         .success();
 
-    // Old place id removed; new slug present.
-    assert!(!temp
-        .path()
-        .join(".minimap/graph/places/place_alpha.json")
-        .exists());
-    let relabeled = read_json_path(
-        &temp
-            .path()
-            .join(".minimap/graph/places/place_homescreen.json"),
-    );
+    // Labels are mutable; graph identity and edge references remain stable.
+    let relabeled = read_json_path(&temp.path().join(".minimap/graph/places/place_alpha.json"));
+    assert_eq!(relabeled["slug"], "homescreen");
+    assert_eq!(relabeled["id"], "place_alpha");
     // KEY: baseline preserved, drift recorded as a variant (NOT overwriting it).
     assert_eq!(relabeled["baseline"]["identity_hash"], original_hash);
     let variants = relabeled["variants"].as_array().unwrap();
@@ -1085,8 +1129,9 @@ fn whereami_relabel_preserves_baseline_and_repoints_edges() {
     let edges = edge_files(temp.path());
     assert_eq!(edges.len(), 1);
     let edge = read_json_path(&edges[0]);
-    assert_eq!(edge["from"]["slug"], "homescreen");
-    assert_eq!(edge["from"]["id"], "place_homescreen");
+    assert_eq!(edge["from"]["id"], "place_alpha");
+    let graph = minimap_repo::load_graph(temp.path()).unwrap();
+    assert_eq!(graph.edges.values().next().unwrap().from.slug, "homescreen");
     assert_eq!(edge["to"]["slug"], "beta");
 }
 
@@ -1241,7 +1286,7 @@ fn go_with_broken_selector_edge_fails_without_writing_graph() {
     // nav -> other via a tap on testTag=go_search. nav_drift still matches nav
     // (known_changed) but the go_search node is gone, so the selector cannot
     // resolve on replay.
-    write_android_layout_script(&bin, &["nav", "nav", "other", "nav_drift"]);
+    write_android_layout_script(&bin, &["nav", "nav", "other", "other", "nav_drift"]);
     write_adb_script(&bin);
 
     minimap(temp.path())
@@ -1561,7 +1606,7 @@ fn doctor_flags_multiple_devices_without_serial_and_targets_one_with_serial() {
 
 fn minimap(cwd: &Path) -> Command {
     let mut command = Command::cargo_bin("minimap").unwrap();
-    command.current_dir(cwd);
+    command.env("HOME", cwd).env("TMPDIR", cwd).current_dir(cwd);
     command.env("MINIMAP_ACTION_SETTLE_MS", "0");
     // Keep an ambient ANDROID_SERIAL on the host from leaking into tests that
     // exercise the serial-less default behavior.
@@ -1570,6 +1615,13 @@ fn minimap(cwd: &Path) -> Command {
 }
 
 fn fake_bin(root: &Path) -> PathBuf {
+    let config_path = root.join(".minimap/config.json");
+    if let Ok(text) = fs::read_to_string(&config_path) {
+        if let Ok(mut config) = serde_json::from_str::<Value>(&text) {
+            config["app_profiles"]["default"]["android_package"] = json!("com.example.app");
+            fs::write(config_path, config.to_string()).unwrap();
+        }
+    }
     let bin = root.join("fake-bin");
     fs::create_dir_all(&bin).unwrap();
     bin
@@ -1813,6 +1865,28 @@ exit 2
 }
 
 fn write_executable(path: &Path, body: &str) {
+    let body = if path.file_name().unwrap() == "adb" {
+        body.replace("if [ \"$1\" = \"shell\" ] && [ \"$2\" = \"input\" ]; then", "if [ \"$1\" = \"shell\" ] && [ \"$2\" = \"dumpsys\" ]; then printf 'mCurrentFocus=Window{1 u0 com.example.app/.MainActivity}\\nversionCode=1\\nlastUpdateTime=fixture\\n'; exit 0; fi\nif [ \"$1\" = \"shell\" ] && [ \"$2\" = \"input\" ]; then")
+    } else {
+        body.to_string()
+    };
+    let body = if path.file_name().unwrap() == "adb" {
+        body.replace("if [ \"$1\" = \"shell\" ] && [ \"$2\" = \"dumpsys\" ]; then", "if [ \"$1\" = shell ] && [ \"$2\" = pidof ]; then printf '4242\\n'; exit 0; fi\nif [ \"$1\" = \"shell\" ] && [ \"$2\" = \"dumpsys\" ]; then")
+    } else {
+        body
+    };
+    let body = if path.file_name().unwrap() == "adb"
+        && !body.contains("expected -s")
+        && !body.contains("emulator-5554")
+    {
+        body.replacen(
+            "#!/bin/sh",
+            "#!/bin/sh\nif [ \"$1\" = -s ]; then shift 2; fi",
+            1,
+        )
+    } else {
+        body
+    };
     fs::write(path, body).unwrap();
     #[cfg(unix)]
     {

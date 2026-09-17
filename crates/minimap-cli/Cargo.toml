@@ -2,6 +2,7 @@
 name = "minimap-cli"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
 description.workspace = true
 repository.workspace = true
@@ -19,7 +20,9 @@ minimap-repo = { version = "0.2.0", path = "../minimap-repo" }
 minimap-schemas = { version = "0.2.0", path = "../minimap-schemas" }
 clap = { workspace = true, features = ["env"] }
 serde_json.workspace = true
+serde.workspace = true
 sha2.workspace = true
+tempfile.workspace = true
 
 [dev-dependencies]
 assert_cmd.workspace = true

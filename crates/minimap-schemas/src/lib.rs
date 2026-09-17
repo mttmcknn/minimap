@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 
 pub const CONFIG_SCHEMA_VERSION: &str = "minimap.config.v2";
 pub const PLACE_SCHEMA_VERSION: &str = "minimap.place.v1";
-pub const EDGE_SCHEMA_VERSION: &str = "minimap.edge.v1";
+pub const EDGE_SCHEMA_VERSION: &str = "minimap.edge.v2";
 pub const RESULT_SCHEMA_VERSION: &str = "minimap.result.v1";
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -34,6 +34,7 @@ pub struct MinimapConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
+#[serde(deny_unknown_fields)]
 pub struct Selector {
     pub kind: String,
     pub value: String,
@@ -78,6 +79,7 @@ pub struct EdgeEndpoint {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct ActionStep {
     pub kind: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -94,6 +96,80 @@ impl ActionStep {
     pub fn is_geometry(&self) -> bool {
         self.point.is_some()
     }
+
+    pub fn validate(&self) -> Result<()> {
+        match self.kind.as_str() {
+            "tap" => {
+                anyhow::ensure!(self.direction.is_none(), "tap cannot have a direction");
+                match (&self.selector, self.point, self.viewport) {
+                    (Some(selector), None, None) => selector.validate()?,
+                    (None, Some(point), Some(viewport)) => {
+                        anyhow::ensure!(
+                            viewport.width > 0
+                                && viewport.height > 0
+                                && point.x >= 0
+                                && point.y >= 0
+                                && point.x < viewport.width
+                                && point.y < viewport.height,
+                            "point must be inside a positive viewport"
+                        );
+                    }
+                    _ => bail!("tap needs exactly one selector or a point with its viewport"),
+                }
+            }
+            "scroll" => anyhow::ensure!(
+                self.selector.is_none()
+                    && self.point.is_none()
+                    && self.viewport.is_none()
+                    && matches!(
+                        self.direction.as_deref(),
+                        Some("up" | "down" | "left" | "right")
+                    ),
+                "scroll needs one supported direction and no other payload"
+            ),
+            "press_back" => anyhow::ensure!(
+                self.selector.is_none()
+                    && self.point.is_none()
+                    && self.viewport.is_none()
+                    && self.direction.is_none(),
+                "Back cannot have an action payload"
+            ),
+            _ => bail!("unsupported action kind"),
+        }
+        Ok(())
+    }
+}
+
+impl Selector {
+    pub fn validate(&self) -> Result<()> {
+        anyhow::ensure!(
+            matches!(
+                self.kind.as_str(),
+                "test_tag"
+                    | "testTag"
+                    | "test-tag"
+                    | "resource_id"
+                    | "id"
+                    | "resourceId"
+                    | "resource-id"
+                    | "content_desc"
+                    | "content_description"
+                    | "desc"
+                    | "contentDesc"
+                    | "contentDescription"
+                    | "content-desc"
+                    | "text"
+            ),
+            "unsupported selector kind"
+        );
+        anyhow::ensure!(
+            !self.value.trim().is_empty()
+                && self.value.len() <= 512
+                && !self.value.chars().any(char::is_control),
+            "selector value must be nonempty bounded text without control characters"
+        );
+        Ok(())
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -105,6 +181,28 @@ pub struct Edge {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub intent: Option<String>,
     pub recipe: Vec<ActionStep>,
+    /// Preferred replacement route; this edge remains a verified fallback for
+    /// teammates whose app context still needs it.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub superseded_by: Vec<String>,
+}
+
+impl Edge {
+    pub fn validate(&self) -> Result<()> {
+        anyhow::ensure!(
+            !self.id.is_empty() && !self.from.id.is_empty() && !self.to.id.is_empty(),
+            "edge and endpoint IDs must be nonempty"
+        );
+        anyhow::ensure!(
+            !self.recipe.is_empty() && self.recipe.len() <= 32,
+            "recipe needs between 1 and 32 actions"
+        );
+        for (index, step) in self.recipe.iter().enumerate() {
+            step.validate()
+                .map_err(|error| anyhow::anyhow!("action {index}: {error}"))?;
+        }
+        Ok(())
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

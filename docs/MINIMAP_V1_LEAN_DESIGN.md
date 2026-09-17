@@ -1,5 +1,12 @@
 # Minimap Lean V1 Design
 
+This document describes the lean command surface and persisted model. Its evolution follows the
+[self-healing contract](MINIMAP_HARDENING_PLAN.md#self-healing-contract): routine
+navigation recovery and verified map updates happen within the agent workflow,
+with source diagnosis performed by the host agent. The
+[follow-up report](../evals/results/2026-09-16-ethos.md) distinguishes implemented
+behavior from outstanding validation and release gates.
+
 Minimap v1 is a narrow Android navigation-memory tool for AI agents. It helps an
 agent remember proven ways through a running app so later agents can navigate and
 verify faster without rediscovering the same Android layout state every time.
@@ -63,20 +70,37 @@ full layout.
 `whereami --label <label>` attaches or changes semantic identity:
 
 - If the current place is unknown and the label is unused, create the place.
-- If the current place is known and the label is unused, relabel the place and
-  rewrite edge references.
+- If the current place is known and the label is unused, change its label while
+  preserving its immutable ID and edge references.
 - If the label already belongs to a different known place, return
   `label_mismatch`.
 - Trust the explicit agent label unless there is a mechanical conflict.
 
-`go <target>` starts from the last verified session place when Minimap was the
-last actor and that session is still fresh. Otherwise it performs a cold
-`whereami` layout observation. It resolves the target by exact normalized
-label/slug, chooses a known UI path, executes each recipe, and verifies each
-semantic transition. It does not create new places or explore unknown actions.
-If one known compatible path fails, it may try another known compatible path.
+`go <target>` always starts from a fresh layout, including a zero-edge plan.
+It resolves the target by exact normalized label, uses deterministic weighted
+search (action count, verification cost, geometry penalty), and verifies each
+semantic transition. Failures exclude the affected edge and replan from the
+actual observed place. Unknown/ambiguous observations hand off to the agent.
+Defaults are 32 actions, 60 seconds, and three failed edges per replay command;
+subprocesses also have a 30-second ceiling. A private recovery token carries the
+original goal, checks, failed edges, deadline, and remaining inputs across host
+handoffs. Every command for that unresolved goal must pass `--recovery <token>`;
+larger retry limits cannot enlarge its budget. Only the host agent explores
+unfamiliar actions. Repeatable `--expect <selector>` anchors verify visible
+instance/state without persisting those assertions in the shared graph.
 
-`tap` calls layout before and after the action. It supports:
+The host may confirm a source-verified appearance change with
+`whereami --confirm-place <id>`; this preserves the baseline and adds a bounded
+variant. `go <target> --supersede <edge-id>` excludes the obsolete edge, requires
+its original source and destination, and prefers the replacement only after
+successful replay and goal checks. The original edge remains a fallback for
+other builds. New edges use `minimap.edge.v2` with optional `superseded_by` route
+IDs; older v1 edges load without automatic file rewrites. Older clients reject
+v2 explicitly. Fallback paths have higher planning cost than ordinary paths.
+
+`tap` observes before the action and requires a stable usable destination
+within three post-action observations. Empty/null-root full captures have
+bounded retries; partial diffs cannot prove a destination. It supports:
 
 - `--selector <kind=value>`
 - `--point <x,y>`
@@ -94,13 +118,15 @@ recipe.
 
 `back` calls layout before and after. If Back moves from one known place to a
 different known place, record a `press_back` edge. Back never creates a new
-place.
+place. The planner currently excludes Back recipes because it cannot prove a
+portable back-stack precondition; agents use explicit UI return routes.
 
 `layout` wraps `android layout` and returns redacted Android layout plus
 read-only Minimap orientation metadata. When it follows a fresh verified
 observation such as `go`, `whereami`, `tap`, or `back`, it may return the
 cached redacted session layout instead of calling `android layout` again. It is
-the raw escape hatch for agents.
+the raw escape hatch for agents. `--fresh` bypasses cached observations on both
+`layout` and `whereami`; use it for current product assertions.
 
 ## Repository State
 
@@ -117,23 +143,16 @@ the raw escape hatch for agents.
 No `.minimap/proposals`, `.minimap/journal.jsonl`, `.minimap/runs`,
 `.minimap/state`, or `.minimap/checks`.
 
-Session/temp state lives outside the repo and is scoped by repo, ADB device
-serial, active Android package, and short TTLs:
+Session/temp state lives outside the repo, scoped by canonical repo, resolved
+ADB serial, package, process ID, installed package metadata, and short TTLs.
+Caches use atomic writes; corrupt caches are discarded. A cached observation
+can serve an immediate diagnostic read, but never authorizes a `go` start.
 
-```text
-<system-temp>/minimap/<repo-hash>/<adb-serial>/<package>/pending-transition.json
-<system-temp>/minimap/<repo-hash>/<adb-serial>/<package>/session-place.json
-```
-
-`pending-transition.json` is recovery glue for multi-action recipes such as
-scroll plus tap. `session-place.json` is a verified navigation fast path: it
-stores the current known place and a redacted layout snapshot so the next `go`
-can skip rediscovering the current place and can resolve the first selector
-without another layout call. The same snapshot can serve one very fresh
-agent-facing `layout` call so `go` plus layout-based verification does not pay
-for duplicate Android layout capture. The orientation session lasts longer than
-the layout reuse window; cached agent-facing layout reuse is intentionally
-short-lived and sized for normal agent decision latency.
+Pending transitions append scrolls and same-place taps (up to 32 actions).
+Failure, Back, restart/build change, stale evidence, or expiration abandons the
+pending route. Locks serialize the whole command for each device and repo;
+OS locks release on exit, including a killed process, and use a stable host temp
+location across per-task TMPDIR values. Graph files use unique atomic staging.
 
 ## Config
 
@@ -145,7 +164,7 @@ short-lived and sized for normal agent decision latency.
   "active_app_profile": "default",
   "app_profiles": {
     "default": {
-      "android_package": ""
+      "android_package": "com.example.myapp"
     }
   }
 }
@@ -186,15 +205,17 @@ aliases in v1. Safe static UI copy may be stored when useful. Dynamic text,
 emails, tokens, long user content, numeric sensitive values, and input values are
 excluded or redacted before hashing or persistence.
 
-Readable place IDs are slug-derived, for example `place_settings`. If a place is
-relabelled, Minimap rewrites the place ID and all edge references. This is rare
-and visible in git.
+Initial readable place IDs are slug-derived, for example `place_settings`,
+with a fingerprint suffix when that ID was previously used. IDs are immutable;
+relabeling changes one place file, and the graph loader resolves endpoint labels
+from their IDs. Edge IDs include a full hash of the complete ordered recipe and
+endpoint IDs, so distinct recipes cannot overwrite each other.
 
 Edges are verified semantic transitions with ordered recipes:
 
 ```json
 {
-  "schema_version": "minimap.edge.v1",
+  "schema_version": "minimap.edge.v2",
   "id": "edge_home__settings__tap_test_tag_settings_button",
   "from": {"id": "place_home", "slug": "home"},
   "to": {"id": "place_settings", "slug": "settings"},
@@ -249,7 +270,14 @@ identity. Git history handles old app versions.
 threshold is not configurable in v1.
 
 Place baseline updates do not rewrite edge recipes. A stale edge is repaired
-only by observing a new successful action to the same destination.
+by learning and replaying a replacement to the same destination before
+supersession. Automatic variants are capped at 16 and must still match the
+original baseline, preventing unbounded growth and chains of fuzzy drift.
+
+One app per graph is currently enforced, with foreground checks before inputs
+and verification. Screen-type recognition does not prove item-specific state;
+the host must verify that separately. Multi-profile graph namespaces and
+parameterized destination contracts remain in the hardening roadmap.
 
 Blocking overlays are reported, not managed. If an overlay prevents destination
 verification, return `blocked_by_overlay` and do not record the edge. Agents

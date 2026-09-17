@@ -24,5 +24,9 @@ jobs:
         run: cargo clippy --all-targets -- -D warnings
       - name: Test
         run: cargo test
+      - name: Evaluation contracts
+        run: python3 -m unittest discover -s evals -p 'test_*.py'
       - name: Build
         run: cargo build -p minimap-cli --bin minimap
+      - name: Verify crate archives
+        run: cargo package --workspace

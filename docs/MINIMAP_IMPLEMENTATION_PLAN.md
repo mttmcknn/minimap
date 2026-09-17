@@ -3,6 +3,19 @@
 The active implementation target is the lean v1 design in
 [MINIMAP_V1_LEAN_DESIGN.md](MINIMAP_V1_LEAN_DESIGN.md).
 
+The next development roadmap, ordered fixes, and evaluation gates are in
+[MINIMAP_HARDENING_PLAN.md](MINIMAP_HARDENING_PLAN.md), grounded in the
+[2026-09-16 live baseline](../evals/results/2026-09-16-jetsnack.md).
+
+The implemented recovery loop supports quiet self-healing: Minimap recovers known navigation
+failures, the host agent diagnoses unfamiliar changes using UI and source
+evidence, and verified repairs improve the shared graph. Routine recovery
+does not interrupt the user; corroborated critical product issues do. See
+the roadmap's [self-healing contract](MINIMAP_HARDENING_PLAN.md#self-healing-contract)
+for the classification, persistence, notification, and evaluation rules.
+Measured results and remaining gates are recorded in the
+[self-healing evaluation](../evals/results/2026-09-16-self-healing.md).
+
 Minimap is now implemented as a breaking pre-1.0 Rust refactor around one narrow
 goal: Android navigation memory for agents. The committed graph stores semantic
 places and verified transition recipes only.
@@ -20,7 +33,8 @@ minimap back
 minimap layout
 ```
 
-Removed concepts from earlier plans are intentionally out of scope:
+Removed top-level commands and heavy workflows remain out of scope; this does
+not prohibit automatic recovery inside navigation or the host agent's loop:
 
 - observe/learn/map
 - route/screen admin commands

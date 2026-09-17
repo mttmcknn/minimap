@@ -2,7 +2,8 @@ use minimap_core::normalize_label;
 use minimap_repo::Graph;
 use minimap_schemas::{Edge, Viewport};
 use serde_json::{json, Value};
-use std::collections::{BTreeSet, VecDeque};
+use std::cmp::Reverse;
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, VecDeque};
 
 #[derive(Debug, Clone)]
 pub struct PathPlan {
@@ -30,6 +31,16 @@ pub fn resolve_path(
     target: &str,
     current_place_id: &str,
     viewport: Option<Viewport>,
+) -> PathPlan {
+    resolve_path_excluding(graph, target, current_place_id, viewport, &BTreeSet::new())
+}
+
+pub fn resolve_path_excluding(
+    graph: &Graph,
+    target: &str,
+    current_place_id: &str,
+    viewport: Option<Viewport>,
+    excluded: &BTreeSet<String>,
 ) -> PathPlan {
     let target_slug = normalize_label(target);
     let current_slug = graph
@@ -63,7 +74,11 @@ pub fn resolve_path(
     }
 
     let mut skipped_edges = Vec::new();
-    let all_edges = graph.edges.values().cloned().collect::<Vec<_>>();
+    let all_edges = graph
+        .edges
+        .values()
+        .filter(|edge| !excluded.contains(&edge.id))
+        .collect::<Vec<_>>();
     let path = shortest_compatible_path(
         &all_edges,
         current_place_id,
@@ -107,65 +122,107 @@ pub fn resolve_path(
     }
 }
 
-/// Plain BFS over ALL edges (no viewport compatibility filter) to decide
-/// whether the target is structurally reachable from the start at all.
-fn target_reachable_ignoring_viewport(edges: &[Edge], start: &str, target: &str) -> bool {
-    let mut queue = VecDeque::from([start.to_string()]);
-    let mut visited = BTreeSet::from([start.to_string()]);
+/// Adjacency is built once; neither search scans the entire edge set per node.
+fn adjacency<'a>(edges: &[&'a Edge]) -> BTreeMap<&'a str, Vec<&'a Edge>> {
+    let mut result: BTreeMap<&str, Vec<&Edge>> = BTreeMap::new();
+    for edge in edges {
+        result.entry(&edge.from.id).or_default().push(edge);
+    }
+    for outgoing in result.values_mut() {
+        outgoing.sort_by_key(|edge| (edge_cost(edge), &edge.id));
+    }
+    result
+}
+
+fn target_reachable_ignoring_viewport(edges: &[&Edge], start: &str, target: &str) -> bool {
+    let adjacent = adjacency(edges);
+    let mut queue = VecDeque::from([start]);
+    let mut visited = BTreeSet::from([start]);
     while let Some(place) = queue.pop_front() {
         if place == target {
             return true;
         }
-        for edge in edges.iter().filter(|edge| edge.from.id == place) {
-            if visited.insert(edge.to.id.clone()) {
-                queue.push_back(edge.to.id.clone());
+        for edge in adjacent.get(place).into_iter().flatten() {
+            if visited.insert(&edge.to.id) {
+                queue.push_back(&edge.to.id);
             }
         }
     }
     false
 }
 
+/// Deterministic Dijkstra over explicit execution units: one verification per
+/// edge, one per action, and extra cost for coordinate-dependent recipes.
+/// These are planning units, not a prediction of model tokens or milliseconds.
 fn shortest_compatible_path(
-    edges: &[Edge],
+    edges: &[&Edge],
     start: &str,
     target: &str,
     viewport: Option<Viewport>,
     skipped_edges: &mut Vec<Value>,
 ) -> Option<Vec<Edge>> {
-    let mut sorted = edges.to_vec();
-    sorted.sort_by_key(edge_rank);
-    let mut queue = VecDeque::from([(start.to_string(), Vec::<Edge>::new())]);
-    let mut visited = BTreeSet::from([start.to_string()]);
-    while let Some((place, path)) = queue.pop_front() {
+    let adjacent = adjacency(edges);
+    // More than the total action cost of any simple route: prefer replacement
+    // paths, but keep an old verified path available in a different app context.
+    let fallback_penalty = edges
+        .iter()
+        .map(|edge| edge_cost(edge))
+        .sum::<u64>()
+        .saturating_add(1);
+    let mut queue = BinaryHeap::from([Reverse((0u64, start))]);
+    let mut distances = BTreeMap::from([(start, 0u64)]);
+    let mut previous: BTreeMap<&str, &Edge> = BTreeMap::new();
+    while let Some(Reverse((cost, place))) = queue.pop() {
+        if distances.get(place) != Some(&cost) {
+            continue;
+        }
         if place == target {
+            let mut path = Vec::new();
+            let mut cursor = target;
+            while cursor != start {
+                let edge = *previous.get(cursor)?;
+                path.push(edge.clone());
+                cursor = &edge.from.id;
+            }
+            path.reverse();
             return Some(path);
         }
-        for edge in sorted.iter().filter(|edge| edge.from.id == place) {
+        for edge in adjacent.get(place).into_iter().flatten() {
+            if edge.recipe.iter().any(|step| step.kind == "press_back") {
+                skipped_edges
+                    .push(json!({"edge": edge.id, "reason": "back_requires_verified_history"}));
+                continue;
+            }
             if !edge_compatible(edge, viewport) {
-                skipped_edges.push(json!({
-                    "edge": edge.id,
-                    "reason": "incompatible_viewport"
-                }));
+                skipped_edges.push(json!({"edge": edge.id, "reason": "incompatible_viewport"}));
                 continue;
             }
-            if visited.contains(&edge.to.id) {
-                continue;
+            let next_cost = cost.saturating_add(edge_cost(edge)).saturating_add(
+                if edge.superseded_by.is_empty() {
+                    0
+                } else {
+                    fallback_penalty
+                },
+            );
+            if distances
+                .get(edge.to.id.as_str())
+                .is_none_or(|old| next_cost < *old)
+            {
+                distances.insert(&edge.to.id, next_cost);
+                previous.insert(&edge.to.id, edge);
+                queue.push(Reverse((next_cost, &edge.to.id)));
             }
-            let mut next_path = path.clone();
-            next_path.push(edge.clone());
-            visited.insert(edge.to.id.clone());
-            queue.push_back((edge.to.id.clone(), next_path));
         }
     }
     None
 }
 
-fn edge_rank(edge: &Edge) -> (usize, usize, String) {
-    let geometry = edge
+fn edge_cost(edge: &Edge) -> u64 {
+    1 + edge
         .recipe
         .iter()
-        .any(|step| step.point.is_some() || step.viewport.is_some());
-    (usize::from(geometry), edge.recipe.len(), edge.id.clone())
+        .map(|step| if step.is_geometry() { 3 } else { 1 })
+        .sum::<u64>()
 }
 
 pub fn edge_compatible(edge: &Edge, viewport: Option<Viewport>) -> bool {
@@ -216,6 +273,7 @@ mod tests {
 
     fn edge(id: &str, from: &str, to: &str, geometry: bool) -> Edge {
         Edge {
+            superseded_by: Vec::new(),
             schema_version: minimap_schemas::EDGE_SCHEMA_VERSION.to_string(),
             id: id.to_string(),
             from: EdgeEndpoint {
@@ -251,6 +309,65 @@ mod tests {
                 }
             }],
         }
+    }
+
+    #[test]
+    fn weighted_search_prefers_less_work_and_respects_exclusions() {
+        let mut expensive = edge("expensive", "home", "target", false);
+        expensive.recipe = vec![expensive.recipe[0].clone(); 12];
+        let mut graph = Graph {
+            places: [place("home"), place("via"), place("target")]
+                .into_iter()
+                .map(|p| (p.id.clone(), p))
+                .collect(),
+            edges: [
+                expensive,
+                edge("first", "home", "via", false),
+                edge("second", "via", "target", false),
+            ]
+            .into_iter()
+            .map(|e| (e.id.clone(), e))
+            .collect(),
+        };
+        assert_eq!(
+            resolve_path(&graph, "target", "place_home", None)
+                .edges
+                .len(),
+            2
+        );
+        let excluded = BTreeSet::from(["first".into()]);
+        assert_eq!(
+            resolve_path_excluding(&graph, "target", "place_home", None, &excluded).edges[0].id,
+            "expensive"
+        );
+        graph.edges.get_mut("expensive").unwrap().recipe[0].kind = "press_back".into();
+        assert_eq!(
+            resolve_path_excluding(&graph, "target", "place_home", None, &excluded).status,
+            "no_compatible_path"
+        );
+    }
+
+    #[test]
+    fn sparse_graph_with_cycles_and_ten_thousand_places_is_reachable() {
+        let mut graph = Graph {
+            places: BTreeMap::new(),
+            edges: BTreeMap::new(),
+        };
+        for n in 0..10_000 {
+            let p = place(&n.to_string());
+            graph.places.insert(p.id.clone(), p);
+            let e = edge(
+                &format!("forward-{n}"),
+                &n.to_string(),
+                &((n + 1) % 10_000).to_string(),
+                false,
+            );
+            graph.edges.insert(e.id.clone(), e);
+        }
+        let start = std::time::Instant::now();
+        let plan = resolve_path(&graph, "9999", "place_0", None);
+        assert_eq!(plan.edges.len(), 9999);
+        eprintln!("10k-place planner: {:?}", start.elapsed());
     }
 
     #[test]

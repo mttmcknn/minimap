@@ -1,0 +1,100 @@
+{
+  "source_revision": "d3ff757b289f7036815978a8f7b16706ee3423b0",
+  "search_baseline": {
+    "fingerprint": {
+      "roles": {},
+      "selectors": [
+        {
+          "kind": "content_desc",
+          "value": "HOME"
+        },
+        {
+          "kind": "content_desc",
+          "value": "MY CART"
+        },
+        {
+          "kind": "content_desc",
+          "value": "PROFILE"
+        },
+        {
+          "kind": "content_desc",
+          "value": "SEARCH"
+        }
+      ],
+      "static_text": [
+        {
+          "value": "Categories"
+        },
+        {
+          "value": "Chips & crackers"
+        },
+        {
+          "value": "Desserts"
+        },
+        {
+          "value": "Fruit snacks"
+        },
+        {
+          "value": "Gluten Free"
+        },
+        {
+          "value": "HOME"
+        },
+        {
+          "value": "Lifestyles"
+        },
+        {
+          "value": "MY CART"
+        },
+        {
+          "value": "Nuts"
+        },
+        {
+          "value": "Organic"
+        },
+        {
+          "value": "PROFILE"
+        },
+        {
+          "value": "Paleo"
+        },
+        {
+          "value": "SEARCH"
+        },
+        {
+          "value": "Vegan"
+        },
+        {
+          "value": "Vegetarian"
+        },
+        {
+          "value": "Whole30"
+        }
+      ]
+    },
+    "identity_hash": "sha256:197a05b044e1320b0bbde171277433a468abdaf49c4b56fa1452d8c425849ce6"
+  },
+  "profile_layout": [
+    {
+      "text": "This is currently work in progress"
+    },
+    {
+      "text": "Grab a beverage and check back later!"
+    },
+    {
+      "content-desc": "HOME"
+    },
+    {
+      "content-desc": "SEARCH"
+    },
+    {
+      "content-desc": "MY CART"
+    },
+    {
+      "content-desc": "PROFILE"
+    },
+    {
+      "text": "PROFILE"
+    }
+  ]
+}

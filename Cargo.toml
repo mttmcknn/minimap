@@ -11,10 +11,11 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.3"
+version = "0.2.0"
 edition = "2021"
+rust-version = "1.89"
 license = "Apache-2.0"
-repository = "https://github.com/himattm/minimap"
+repository = "https://github.com/mttmcknn/minimap"
 readme = "README.md"
 description = "Shared navigation memory and soft validation for AI agents working in Android codebases."
 keywords = ["android", "cli", "agents", "automation", "testing"]
@@ -24,6 +25,7 @@ categories = ["command-line-utilities", "development-tools::testing"]
 anyhow = "1.0"
 assert_cmd = "2.0"
 clap = { version = "4.5", features = ["derive"] }
+deunicode = "1"
 predicates = "3.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

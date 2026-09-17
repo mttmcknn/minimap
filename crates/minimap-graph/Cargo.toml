@@ -2,14 +2,16 @@
 name = "minimap-graph"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
 description.workspace = true
 repository.workspace = true
 
 [dependencies]
 anyhow.workspace = true
-minimap-repo = { version = "0.1.3", path = "../minimap-repo" }
-minimap-schemas = { version = "0.1.3", path = "../minimap-schemas" }
+minimap-core = { version = "0.2.0", path = "../minimap-core" }
+minimap-repo = { version = "0.2.0", path = "../minimap-repo" }
+minimap-schemas = { version = "0.2.0", path = "../minimap-schemas" }
 serde.workspace = true
 serde_json.workspace = true
 

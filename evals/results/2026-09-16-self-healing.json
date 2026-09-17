@@ -1,0 +1,1134 @@
+{
+  "base_revision": "e838065b7b9f837f11233e452afc47e8bbdeefb0",
+  "fixture_manifest": {
+    "revision": "d3ff757b289f7036815978a8f7b16706ee3423b0",
+    "fixtures": {
+      "jetsnack-baseline": {
+        "sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+        "changes": {}
+      },
+      "jetnews-baseline": {
+        "sha256": "b734a9138759fae49c50c26adbaccf8b17111b7fcced0b2073d6480498e75ed9",
+        "changes": {}
+      },
+      "jetchat-baseline": {
+        "sha256": "1934fe9e8461de3fe99ff857864549a9015daea7b11374f8e9d65aa88a341e5c",
+        "changes": {}
+      },
+      "jetsnack-renamed": {
+        "sha256": "050c6d8e79c00b0422a4d0a72eb87b144a4147ad1ce0661eea3d9755d06a5f46",
+        "changes": {
+          "Jetsnack/app/src/main/res/values/strings.xml": "home_search: Search \u2192 Discover; route unchanged"
+        }
+      },
+      "jetsnack-relocated": {
+        "sha256": "369f2be68c45e8cedeef4b819120d1cea125293a1200accf3e612e51669cba7c",
+        "changes": {
+          "Jetsnack/app/src/main/java/com/example/jetsnack/ui/home/Home.kt": "Search tab visible from Profile or Search; layout count/index use visible tabs"
+        }
+      },
+      "jetsnack-broken": {
+        "sha256": "0ffa6e54f573940fb11fcdbe0f06095d99ccab44ec341a2ba5a976a9f27daad4",
+        "changes": {
+          "Jetsnack/app/src/main/java/com/example/jetsnack/ui/home/Home.kt": "Search callback deliberately navigates to Cart"
+        }
+      }
+    },
+    "java_home": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
+  },
+  "checks": {
+    "rust_tests_passed": 135,
+    "clippy": "passed",
+    "skill_validator": "passed",
+    "planner_10000_places_ms": 9.541125,
+    "format": "passed",
+    "python_syntax": "passed for all five evaluation scripts",
+    "release_build": "passed",
+    "rust_version": "1.98.1",
+    "declared_msrv": "1.89 (not separately built in this pass)",
+    "repo_only_doctor": "passed on project graph with final release binary"
+  },
+  "runs": {
+    "stage1-live": {
+      "metadata": {
+        "binary_sha256": "333ae9c4ea685bb0d704e512ebc13fd9ef21dc9cb7edf6529456da70bea61480",
+        "apk_sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+        "serial": "emulator-5554",
+        "repetitions": 3,
+        "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+        "token_usage": null,
+        "android_version": "1.0.15498356",
+        "adb_version": "Android Debug Bridge version 1.0.41\nVersion 37.0.1-15733141\nInstalled as /opt/homebrew/bin/adb\nRunning on Darwin 25.6.0 (arm64)",
+        "api_level": "37",
+        "viewport": "Physical size: 1080x2424",
+        "learning": {
+          "seconds": 14.621317709039431,
+          "commands": 4,
+          "stdout_bytes": 3109,
+          "stderr_bytes": 0
+        },
+        "external_navigation": {
+          "reported_status": "ok",
+          "oracle_reached_home": true,
+          "false_success": false,
+          "planned_path": [
+            "edge_search_home_tap_content_desc_HOME"
+          ],
+          "seconds": 5.7275665840134025,
+          "commands": 1,
+          "stdout_bytes": 659,
+          "stderr_bytes": 0
+        }
+      },
+      "summary": {
+        "raw": {
+          "trials": 3,
+          "successes": 3,
+          "median_seconds": 5.694376707950141,
+          "median_commands": 3,
+          "median_stdout_bytes": 6017,
+          "median_stderr_bytes": 0,
+          "max_seconds": 6.813936499936972
+        },
+        "cold": {
+          "trials": 3,
+          "successes": 3,
+          "median_seconds": 5.758528790960554,
+          "median_commands": 2,
+          "median_stdout_bytes": 5398,
+          "median_stderr_bytes": 0,
+          "max_seconds": 5.76074533292558
+        },
+        "warm": {
+          "trials": 3,
+          "successes": 3,
+          "median_seconds": 5.729521500063129,
+          "median_commands": 2,
+          "median_stdout_bytes": 5398,
+          "median_stderr_bytes": 0,
+          "max_seconds": 5.733342583000194
+        }
+      },
+      "trials": [
+        {
+          "arm": "raw",
+          "repeat": 1,
+          "seconds": 6.813936499936972,
+          "commands": 3,
+          "stdout_bytes": 6017,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": null
+        },
+        {
+          "arm": "cold",
+          "repeat": 1,
+          "seconds": 5.76074533292558,
+          "commands": 2,
+          "stdout_bytes": 5398,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "warm",
+          "repeat": 1,
+          "seconds": 5.733342583000194,
+          "commands": 2,
+          "stdout_bytes": 5398,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "cold",
+          "repeat": 2,
+          "seconds": 5.758528790960554,
+          "commands": 2,
+          "stdout_bytes": 5398,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "warm",
+          "repeat": 2,
+          "seconds": 5.694427542039193,
+          "commands": 2,
+          "stdout_bytes": 5398,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "raw",
+          "repeat": 2,
+          "seconds": 5.694376707950141,
+          "commands": 3,
+          "stdout_bytes": 6017,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": null
+        },
+        {
+          "arm": "warm",
+          "repeat": 3,
+          "seconds": 5.729521500063129,
+          "commands": 2,
+          "stdout_bytes": 5398,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "raw",
+          "repeat": 3,
+          "seconds": 5.666857125994284,
+          "commands": 3,
+          "stdout_bytes": 6017,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": null
+        },
+        {
+          "arm": "cold",
+          "repeat": 3,
+          "seconds": 5.724604708957486,
+          "commands": 2,
+          "stdout_bytes": 5398,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        }
+      ],
+      "total_recorded_subprocesses": {
+        "commands": 85,
+        "seconds": 191.54525583569193,
+        "stdout_bytes": 168298,
+        "stderr_bytes": 0
+      },
+      "auxiliary_phase_costs": {
+        "environment": {
+          "commands": 4,
+          "seconds": 0.2941117919399403,
+          "stdout_bytes": 169,
+          "stderr_bytes": 0
+        },
+        "deployment": {
+          "commands": 1,
+          "seconds": 1.1063293750048615,
+          "stdout_bytes": 436,
+          "stderr_bytes": 0
+        },
+        "fixture": {
+          "commands": 36,
+          "seconds": 68.86964016588172,
+          "stdout_bytes": 76167,
+          "stderr_bytes": 0
+        },
+        "learning": {
+          "commands": 4,
+          "seconds": 14.621317709039431,
+          "stdout_bytes": 3109,
+          "stderr_bytes": 0
+        },
+        "oracle": {
+          "commands": 12,
+          "seconds": 34.2606096668751,
+          "stdout_bytes": 30818,
+          "stderr_bytes": 0
+        },
+        "warmup": {
+          "commands": 3,
+          "seconds": 8.430432208057027,
+          "stdout_bytes": 2124,
+          "stderr_bytes": 0
+        },
+        "adversarial-setup": {
+          "commands": 3,
+          "seconds": 5.658907543052919,
+          "stdout_bytes": 4377,
+          "stderr_bytes": 0
+        }
+      }
+    },
+    "recovery-api36-2": {
+      "metadata": {
+        "binary_sha256": "490d45385a69bb43923d3885db50f0a091f35812659e19790eb0b9f5aa517f8e",
+        "apk_sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+        "serial": "emulator-5556",
+        "repetitions": 1,
+        "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+        "token_usage": null,
+        "fixture_manifest": {
+          "revision": "d3ff757b289f7036815978a8f7b16706ee3423b0",
+          "fixtures": {
+            "jetsnack-baseline": {
+              "sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+              "changes": {}
+            },
+            "jetnews-baseline": {
+              "sha256": "b734a9138759fae49c50c26adbaccf8b17111b7fcced0b2073d6480498e75ed9",
+              "changes": {}
+            },
+            "jetchat-baseline": {
+              "sha256": "1934fe9e8461de3fe99ff857864549a9015daea7b11374f8e9d65aa88a341e5c",
+              "changes": {}
+            },
+            "jetsnack-renamed": {
+              "sha256": "050c6d8e79c00b0422a4d0a72eb87b144a4147ad1ce0661eea3d9755d06a5f46",
+              "changes": {
+                "Jetsnack/app/src/main/res/values/strings.xml": "home_search: Search \u2192 Discover; route unchanged"
+              }
+            },
+            "jetsnack-relocated": {
+              "sha256": "369f2be68c45e8cedeef4b819120d1cea125293a1200accf3e612e51669cba7c",
+              "changes": {
+                "Jetsnack/app/src/main/java/com/example/jetsnack/ui/home/Home.kt": "Search tab visible from Profile or Search; layout count/index use visible tabs"
+              }
+            },
+            "jetsnack-broken": {
+              "sha256": "0ffa6e54f573940fb11fcdbe0f06095d99ccab44ec341a2ba5a976a9f27daad4",
+              "changes": {
+                "Jetsnack/app/src/main/java/com/example/jetsnack/ui/home/Home.kt": "Search callback deliberately navigates to Cart"
+              }
+            }
+          },
+          "java_home": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
+        },
+        "apks": {
+          "baseline": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+          "renamed": "050c6d8e79c00b0422a4d0a72eb87b144a4147ad1ce0661eea3d9755d06a5f46",
+          "relocated": "369f2be68c45e8cedeef4b819120d1cea125293a1200accf3e612e51669cba7c",
+          "broken": "0ffa6e54f573940fb11fcdbe0f06095d99ccab44ec341a2ba5a976a9f27daad4"
+        },
+        "host_budgets": {
+          "renamed_control": {
+            "actions_used": 5,
+            "action_limit": 32,
+            "seconds_limit": 180,
+            "elapsed_seconds": 62.874468124995474
+          },
+          "relocated_route": {
+            "actions_used": 8,
+            "action_limit": 32,
+            "seconds_limit": 180,
+            "elapsed_seconds": 68.9247009169776
+          },
+          "wrong_callback": {
+            "actions_used": 2,
+            "action_limit": 32,
+            "seconds_limit": 180,
+            "elapsed_seconds": 24.918549291032832
+          }
+        },
+        "scenarios": [
+          {
+            "scenario": "renamed_control",
+            "passed": true,
+            "initial_status": "action_failed",
+            "repaired_steps": 1,
+            "teammate_status": "ok",
+            "user_interventions": 0,
+            "seconds": 47.39025746000698,
+            "commands": 7,
+            "stdout_bytes": 13511,
+            "stderr_bytes": 0
+          },
+          {
+            "scenario": "relocated_route",
+            "passed": true,
+            "initial_status": "action_failed",
+            "repaired_steps": 2,
+            "teammate_status": "ok",
+            "user_interventions": 0,
+            "seconds": 56.131313875026535,
+            "commands": 7,
+            "stdout_bytes": 13943,
+            "stderr_bytes": 0
+          },
+          {
+            "scenario": "wrong_callback",
+            "passed": true,
+            "statuses": [
+              "unknown",
+              "unknown"
+            ],
+            "graph_unchanged": true,
+            "diagnosis": "Reproduced twice; fixture source maps Search to Cart. Escalate the product bug, preserve the original target.",
+            "seconds": 15.008198541007005,
+            "commands": 2,
+            "stdout_bytes": 5746,
+            "stderr_bytes": 0
+          }
+        ]
+      },
+      "summary": {},
+      "trials": [],
+      "total_recorded_subprocesses": {
+        "commands": 66,
+        "seconds": 258.31291396007873,
+        "stdout_bytes": 127918,
+        "stderr_bytes": 435
+      },
+      "auxiliary_phase_costs": {
+        "fixture": {
+          "commands": 37,
+          "seconds": 92.49780554097379,
+          "stdout_bytes": 65918,
+          "stderr_bytes": 435
+        },
+        "learning": {
+          "commands": 4,
+          "seconds": 19.59106900106417,
+          "stdout_bytes": 3482,
+          "stderr_bytes": 0
+        },
+        "oracle": {
+          "commands": 9,
+          "seconds": 27.694269542000256,
+          "stdout_bytes": 25318,
+          "stderr_bytes": 0
+        }
+      }
+    },
+    "jetnews-journeys-1": {
+      "metadata": {
+        "binary_sha256": "479eb5c1bd3c813ba05936cf09dc6d264e96b9305f43807e0426f4dd46fe750d",
+        "apk_sha256": "b734a9138759fae49c50c26adbaccf8b17111b7fcced0b2073d6480498e75ed9",
+        "serial": "emulator-5556",
+        "repetitions": 3,
+        "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+        "token_usage": null,
+        "journeys": [
+          {
+            "repeat": 1,
+            "passed": true,
+            "seconds": 22.75893570901826,
+            "commands": 2,
+            "stdout_bytes": 1848,
+            "stderr_bytes": 0
+          },
+          {
+            "repeat": 2,
+            "passed": true,
+            "seconds": 22.360944292042404,
+            "commands": 2,
+            "stdout_bytes": 1848,
+            "stderr_bytes": 0
+          },
+          {
+            "repeat": 3,
+            "passed": true,
+            "seconds": 22.106678499956615,
+            "commands": 2,
+            "stdout_bytes": 1848,
+            "stderr_bytes": 0
+          }
+        ],
+        "learning": {
+          "seconds": 30.94031708315015,
+          "commands": 6,
+          "stdout_bytes": 4245,
+          "stderr_bytes": 0
+        }
+      },
+      "summary": {},
+      "trials": [],
+      "total_recorded_subprocesses": {
+        "commands": 21,
+        "seconds": 124.43503670819337,
+        "stdout_bytes": 24448,
+        "stderr_bytes": 87
+      },
+      "auxiliary_phase_costs": {
+        "fixture": {
+          "commands": 3,
+          "seconds": 8.100434040999971,
+          "stdout_bytes": 2329,
+          "stderr_bytes": 87
+        },
+        "learning": {
+          "commands": 6,
+          "seconds": 30.94031708315015,
+          "stdout_bytes": 4245,
+          "stderr_bytes": 0
+        },
+        "oracle": {
+          "commands": 6,
+          "seconds": 18.167727083025966,
+          "stdout_bytes": 12330,
+          "stderr_bytes": 0
+        }
+      }
+    },
+    "jetchat-journeys-1": {
+      "metadata": {
+        "binary_sha256": "479eb5c1bd3c813ba05936cf09dc6d264e96b9305f43807e0426f4dd46fe750d",
+        "apk_sha256": "1934fe9e8461de3fe99ff857864549a9015daea7b11374f8e9d65aa88a341e5c",
+        "serial": "emulator-5556",
+        "repetitions": 3,
+        "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+        "token_usage": null,
+        "journeys": [
+          {
+            "repeat": 1,
+            "passed": true,
+            "seconds": 22.304297957976814,
+            "commands": 2,
+            "stdout_bytes": 1832,
+            "stderr_bytes": 0
+          },
+          {
+            "repeat": 2,
+            "passed": true,
+            "seconds": 22.81412725005066,
+            "commands": 2,
+            "stdout_bytes": 1832,
+            "stderr_bytes": 0
+          },
+          {
+            "repeat": 3,
+            "passed": true,
+            "seconds": 23.622362833004445,
+            "commands": 2,
+            "stdout_bytes": 1832,
+            "stderr_bytes": 0
+          }
+        ],
+        "learning": {
+          "seconds": 30.646544457995333,
+          "commands": 6,
+          "stdout_bytes": 4771,
+          "stderr_bytes": 0
+        }
+      },
+      "summary": {},
+      "trials": [],
+      "total_recorded_subprocesses": {
+        "commands": 21,
+        "seconds": 126.6057969169924,
+        "stdout_bytes": 25712,
+        "stderr_bytes": 87
+      },
+      "auxiliary_phase_costs": {
+        "fixture": {
+          "commands": 3,
+          "seconds": 8.150777875911444,
+          "stdout_bytes": 3337,
+          "stderr_bytes": 87
+        },
+        "learning": {
+          "commands": 6,
+          "seconds": 30.646544457995333,
+          "stdout_bytes": 4771,
+          "stderr_bytes": 0
+        },
+        "oracle": {
+          "commands": 6,
+          "seconds": 19.067686542053707,
+          "stdout_bytes": 12108,
+          "stderr_bytes": 0
+        }
+      }
+    },
+    "final-timing-api36": {
+      "metadata": {
+        "binary_sha256": "479eb5c1bd3c813ba05936cf09dc6d264e96b9305f43807e0426f4dd46fe750d",
+        "apk_sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+        "serial": "emulator-5556",
+        "repetitions": 5,
+        "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+        "token_usage": null,
+        "android_version": "1.0.15498356",
+        "adb_version": "Android Debug Bridge version 1.0.41\nVersion 37.0.1-15733141\nInstalled as /opt/homebrew/bin/adb\nRunning on Darwin 25.6.0 (arm64)",
+        "api_level": "36",
+        "viewport": "Physical size: 1080x2400",
+        "learning": {
+          "seconds": 19.237637915997766,
+          "commands": 4,
+          "stdout_bytes": 3380,
+          "stderr_bytes": 0
+        },
+        "external_navigation": {
+          "reported_status": "ok",
+          "oracle_reached_home": true,
+          "false_success": false,
+          "planned_path": [
+            "edge_search_home_tap_content_desc_HOME__13062887aaf09266c046e7f722c707a98c8b38fd103c418228e3f4dd25130444"
+          ],
+          "seconds": 7.392849957977887,
+          "commands": 1,
+          "stdout_bytes": 871,
+          "stderr_bytes": 0
+        }
+      },
+      "summary": {
+        "raw": {
+          "trials": 5,
+          "successes": 5,
+          "median_seconds": 6.742519291001372,
+          "median_commands": 3,
+          "median_stdout_bytes": 6017,
+          "median_stderr_bytes": 0,
+          "max_seconds": 6.897774833079893
+        },
+        "cold": {
+          "trials": 5,
+          "successes": 5,
+          "median_seconds": 7.680733250977937,
+          "median_commands": 2,
+          "median_stdout_bytes": 5676,
+          "median_stderr_bytes": 0,
+          "max_seconds": 7.744088708015624
+        },
+        "warm": {
+          "trials": 5,
+          "successes": 5,
+          "median_seconds": 7.6775180420372635,
+          "median_commands": 2,
+          "median_stdout_bytes": 5676,
+          "median_stderr_bytes": 0,
+          "max_seconds": 7.762120291998144
+        }
+      },
+      "trials": [
+        {
+          "arm": "raw",
+          "repeat": 1,
+          "seconds": 6.897774833079893,
+          "commands": 3,
+          "stdout_bytes": 6017,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": null
+        },
+        {
+          "arm": "cold",
+          "repeat": 1,
+          "seconds": 7.668680624978151,
+          "commands": 2,
+          "stdout_bytes": 5676,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "warm",
+          "repeat": 1,
+          "seconds": 7.730666459014174,
+          "commands": 2,
+          "stdout_bytes": 5676,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "cold",
+          "repeat": 2,
+          "seconds": 7.744088708015624,
+          "commands": 2,
+          "stdout_bytes": 5676,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "warm",
+          "repeat": 2,
+          "seconds": 7.762120291998144,
+          "commands": 2,
+          "stdout_bytes": 5676,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "raw",
+          "repeat": 2,
+          "seconds": 6.7053281660191715,
+          "commands": 3,
+          "stdout_bytes": 6017,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": null
+        },
+        {
+          "arm": "warm",
+          "repeat": 3,
+          "seconds": 7.562869707937352,
+          "commands": 2,
+          "stdout_bytes": 5676,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "raw",
+          "repeat": 3,
+          "seconds": 6.742519291001372,
+          "commands": 3,
+          "stdout_bytes": 6017,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": null
+        },
+        {
+          "arm": "cold",
+          "repeat": 3,
+          "seconds": 7.680733250977937,
+          "commands": 2,
+          "stdout_bytes": 5676,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "raw",
+          "repeat": 4,
+          "seconds": 6.852882290957496,
+          "commands": 3,
+          "stdout_bytes": 6017,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": null
+        },
+        {
+          "arm": "cold",
+          "repeat": 4,
+          "seconds": 7.430346290988382,
+          "commands": 2,
+          "stdout_bytes": 5676,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "warm",
+          "repeat": 4,
+          "seconds": 7.62826295895502,
+          "commands": 2,
+          "stdout_bytes": 5676,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "cold",
+          "repeat": 5,
+          "seconds": 7.7032405830104835,
+          "commands": 2,
+          "stdout_bytes": 5676,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "warm",
+          "repeat": 5,
+          "seconds": 7.6775180420372635,
+          "commands": 2,
+          "stdout_bytes": 5676,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "raw",
+          "repeat": 5,
+          "seconds": 6.625941707985476,
+          "commands": 3,
+          "stdout_bytes": 6017,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": null
+        }
+      ],
+      "total_recorded_subprocesses": {
+        "commands": 127,
+        "seconds": 374.596652159933,
+        "stdout_bytes": 257194,
+        "stderr_bytes": 174
+      },
+      "auxiliary_phase_costs": {
+        "environment": {
+          "commands": 4,
+          "seconds": 0.2879667499801144,
+          "stdout_bytes": 169,
+          "stderr_bytes": 0
+        },
+        "deployment": {
+          "commands": 1,
+          "seconds": 1.7134522910346277,
+          "stdout_bytes": 441,
+          "stderr_bytes": 0
+        },
+        "fixture": {
+          "commands": 56,
+          "seconds": 151.49848433205625,
+          "stdout_bytes": 112269,
+          "stderr_bytes": 174
+        },
+        "learning": {
+          "commands": 4,
+          "seconds": 19.237637915997766,
+          "stdout_bytes": 3380,
+          "stderr_bytes": 0
+        },
+        "oracle": {
+          "commands": 18,
+          "seconds": 59.13793753989739,
+          "stdout_bytes": 44906,
+          "stderr_bytes": 0
+        },
+        "warmup": {
+          "commands": 5,
+          "seconds": 17.981836958031636,
+          "stdout_bytes": 3870,
+          "stderr_bytes": 0
+        },
+        "adversarial-setup": {
+          "commands": 3,
+          "seconds": 6.933513208001386,
+          "stdout_bytes": 4443,
+          "stderr_bytes": 0
+        }
+      }
+    },
+    "compact-api36": {
+      "metadata": {
+        "binary_sha256": "2e9fb9b55793e6907259baf763c9104d474044615806639a4e43eabe0e548720",
+        "apk_sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+        "serial": "emulator-5556",
+        "repetitions": 3,
+        "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+        "token_usage": null,
+        "android_version": "1.0.15498356",
+        "adb_version": "Android Debug Bridge version 1.0.41\nVersion 37.0.1-15733141\nInstalled as /opt/homebrew/bin/adb\nRunning on Darwin 25.6.0 (arm64)",
+        "api_level": "36",
+        "viewport": "Physical size: 1080x2400",
+        "learning": {
+          "seconds": 20.059492792002857,
+          "commands": 4,
+          "stdout_bytes": 2422,
+          "stderr_bytes": 0
+        },
+        "external_navigation": {
+          "reported_status": "ok",
+          "oracle_reached_home": true,
+          "false_success": false,
+          "planned_path": [
+            "edge_search_home_tap_content_desc_HOME__13062887aaf09266c046e7f722c707a98c8b38fd103c418228e3f4dd25130444"
+          ],
+          "seconds": 7.303667750034947,
+          "commands": 1,
+          "stdout_bytes": 662,
+          "stderr_bytes": 0
+        }
+      },
+      "summary": {
+        "raw": {
+          "trials": 3,
+          "successes": 3,
+          "median_seconds": 6.6536715010297485,
+          "median_commands": 3,
+          "median_stdout_bytes": 6017,
+          "median_stderr_bytes": 0,
+          "max_seconds": 6.905797666986473
+        },
+        "cold": {
+          "trials": 3,
+          "successes": 3,
+          "median_seconds": 7.743690457951743,
+          "median_commands": 2,
+          "median_stdout_bytes": 3667,
+          "median_stderr_bytes": 0,
+          "max_seconds": 7.816440458002035
+        },
+        "warm": {
+          "trials": 3,
+          "successes": 3,
+          "median_seconds": 7.764118582999799,
+          "median_commands": 2,
+          "median_stdout_bytes": 3667,
+          "median_stderr_bytes": 0,
+          "max_seconds": 7.803772790939547
+        }
+      },
+      "trials": [
+        {
+          "arm": "raw",
+          "repeat": 1,
+          "seconds": 6.905797666986473,
+          "commands": 3,
+          "stdout_bytes": 6017,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": null
+        },
+        {
+          "arm": "cold",
+          "repeat": 1,
+          "seconds": 7.816440458002035,
+          "commands": 2,
+          "stdout_bytes": 3667,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "warm",
+          "repeat": 1,
+          "seconds": 7.764118582999799,
+          "commands": 2,
+          "stdout_bytes": 3667,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "cold",
+          "repeat": 2,
+          "seconds": 7.743690457951743,
+          "commands": 2,
+          "stdout_bytes": 3667,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "warm",
+          "repeat": 2,
+          "seconds": 7.803772790939547,
+          "commands": 2,
+          "stdout_bytes": 3667,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "raw",
+          "repeat": 2,
+          "seconds": 6.6536715010297485,
+          "commands": 3,
+          "stdout_bytes": 6017,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": null
+        },
+        {
+          "arm": "warm",
+          "repeat": 3,
+          "seconds": 7.573926459008362,
+          "commands": 2,
+          "stdout_bytes": 3667,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        },
+        {
+          "arm": "raw",
+          "repeat": 3,
+          "seconds": 6.615314331953414,
+          "commands": 3,
+          "stdout_bytes": 6017,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": null
+        },
+        {
+          "arm": "cold",
+          "repeat": 3,
+          "seconds": 7.603940458968282,
+          "commands": 2,
+          "stdout_bytes": 3667,
+          "stderr_bytes": 0,
+          "reported_ok": true,
+          "oracle_reached_target": true,
+          "start_source": "layout"
+        }
+      ],
+      "total_recorded_subprocesses": {
+        "commands": 87,
+        "seconds": 241.4379257071996,
+        "stdout_bytes": 156665,
+        "stderr_bytes": 174
+      },
+      "auxiliary_phase_costs": {
+        "environment": {
+          "commands": 4,
+          "seconds": 0.29659904103027657,
+          "stdout_bytes": 169,
+          "stderr_bytes": 0
+        },
+        "deployment": {
+          "commands": 1,
+          "seconds": 1.840142749948427,
+          "stdout_bytes": 441,
+          "stderr_bytes": 0
+        },
+        "fixture": {
+          "commands": 38,
+          "seconds": 88.87707570922794,
+          "stdout_bytes": 76167,
+          "stderr_bytes": 174
+        },
+        "learning": {
+          "commands": 4,
+          "seconds": 20.059492792002857,
+          "stdout_bytes": 2422,
+          "stderr_bytes": 0
+        },
+        "oracle": {
+          "commands": 12,
+          "seconds": 38.876622207055334,
+          "stdout_bytes": 30818,
+          "stderr_bytes": 0
+        },
+        "warmup": {
+          "commands": 3,
+          "seconds": 10.837307458044961,
+          "stdout_bytes": 1698,
+          "stderr_bytes": 0
+        },
+        "adversarial-setup": {
+          "commands": 3,
+          "seconds": 6.866345292015467,
+          "stdout_bytes": 4235,
+          "stderr_bytes": 0
+        }
+      }
+    },
+    "scroll-api36-2": {
+      "metadata": {
+        "binary_sha256": "3efe56fda1ade9de54c5ab42a44f91eb63686759fe834dc8605c03eb9532d8a0",
+        "apk_sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+        "serial": "emulator-5556",
+        "repetitions": 1,
+        "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+        "token_usage": null,
+        "scroll_replay": {
+          "passed": true,
+          "recipe_actions": 3,
+          "seconds": 14.181700750021264,
+          "commands": 1,
+          "stdout_bytes": 651,
+          "stderr_bytes": 0
+        },
+        "learning": {
+          "seconds": 35.42364816501504,
+          "commands": 6,
+          "stdout_bytes": 2841,
+          "stderr_bytes": 0
+        }
+      },
+      "summary": {},
+      "trials": [],
+      "total_recorded_subprocesses": {
+        "commands": 21,
+        "seconds": 83.53107045893557,
+        "stdout_bytes": 23746,
+        "stderr_bytes": 174
+      },
+      "auxiliary_phase_costs": {
+        "fixture": {
+          "commands": 12,
+          "seconds": 27.4695423359517,
+          "stdout_bytes": 15558,
+          "stderr_bytes": 174
+        },
+        "learning": {
+          "commands": 6,
+          "seconds": 35.42364816501504,
+          "stdout_bytes": 2841,
+          "stderr_bytes": 0
+        },
+        "oracle": {
+          "commands": 2,
+          "seconds": 6.456179207947571,
+          "stdout_bytes": 4696,
+          "stderr_bytes": 0
+        }
+      }
+    }
+  },
+  "partial_failed_runs": {
+    "recovery-live-1": "API 37 foreground metadata missing from narrow window dump; adapter fixed to use full dump",
+    "recovery-live-2": "Renamed destination needs explicit appearance confirmation; command added",
+    "recovery-live-3": "API 37 Android CLI null accessibility root during fixture setup",
+    "recovery-live-4": "API 37 null accessibility root persisted across retries",
+    "recovery-api36-1": "Profile falsely matched Search at 0.8039215686274509; content-evidence guard and live regression fixture added",
+    "scroll-api36": "Three-action recipe replay and Search oracle passed; cleanup incorrectly expected unscrolled Home after a tab switch. Fixture now restarts the app without clearing data; complete rerun passed."
+  },
+  "implementation": {
+    "state": "uncommitted working tree",
+    "final_binary_sha256": "3efe56fda1ade9de54c5ab42a44f91eb63686759fe834dc8605c03eb9532d8a0",
+    "last_runtime_change": "Direct scrolling refuses an unavailable viewport instead of guessing coordinates; the preceding compact-output timing build differs only by this guard.",
+    "source_bundle_sha256": "773780ee1349c082797b86cfafe86a33d785cd90644bab84b611fe8a3d0a9931",
+    "source_bundle_hash_definition": "SHA-256 of sorted relative POSIX path + NUL + file bytes + NUL for Cargo.toml, Cargo.lock, crates/**/*.rs, crates/*/Cargo.toml, and the canonical plugin SKILL.md"
+  },
+  "trace_root": "/private/tmp/minimap-self-healing-20260916",
+  "github_rename": {
+    "repo_references": "updated; no old handle found in project source/docs",
+    "origin": "git@github.com:mttmcknn/minimap.git",
+    "homebrew_formula_pr": "https://github.com/mttmcknn/homebrew-minimap/pull/1",
+    "homebrew_formula_checks": "three platform checks passed",
+    "homebrew_formula_merge": "merged with explicit user authorization",
+    "homebrew_formula_merge_commit": "5dceab25e9d68a82c06652c4f69cae56b42ab820",
+    "homebrew_formula_merged_at": "2026-09-16T21:00:58Z",
+    "installed_tap_alias": "legacy local alias retained; origin updated",
+    "installed_minimap": "0.1.3; not replaced by development build"
+  },
+  "environment_api36": {
+    "build_fingerprint": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.D1/13818094:user/release-keys",
+    "android_release": "16",
+    "api_level": "36",
+    "viewport": "Physical size: 1080x2400",
+    "density": "Physical density: 420",
+    "font_scale": "1.0",
+    "locale": "",
+    "default_locale": "en-US",
+    "window_animation_scale": "1.0",
+    "transition_animation_scale": "1.0",
+    "animator_duration_scale": "null",
+    "capture_scope": "Read after final API 36 run; no display/locale/animation settings were changed by this evaluation."
+  },
+  "metric_limits": [
+    "Scripted trials do not measure model tokens, reasoning latency, or billed cost.",
+    "Total subprocess time sums all recorded commands, including setup and independent oracles; it excludes Python work and between-command sleeps.",
+    "Timing, recovery, and journey runs used different incremental builds, identified by per-run hashes.",
+    "The recovery host knew the seeded change; no blinded agent diagnosis or notification-rate evaluation was performed."
+  ]
+}

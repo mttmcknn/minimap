@@ -1,0 +1,239 @@
+{
+  "metadata": {
+    "binary_sha256": "3495faa79fda26e18b910063a8897ce92d260a7484f81f846ef985cc126f2fc5",
+    "apk_sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+    "serial": "emulator-5554",
+    "repetitions": 5,
+    "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+    "token_usage": null,
+    "android_version": "1.0.15498356",
+    "adb_version": "Android Debug Bridge version 1.0.41\nVersion 37.0.1-15733141\nInstalled as /opt/homebrew/bin/adb\nRunning on Darwin 25.6.0 (arm64)",
+    "api_level": "37",
+    "viewport": "Physical size: 1080x2424",
+    "learning": {
+      "seconds": 14.314837832935154,
+      "commands": 4,
+      "stdout_bytes": 3108,
+      "stderr_bytes": 0
+    },
+    "external_navigation": {
+      "reported_status": "ok",
+      "oracle_reached_home": false,
+      "false_success": true,
+      "planned_path": [],
+      "seconds": 0.053814083978068084,
+      "commands": 1,
+      "stdout_bytes": 298,
+      "stderr_bytes": 0
+    }
+  },
+  "summary": {
+    "raw": {
+      "trials": 5,
+      "successes": 5,
+      "median_seconds": 5.668605293089058,
+      "median_commands": 3,
+      "median_stdout_bytes": 6017,
+      "median_stderr_bytes": 0,
+      "max_seconds": 5.702146874042228
+    },
+    "cold": {
+      "trials": 5,
+      "successes": 5,
+      "median_seconds": 5.749865248973947,
+      "median_commands": 2,
+      "median_stdout_bytes": 5208,
+      "median_stderr_bytes": 0,
+      "max_seconds": 5.770777874044143
+    },
+    "warm": {
+      "trials": 5,
+      "successes": 5,
+      "median_seconds": 2.941615125979297,
+      "median_commands": 2,
+      "median_stdout_bytes": 5209,
+      "median_stderr_bytes": 0,
+      "max_seconds": 2.9466945409658365
+    }
+  },
+  "trials": [
+    {
+      "arm": "raw",
+      "repeat": 1,
+      "seconds": 5.702146874042228,
+      "commands": 3,
+      "stdout_bytes": 6017,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": null
+    },
+    {
+      "arm": "cold",
+      "repeat": 1,
+      "seconds": 5.770777874044143,
+      "commands": 2,
+      "stdout_bytes": 5208,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": "layout"
+    },
+    {
+      "arm": "warm",
+      "repeat": 1,
+      "seconds": 2.9466945409658365,
+      "commands": 2,
+      "stdout_bytes": 5209,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": "session"
+    },
+    {
+      "arm": "cold",
+      "repeat": 2,
+      "seconds": 5.749865248973947,
+      "commands": 2,
+      "stdout_bytes": 5208,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": "layout"
+    },
+    {
+      "arm": "warm",
+      "repeat": 2,
+      "seconds": 2.944405291986186,
+      "commands": 2,
+      "stdout_bytes": 5209,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": "session"
+    },
+    {
+      "arm": "raw",
+      "repeat": 2,
+      "seconds": 5.70164637506241,
+      "commands": 3,
+      "stdout_bytes": 6017,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": null
+    },
+    {
+      "arm": "warm",
+      "repeat": 3,
+      "seconds": 2.941615125979297,
+      "commands": 2,
+      "stdout_bytes": 5209,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": "session"
+    },
+    {
+      "arm": "raw",
+      "repeat": 3,
+      "seconds": 5.653094915964175,
+      "commands": 3,
+      "stdout_bytes": 6017,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": null
+    },
+    {
+      "arm": "cold",
+      "repeat": 3,
+      "seconds": 5.728677583974786,
+      "commands": 2,
+      "stdout_bytes": 5208,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": "layout"
+    },
+    {
+      "arm": "raw",
+      "repeat": 4,
+      "seconds": 5.668605293089058,
+      "commands": 3,
+      "stdout_bytes": 6017,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": null
+    },
+    {
+      "arm": "cold",
+      "repeat": 4,
+      "seconds": 5.750179041002411,
+      "commands": 2,
+      "stdout_bytes": 5208,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": "layout"
+    },
+    {
+      "arm": "warm",
+      "repeat": 4,
+      "seconds": 2.8773406239924952,
+      "commands": 2,
+      "stdout_bytes": 5209,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": "session"
+    },
+    {
+      "arm": "cold",
+      "repeat": 5,
+      "seconds": 5.734945998992771,
+      "commands": 2,
+      "stdout_bytes": 5208,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": "layout"
+    },
+    {
+      "arm": "warm",
+      "repeat": 5,
+      "seconds": 2.9082804589997977,
+      "commands": 2,
+      "stdout_bytes": 5209,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": "session"
+    },
+    {
+      "arm": "raw",
+      "repeat": 5,
+      "seconds": 5.6556812080089,
+      "commands": 3,
+      "stdout_bytes": 6017,
+      "stderr_bytes": 0,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "start_source": null
+    }
+  ],
+  "derived": {
+    "median_warm_including_source_observation_seconds": 5.752847500960343,
+    "all_replay_graphs_unchanged": true
+  },
+  "provenance": {
+    "date": "2026-09-16",
+    "minimap_source_revision": "e838065b7b9f837f11233e452afc47e8bbdeefb0",
+    "sample_checkout_revision": "d3ff757b289f7036815978a8f7b16706ee3423b0",
+    "apk_rebuilt_from_checkout": false,
+    "raw_trace_location": "external eval output directory; not committed",
+    "expected_suite_exit_code": 1,
+    "scope": "single-route scripted smoke, not agent token economics or a release reliability evaluation"
+  }
+}

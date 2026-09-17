@@ -1,0 +1,7 @@
+{
+  "python": "3.12.14",
+  "matplotlib": "3.11.2",
+  "numpy": "2.3.5",
+  "chart_script_sha256": "05cf92c36d21ab92c27b1f47b6f621684ba14c07b7dbd51741e05e0abf0ef00c",
+  "data_script_sha256": "fbe8742c49a9ce437936dac0b792015695287fcab071160f71cb1c54bff958f8"
+}

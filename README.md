@@ -1,31 +1,17 @@
 # Minimap
 
-Give AI agents a map of your Android app.
+Android navigation memory for AI agents.
 
-Minimap is shared navigation memory and soft validation for AI agents working in
-Android codebases. It wraps documented [`android` CLI](https://developer.android.com/tools/agents/android-cli) and [`adb`](https://developer.android.com/tools/adb) primitives, records
-navigation runs, stores distilled graph artifacts under `.minimap/`, and lets later
-agents reuse known routes instead of rediscovering the UI.
+Minimap records proven paths through a running Android app as a small repo graph
+under `.minimap/`. Later agents can ask where they are, go to known places, and
+extend the graph as they navigate instead of rediscovering the same layout state
+from scratch.
+
+Minimap keeps navigation deterministic and agent-independent. Agents build,
+install, launch, inspect source, and decide what the task requires. Minimap
+remembers navigation and checks the visible destination they request.
 
 ## Install
-
-With Homebrew, after the tap is published:
-
-```bash
-brew install himattm/minimap/minimap
-```
-
-With Cargo, after the crates are published:
-
-```bash
-cargo install minimap-cli
-```
-
-From source:
-
-```bash
-cargo install --git https://github.com/himattm/minimap minimap-cli
-```
 
 From a checkout:
 
@@ -33,84 +19,142 @@ From a checkout:
 cargo build -p minimap-cli --bin minimap
 ```
 
-Release binaries are published from GitHub releases for macOS, Linux, and
-Windows. See [docs/RELEASING.md](docs/RELEASING.md) for maintainer release
-steps.
+Building requires Rust 1.89 or newer.
+
+From source after publication:
+
+```bash
+cargo install --git https://github.com/mttmcknn/minimap minimap-cli
+```
 
 ## Basic Workflow
 
-Initialize a repo:
+Initialize the repo and install agent skills:
 
 ```bash
-minimap init --agents all
+minimap init --agents all --package com.example.myapp
 minimap doctor
 ```
 
-`minimap init` creates an empty graph under `.minimap/`. That is the expected
-starting state — Minimap is useful immediately, and the graph fills in as you
-naturally use the app. There is no required baseline survey.
+Label the current place:
 
-### Grow the graph one screen at a time
+```bash
+minimap whereami --label home
+```
 
-While you are using the app, just tap. The graph commits inline:
+Navigate and learn a verified transition:
+
+```bash
+minimap tap --selector "text=SEARCH" --label search --reason "open search"
+```
+
+Reuse the graph:
+
+```bash
+minimap go search --expect "text=Categories"
+```
+
+Use raw layout only when the agent needs details Minimap does not model:
 
 ```bash
 minimap layout
-minimap tap --selector "text=Open" --reason "open article detail"
 ```
 
-Each `tap` either matches an existing screen and commits an edge, creates a new
-screen and commits an edge, or stages a drift proposal for ambiguous cases. The
-ambiguous case is rare — only then is `minimap accept <proposal-id>` involved.
+`layout` returns redacted Android layout plus Minimap orientation metadata.
+Unlabeled `whereami` returns compact orientation. If either immediately follows a
+fresh verified observation, Minimap can serve the cached session state instead
+of paying for another Android layout capture.
+Use `layout --fresh` or `whereami --fresh` after external changes and for current
+product assertions. Every `go` observes the real starting screen, even when the
+graph suggests that it is already at the destination.
+Repeat `--expect` for every required visible anchor. Each must match exactly one
+visible element, including for an already-at-target request. A missing anchor
+returns `goal_mismatch`; reaching a generic screen does not prove the right item
+or account. A successful check avoids a separate full-layout read when it
+covers the task's verification needs.
 
-Name a route after walking it:
+## Self-healing navigation
 
-```bash
-minimap route define article-detail --to screen_article_detail --from screen_home
-```
+Minimap replans from observed destinations, excludes failing edges, and tries
+other verified routes within an action/time budget. Unfamiliar changes return
+a compact recovery handoff to the host agent. The installed skill directs the
+agent to inspect fresh UI and matching source, learn a replacement, verify it,
+and resume the task quietly. A mismatch alone is not a product defect.
 
-### Reuse and validate
+The first `go` returns `data.recovery.token`. Continue the same goal with
+`--recovery <token>` on every discovery/replay command. The token retains the
+original goal checks, failed edges, and budget across processes and time spent
+in the agent. Defaults are 32 inputs and 60 seconds; set `--max-actions` and
+`--recovery-seconds` on the initial request if needed. Retries cannot extend
+that token's budget. The host must carry it forward instead of starting a new
+goal for each retry.
 
-Once a route is in the graph, reuse and validate it:
+After verifying a changed screen, the agent can explicitly attach its new
+appearance with `whereami --confirm-place <existing-place-id>`. From an obsolete
+edge's original source, `go <destination> --supersede <edge-id>` prefers a
+replacement only after it reaches the same destination and passes the goal
+checks. The old route remains a fallback for other builds or supported states.
+Critical product bugs are escalated with reproduction and code evidence.
 
-```bash
-minimap route resolve article-detail
-minimap go article-detail
-minimap validate --screen current
-minimap drift
-```
+Device and repo locks serialize Minimap operations. Writes are atomic, place
+IDs survive relabeling, and runtime caches are scoped to the repo, device,
+package, process, and installed build. Commit `.minimap/` for teammates to reuse;
+run `minimap doctor --repo-only` in CI without an emulator.
+Recipes are validated before any input, and post-action learning requires stable UI.
+Editable/password content is redacted before caching and fingerprinting;
+obvious sensitive labels, intents, and selectors are rejected. Unmarked personal
+text still needs agent judgment.
 
-## Bulk Mapping (optional)
+Current boundaries: one app per graph, screen-level identity, and explicit UI
+return routes for reusable navigation. Generic detail screens do not prove a
+particular item was reached, and the planner does not replay Back recipes
+without history it can verify. New edges use `minimap.edge.v2` for fallback
+preferences; existing lean v1 edge records load without rewriting files, and older clients reject
+v2 rather than silently ignoring its meaning. Upgrade teammates together.
+Token savings still need measured agent trials.
 
-`minimap init --agents all` installs the `minimap-app-navigation` skill, which
-covers both everyday navigation and bulk mapping.
+## Commands
 
-Most users will not need a bulk pass. The incremental flow above grows the
-graph naturally over time as the app is used.
-
-If you want a bulk pass over many flows at once — for example, seeding a
-brand-new repo with coverage of the settings, profile, and article-detail flows
-in one sitting — ask the skill explicitly. It is token-intensive: the agent has
-to inspect Android layout JSON, decide what to tap, and walk many routes in a
-single session. The skill will warn you and propose a scoped list of named
-flows before starting.
-
-Example prompt:
+The v1 command surface is intentionally small:
 
 ```text
-Bulk-map this Android app. Start with the settings, profile, and article-detail
-flows. Warn me before exploring outside that list.
+minimap init
+minimap doctor
+minimap whereami
+minimap go
+minimap tap
+minimap scroll
+minimap back
+minimap layout
 ```
+
+All commands return compact JSON by default; use `--pretty` for indented output.
+Graph changes are reported with `changed_graph: true` and `changed_files`.
+
+## Graph State
+
+`.minimap/` contains only committed graph/config files:
+
+```text
+.minimap/
+  config.json
+  graph/
+    places/
+    edges/
+```
+
+There are no proposals, journals, run directories, or hidden repo-local runtime
+state. Review graph changes through normal git diffs and PRs.
 
 ## Claude Code Plugin
 
-Claude Code users can install the same Minimap skills from this repo's plugin
+Claude Code users can install the Minimap skill from this repo's plugin
 marketplace.
 
 From Claude Code, add the marketplace:
 
 ```text
-/plugin marketplace add himattm/minimap
+/plugin marketplace add mttmcknn/minimap
 ```
 
 Then install the plugin:
@@ -126,39 +170,41 @@ For local development from a checkout:
 /plugin install minimap@minimap
 ```
 
-The plugin includes:
-
-- `minimap-app-navigation` for everyday Minimap navigation, incremental graph
-  growth one screen at a time, route reuse, validation, and bulk mapping when
-  the user explicitly asks to map many flows at once.
-
-## Product Rules
-
-- Raw Android layout JSON is not committed by default.
-- Redaction runs before hashing, normalization, or graph proposal generation.
-- Append-only `.minimap/journal.jsonl` is gitignored by `minimap init`.
-- `minimap tap` auto-commits Screen and NavigationEdge JSON inline. Only
-  ambiguous drift lands in `.minimap/proposals/` and requires `minimap accept`.
-- `android layout --diff` remains an Android in-session diff. Minimap graph drift
-  is reported by `minimap drift` and `minimap validate`.
+The plugin ships `minimap-app-navigation`, the same skill `minimap init`
+installs for everyday Minimap navigation and incremental graph growth.
 
 ## Live Device Smoke
 
-With a built and launched Android app plus `android` and `adb` on `PATH`:
+With an Android app already built, installed, and launched plus `android` and
+`adb` on `PATH`:
 
 ```bash
 minimap doctor
-minimap layout
-minimap tap --selector "text=Settings" --reason "open settings"
-minimap validate --screen current
+minimap whereami --label home
+minimap tap --selector "text=SEARCH" --label search --reason "open search"
+minimap back
+minimap go search
 ```
 
-For a known route already committed under `.minimap/`:
+If more than one device or emulator is attached, pass `--serial <SERIAL>` on
+any command (or set `ANDROID_SERIAL`) so every `adb` and `android` call targets
+a single device; `minimap doctor` flags ambiguous multi-device setups.
+
+For controlled raw navigation, first-use learning, graph reuse, and recovery
+comparisons, see [Evaluations](evals/README.md) and the
+[90-trial controlled results](evals/results/2026-09-16-controlled.md) and
+[benchmark graphs](evals/results/2026-09-17-benchmarks/README.md).
+The next development steps and release gates are in the
+[hardening plan](docs/MINIMAP_HARDENING_PLAN.md).
+
+For broader manual validation, clone the public
+[Android Compose samples](https://github.com/android/compose-samples) and build
+one of its apps (Jetsnack, JetNews, or Jetchat):
 
 ```bash
-minimap go <route-or-screen>
-minimap drift
+git clone https://github.com/android/compose-samples
 ```
 
-Live device tests are intentionally separate from CI. CI uses fake `android` and
-`adb` executables for deterministic command-contract coverage.
+Then build and launch a sample (for example Jetsnack) from the cloned
+`compose-samples/` checkout and run the smoke commands above against it; see
+[docs/MINIMAP_V1_LEAN_DESIGN.md](docs/MINIMAP_V1_LEAN_DESIGN.md).

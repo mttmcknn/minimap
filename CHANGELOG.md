@@ -2,9 +2,12 @@
 
 All notable changes to Minimap are documented here.
 
-## 0.2.0 - unreleased
+## 0.2.0 - 2026-09-17
 
-Breaking redesign: capture is now incremental and progressive. Every selector- or label-grounded `tap` grows the graph automatically; there is no separate `learn` or `accept` ritual for the common case.
+Breaking redesign: Minimap is now a lean Android navigation-memory tool. The
+repo graph stores only semantic places, verified transitions, and compact
+fingerprints. Agents use `whereami`, `go`, `tap`, `scroll`, `back`, and `layout`;
+git diff/PR review is the review surface.
 
 This is a clean break — existing `.minimap/` trees from 0.1.x must be re-initialized (`minimap init --force`).
 
@@ -14,30 +17,58 @@ This is a clean break — existing `.minimap/` trees from 0.1.x must be re-initi
 - `learn`
 - `map --discover` / `map --finish`
 - `repair`
-- `check` (use `validate --screen current` instead)
-
-### Renamed
-
-- `minimap route <name>` → `minimap route resolve <name>` (`route` is now a subcommand group)
+- `check`
+- `validate`
+- `accept`
+- `undo`
+- `route`
+- `screen`
+- `.minimap/proposals`
+- `.minimap/journal.jsonl`
 
 ### Added
 
-- `route define <name> --to <screen> [--from <screen>] [--triggers ...]` (pass `--triggers` multiple times for multiple globs; embedded commas like `{login,signup}/**` are preserved)
-- `screen rename <id> <new-name>`
-- `undo` — sugar for `git checkout -- .minimap/graph .minimap/routes`
-- `validate --screen current` replaces the old `check`
-- `accept <id> --as-new` materializes a new screen from a drift proposal instead of merging with the candidate
-- `.minimap/journal.jsonl` — append-only event log with documented outcomes (`matched | new_screen | drift_staged | coord_journal_only | tap_failed | from_screen_unknown`)
-- `navigation.post_tap_settle_ms` config key controls the post-tap settle window (default 500 ms)
-- Tap actions and journal entries now carry an optional viewport (`{width, height}`) captured from `adb shell wm size`, enabling cross-device reusability checks
+- `whereami` — orient from one Android layout observation; `--label` attaches or updates semantic identity.
+- `go <target>` — navigate to a known global label through verified graph edges.
+- `scroll` — execute scrolls and retain them as pending recipe steps for the next transition.
+- `back` — press Android Back and record a verified known transition when one occurs.
+- Destination labels on `tap` via `--label`; `--reason` records action intent only.
+- Screenshot-label taps via `--screenshot-label <n> --screenshot <path>`.
+- `.minimap/graph/places` and `.minimap/graph/edges` as the committed graph.
+- Quiet recovery with fresh source observations, per-transition verification, bounded replanning, and structured agent handoffs.
+- Persistent `--recovery` tokens that preserve input/time budgets, original goal checks, and failed edges across host commands.
+- Repeatable `go --expect <selector>` checks for the requested visible item or state, including already-at-target requests.
+- Explicit source-backed appearance confirmation and verified `go --supersede` replacements that retain older routes as fallbacks.
+- Repository/device operation locks, atomic JSON writes, repo-root discovery, and device-free `doctor --repo-only` checks.
+- Strict recipe validation before input, bounded UI settling, transient capture retries, and private-input redaction.
+- Reproducible Compose recovery, destination, timing, and Git-merge evaluations with measured outcomes and explicit limits.
+- A controlled 90-trial benchmark across Jetsnack, JetNews, and Jetchat on Android APIs 36 and 37, with 16 recovery/negative controls and retained earlier setup failures.
+- Reproducible PNG/SVG benchmark graphs and per-trial CSV/JSON data, including exact tool-text token counts and instruction-loading cost projections.
 
 ### Changed
 
-- `tap` is atomic: it captures the pre-tap layout, executes the tap, waits for settle, captures the post-tap layout, and either commits an edge or stages a drift proposal — all in one call
-- `.minimap/runs/` is gone; replaced by `journal.jsonl`
-- `Route` schema slimmed to `{name, target, from?, triggers, aliases}`
-- Screen IDs are now stable `screen_<hash8>` handles; edges reference IDs, so `screen rename` does not break edges
-- Drift proposals now round-trip through `accept`: the default resolution writes the staged edge from the source to the candidate, and `accept --as-new` materializes a fresh screen plus edge from the observed layout instead
+- `.minimap/` now contains only `config.json`, `graph/places`, and `graph/edges`.
+- `init --force` replaces the whole `.minimap/` directory with the lean layout.
+- Labels are global, unique, normalized slugs; no aliases in v1.
+- Place IDs start readable and label-derived, for example `place_settings`, and remain immutable after relabeling.
+- Edge IDs hash the full recipe and immutable endpoint IDs, keeping both the readable prefix and hash stable across place renames.
+- Edge recipes are ordered action steps, not tap-only actions.
+- Coordinate and screenshot-label edges require exact viewport guards.
+- Unknown destinations without `--label` do not enter the committed graph.
+- `layout` returns redacted Android layout plus read-only Minimap orientation metadata.
+- Agent skills installed by `init` now teach the lean command surface.
+- CLI output is compact JSON by default, with `--pretty` for readable indentation.
+- New lean edges use `minimap.edge.v2`; existing lean v1 edge records load without a file rewrite, while older clients reject v2 explicitly.
+- Project links, Cargo metadata, plugin metadata, and Homebrew references use the renamed GitHub account `mttmcknn`.
+- The repository crate bundles its navigation skill so published crate archives compile without the surrounding plugin checkout; a workspace test enforces byte-for-byte agreement with the canonical plugin skill.
+
+### Validation and limits
+
+- All 90 primary navigation trials and 16 scripted recovery/negative controls passed; copied graph replay and real Git merge/conflict checks also passed.
+- Graph reuse reduced recorded tool-response tokens by 82.5–87.7% under `o200k_base`, while adding 0.58–1.81 seconds at the paired median versus the known-route raw control.
+- Actual model usage, billed savings, autonomous agent diagnosis, and broader device/app-state reliability remain unmeasured; these results do not establish a reliability SLA.
+- See [the benchmark report](evals/results/2026-09-17-benchmarks/README.md) for every trial, source hashes, formulas, and instruction-overhead assumptions.
+- Teams should upgrade the CLI and refresh installed navigation skills together; the host must carry recovery tokens and goal checks across commands.
 
 ## 0.1.3 - 2026-05-08
 

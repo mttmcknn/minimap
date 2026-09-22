@@ -10,7 +10,7 @@ every tap.
 The routes live in your project's `.minimap/` folder. Commit them to Git so your
 teammates and their AI agents can use what has already been learned.
 
-## Results in plain English
+## Results
 
 **Saved routes returned about 83–88% less text for the AI to read.** Navigation
 was a little slower than the script without Minimap; we have not measured a

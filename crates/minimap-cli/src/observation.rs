@@ -43,23 +43,47 @@ pub(super) fn observe_after_action<R: CommandRunner>(
     observe_destination(android, |_| false, true)
 }
 
-/// A following selector supplies its own readiness condition. Observe it now,
-/// then retry only if it is not yet uniquely actionable; a fixed sleep delays
-/// every healthy transition and still cannot prove that a slow screen is ready.
+/// Visibility alone does not make an animating control safe to tap. Require
+/// the same unique, enabled tap point in two consecutive fresh observations.
 pub(super) fn observe_selector<R: CommandRunner>(
     android: &mut AndroidCli<R>,
     selector: &str,
+    mut initial_layout: Option<Value>,
 ) -> Result<Value> {
-    let layout = observe_destination(
-        android,
-        |layout| minimap_android::resolve_selector_point(layout, selector).is_ok(),
-        false,
-    )?;
-    if let Some(reason) = detect_overlay(&layout) {
-        anyhow::bail!("input blocked by overlay: {reason}");
+    let mut previous = None;
+    let mut last_error = None;
+    for attempt in 0..5 {
+        if attempt == 3 && android.uses_fast_layout() {
+            android.use_android_cli_layout();
+            previous = None;
+        }
+        let layout = match initial_layout.take() {
+            Some(layout) => layout,
+            None => observe_layout(android, false)?,
+        };
+        if let Some(reason) = detect_overlay(&layout) {
+            anyhow::bail!("input blocked by overlay: {reason}");
+        }
+        match minimap_android::resolve_selector_point(&layout, selector) {
+            Ok(point) => {
+                if previous == Some(point) {
+                    return Ok(layout);
+                }
+                previous = Some(point);
+                last_error = None;
+            }
+            Err(error) => {
+                previous = None;
+                last_error = Some(error);
+            }
+        }
+        if attempt < 4 {
+            android.pause(Duration::from_millis(super::action_settle_ms().min(250)))?;
+        }
     }
-    minimap_android::resolve_selector_point(&layout, selector)?;
-    Ok(layout)
+    Err(last_error.unwrap_or_else(|| {
+        DriverError("Selector did not settle into a stable tap location".into()).into()
+    }))
 }
 
 pub(super) fn observe_destination<R: CommandRunner>(
@@ -161,17 +185,52 @@ mod tests {
             json!([{"text":"Loading"}]).to_string(),
             json!([{"text":"Next", "center":"[10,20]", "enabled":false}]).to_string(),
             ready.to_string(),
+            ready.to_string(),
         ]);
-        assert_eq!(observe_selector(&mut android, "text=Next").unwrap(), ready);
+        assert_eq!(
+            observe_selector(&mut android, "text=Next", None).unwrap(),
+            ready
+        );
+        assert_eq!(android.layout_calls(), 4);
+    }
+
+    #[test]
+    fn initial_selector_observation_is_reused_but_its_position_is_confirmed() {
+        let ready = json!([{"text":"Next", "center":"[10,20]"}]);
+        let mut android = android(vec![ready.to_string()]);
+        assert_eq!(
+            observe_selector(&mut android, "text=Next", Some(ready.clone())).unwrap(),
+            ready
+        );
+        assert_eq!(android.layout_calls(), 1);
+    }
+
+    #[test]
+    fn a_visible_control_must_stop_moving_before_a_tap_is_allowed() {
+        let ready = json!([{"text":"Next", "center":"[30,20]"}]);
+        let mut android = android(vec![
+            json!([{"text":"Next", "center":"[10,20]"}]).to_string(),
+            ready.to_string(),
+            ready.to_string(),
+        ]);
+        assert_eq!(
+            observe_selector(&mut android, "text=Next", None).unwrap(),
+            ready
+        );
         assert_eq!(android.layout_calls(), 3);
     }
 
     #[test]
-    fn ready_selector_needs_only_one_observation() {
-        let ready = json!([{"text":"Next", "center":"[10,20]"}]);
-        let mut android = android(vec![ready.to_string()]);
-        assert_eq!(observe_selector(&mut android, "text=Next").unwrap(), ready);
-        assert_eq!(android.layout_calls(), 1);
+    fn a_control_that_keeps_moving_is_not_tapped_after_the_observation_bound() {
+        let frames = (0..5)
+            .map(|x| json!([{"text":"Next", "center":format!("[{x},20]")}]).to_string())
+            .collect();
+        let mut android = android(frames);
+        assert!(observe_selector(&mut android, "text=Next", None)
+            .unwrap_err()
+            .to_string()
+            .contains("stable tap location"));
+        assert_eq!(android.layout_calls(), 5);
     }
 
     #[test]
@@ -184,10 +243,14 @@ mod tests {
             loading.clone(),
             loading,
             ready.to_string(),
+            ready.to_string(),
         ]);
         android.prefer_fast_layout();
-        assert_eq!(observe_selector(&mut android, "text=Next").unwrap(), ready);
-        assert_eq!(android.layout_calls(), 4);
+        assert_eq!(
+            observe_selector(&mut android, "text=Next", None).unwrap(),
+            ready
+        );
+        assert_eq!(android.layout_calls(), 5);
         assert!(!android.uses_fast_layout());
     }
 
@@ -197,12 +260,12 @@ mod tests {
             {"text":"Next", "center":"[10,20]"},
             {"text":"Next", "center":"[30,20]"}
         ]);
-        let mut android = android(vec![ambiguous.to_string(); 3]);
-        assert!(observe_selector(&mut android, "text=Next")
+        let mut android = android(vec![ambiguous.to_string(); 5]);
+        assert!(observe_selector(&mut android, "text=Next", None)
             .unwrap_err()
             .to_string()
             .contains("Ambiguous selector"));
-        assert_eq!(android.layout_calls(), 3);
+        assert_eq!(android.layout_calls(), 5);
     }
 
     #[test]
@@ -212,7 +275,7 @@ mod tests {
             {"text":"Next", "center":"[10,20]"}
         ])
         .to_string()]);
-        assert!(observe_selector(&mut android, "text=Next")
+        assert!(observe_selector(&mut android, "text=Next", None)
             .unwrap_err()
             .to_string()
             .contains("blocked by overlay"));

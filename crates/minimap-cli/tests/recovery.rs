@@ -646,18 +646,22 @@ fn selector_recipe_waits_for_ready_controls_without_requiring_a_viewport() {
     );
     minimap_repo::commit_edge(app.temp.path(), &edge).unwrap();
     app.layout("loading", screen("menu", &[("Loading", 20)]));
-    app.layout("menu", screen("menu", &[("Continue", 20)]));
+    app.layout("moving", screen("menu", &[("Continue", 20)]));
+    app.layout("menu", screen("menu", &[("Continue", 30)]));
     app.route("home", "tap_10_20", "loading");
-    app.route("menu", "tap_20_20", "target");
+    app.route("menu", "tap_30_20", "target");
     executable(
         &app.bin.join("android"),
         r#"#!/bin/sh
 printf 'android %s\n' "$*" >> "$SIM_ROOT/calls"
 cat "$SIM_ROOT/current.json"
-if [ "$(cat "$SIM_ROOT/current-name")" = loading ]; then
-  cp "$SIM_ROOT/layouts/menu.json" "$SIM_ROOT/current.json"
-  printf menu > "$SIM_ROOT/current-name"
-fi
+case "$(cat "$SIM_ROOT/current-name")" in
+  loading) next=moving;;
+  moving) next=menu;;
+  *) exit 0;;
+esac
+cp "$SIM_ROOT/layouts/$next.json" "$SIM_ROOT/current.json"
+printf '%s' "$next" > "$SIM_ROOT/current-name"
 "#,
     );
     app.at("home");
@@ -668,7 +672,8 @@ fi
     assert_eq!(app.current(), "target");
     let calls = fs::read_to_string(app.temp.path().join("calls")).unwrap();
     assert_eq!(calls.matches("shell input tap").count(), 2);
-    assert_eq!(calls.matches("android layout").count(), 4);
+    assert_eq!(calls.matches("android layout").count(), 7);
+    assert!(!calls.contains("input tap 20 20"));
     assert!(!calls.contains("wm size"));
 }
 

@@ -1658,10 +1658,8 @@ fn execute_recipe<AR: CommandRunner, DR: CommandRunner>(
             "tap" => {
                 if let Some(selector) = &step.selector {
                     let selector = format!("{}={}", selector.kind, selector.value);
-                    let layout = match cached_layout.take() {
-                        Some(layout) => layout,
-                        None => observation::observe_selector(android, &selector)?,
-                    };
+                    let layout =
+                        observation::observe_selector(android, &selector, cached_layout.take())?;
                     let point = resolve_selector_point(&layout, &selector)?;
                     adb.tap(point)?;
                 } else if let Some(point) = step.point {

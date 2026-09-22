@@ -28,6 +28,11 @@ Graph matching, foreground checks, input budgets, and destination assertions
 still run in the existing Rust code. Learning and `layout --diff` continue to
 use Android CLI.
 
+Before each selector tap, replay requires the tap point to stay unchanged in
+two consecutive fresh observations. A visible control can still be moving
+during a drawer animation. Unsettled controls get a bounded Android CLI
+confirmation; replay refuses the tap if their position never stabilizes.
+
 Rebuild with JDK 21, Android platform 36, and build-tools 36.0.0:
 
 ```sh

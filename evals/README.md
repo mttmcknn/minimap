@@ -59,6 +59,17 @@ cached input or reasoning twice. These are API price scenarios, never measured
 ChatGPT subscription charges. Agent trials require explicit authorization;
 preparing the experiment does not mean it has run.
 
+After collecting an authorized cohort, `analyze_agent.py --plan PLAN.json
+--runs RUN_DIRECTORY --prices PRICE_RECORD.json --output SUMMARY.json` audits
+the original usage events, prepared prompt, matching app source, starting graph,
+APK, model settings, and CLI version. The plan lists every assignment with its
+ID, sample, repeat, arm, prompt hash, and starting-graph hash; it also pins the
+binary, APK and price hashes, source-file hashes, device/API, model settings,
+and time/input limits. Store each trial under `RUN_DIRECTORY/<id>/results.json`
+with its original `trial/` evidence. Missing assignments remain in the planned
+denominator, and absent usage is never priced as zero. Cost bounds that overlap
+do not prove a saving. None of these analysis commands launches an agent.
+
 ## Controlled baseline suite
 
 [SUITE_V1.md](SUITE_V1.md) defines the hypotheses, control groups, matched trial

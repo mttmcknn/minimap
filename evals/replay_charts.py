@@ -11,7 +11,7 @@ COLORS = {"raw": "#37659B", "baseline": "#B16B31", "candidate": "#087F72"}
 LABELS = ("Without\nMinimap", "Released\nMinimap", "Candidate")
 
 
-def render(data, output):
+def render(data, output, medians_only=False):
     plt = setup_plotting()
     apis = sorted({group["api"] for group in data["groups"]})
     samples = ["jetsnack", "jetnews", "jetchat"]
@@ -20,13 +20,17 @@ def render(data, output):
     fig.subplots_adjust(top=1 - 1.2 / fig.get_figheight(), bottom=1.35 / fig.get_figheight(),
                         left=.07, right=.98, hspace=.55, wspace=.22)
     rows = [row for row in data["trials"] if successful(row)]
-    highest = max((row["seconds"] for row in rows), default=1) * 1.2
+    plotted = ([arm["median_successful_seconds"] for group in data["groups"]
+                for arm in group["arms"].values() if arm["median_successful_seconds"] is not None]
+               if medians_only else [row["seconds"] for row in rows])
+    highest = max(plotted, default=1) * 1.2
     for y, api in enumerate(apis):
         for x, sample in enumerate(samples):
             ax = axes[y, x]
             group = next((g for g in data["groups"] if g["api"] == api and g["sample"] == sample), None)
             ax.set_title(f"{NAMES[sample]} · API {api}", loc="left", fontweight="bold")
-            ax.set_xticks(range(3), LABELS)
+            labels = ("Without\nMinimap", "Previous\nMinimap", "Improved\nMinimap") if medians_only else LABELS
+            ax.set_xticks(range(3), labels)
             ax.set_ylim(0, highest)
             ax.grid(axis="y", color="#E6EBEE")
             ax.set_axisbelow(True)
@@ -41,26 +45,32 @@ def render(data, output):
                 values = [r["seconds"] for r in rows if r["api"] == api and r["sample"] == sample and r["arm"] == arm]
                 if m is not None:
                     ax.bar(index, m, color=COLORS[arm], alpha=.85, width=.66)
-                    ax.text(index, m + highest * .035, f"{m:.2f}", ha="center", fontweight="bold", fontsize=12)
-                    offsets = [(j - (len(values) - 1) / 2) * min(.05, .45 / max(1, len(values))) for j in range(len(values))]
-                    ax.scatter([index + offset for offset in offsets], values,
-                               s=25, color="#172C3B", edgecolor="white", linewidth=.5, zorder=3)
+                    value = f"{m:.1f}" if medians_only else f"{m:.2f}"
+                    ax.text(index, m + highest * .035, value, ha="center", fontweight="bold", fontsize=12)
+                    if not medians_only:
+                        offsets = [(j - (len(values) - 1) / 2) * min(.05, .45 / max(1, len(values))) for j in range(len(values))]
+                        ax.scatter([index + offset for offset in offsets], values,
+                                   s=25, color="#172C3B", edgecolor="white", linewidth=.5, zorder=3)
                 if stats["failures"] or stats["missing"]:
                     ax.text(index, highest * .93, f"{stats['successes']}/{stats['planned']} passed",
                             ha="center", fontsize=9, color="#A1382E")
     stage = "CONFIRMATION" if data["gates"]["confirmation_eligible"] else data["stage"].upper()
     fig.text(.055, .965, f"Saved-route navigation time · {stage}", fontsize=22, fontweight="bold", va="top")
+    detail = "typical time (median)" if medians_only else "every successful run shown"
     fig.text(.055, .965 - .43 / fig.get_figheight(),
-             f"{data['successes']}/{data['planned_trials']} trials passed · same apps and destinations · every successful run shown",
+             f"{data['successes']}/{data['planned_trials']} trials passed · same apps and destinations · {detail}",
              fontsize=12, color="#52616E", va="top")
-    note = "Bars = medians of successful runs. Dots = individual runs. Setup and the separate destination checker are excluded."
+    note = ("Bars = typical times (medians). Previous = v0.2.0; improved = performance candidate. All runs: replay-time.png."
+            if medians_only else "Bars = medians of successful runs. Dots = individual runs.")
+    note += "\nSetup and the separate destination checker are excluded."
     if not data["gates"]["confirmation_eligible"]:
         note += "\nDevelopment pilot: these results do not establish reliability or a confirmed speedup."
     if data["profiled"]:
         note += "\nProfiling overhead is included; these times cannot support a speed claim."
     fig.text(.055, .04, note, fontsize=10, color="#52616E", va="bottom", linespacing=1.5)
     for suffix in ("png", "svg"):
-        fig.savefig(output / f"replay-time.{suffix}", dpi=170,
+        name = "replay-summary" if medians_only else "replay-time"
+        fig.savefig(output / f"{name}.{suffix}", dpi=170,
                     metadata={"Creator": "Minimap replay benchmark", "Date": None} if suffix == "svg" else None)
     plt.close(fig)
 
@@ -69,9 +79,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("summary", type=Path)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--medians-only", action="store_true", help="Readable overview; full chart retains every run and outlier")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
-    render(json.loads(args.summary.read_text()), args.output)
+    render(json.loads(args.summary.read_text()), args.output, args.medians_only)
 
 
 if __name__ == "__main__":

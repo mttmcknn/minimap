@@ -77,7 +77,10 @@ def main():
         setattr(args, name, getattr(args, name).resolve())
     paired = json.loads((args.paired_run / "results.json").read_text())
     binary_hash = hashlib.sha256(args.binary.read_bytes()).hexdigest()
-    assert paired["metadata"]["binary_sha256"] == binary_hash
+    allowed_binaries = paired["metadata"].get(
+        "binary_sha256_by_arm", {"baseline": paired["metadata"]["binary_sha256"]},
+    )
+    assert binary_hash in allowed_binaries.values(), "Binary was not frozen in the paired run"
     assert paired["metadata"]["serial"] == args.serial
     args.output.mkdir(parents=True, exist_ok=False)
     report = {"binary_sha256": binary_hash, "serial": args.serial,

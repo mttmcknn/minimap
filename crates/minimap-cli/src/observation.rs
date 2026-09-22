@@ -43,6 +43,25 @@ pub(super) fn observe_after_action<R: CommandRunner>(
     observe_destination(android, |_| false, true)
 }
 
+/// A following selector supplies its own readiness condition. Observe it now,
+/// then retry only if it is not yet uniquely actionable; a fixed sleep delays
+/// every healthy transition and still cannot prove that a slow screen is ready.
+pub(super) fn observe_selector<R: CommandRunner>(
+    android: &mut AndroidCli<R>,
+    selector: &str,
+) -> Result<Value> {
+    let layout = observe_destination(
+        android,
+        |layout| minimap_android::resolve_selector_point(layout, selector).is_ok(),
+        false,
+    )?;
+    if let Some(reason) = detect_overlay(&layout) {
+        anyhow::bail!("input blocked by overlay: {reason}");
+    }
+    minimap_android::resolve_selector_point(&layout, selector)?;
+    Ok(layout)
+}
+
 pub(super) fn observe_destination<R: CommandRunner>(
     android: &mut AndroidCli<R>,
     expected: impl Fn(&Value) -> bool,
@@ -74,7 +93,15 @@ pub(super) fn observe_destination<R: CommandRunner>(
         )
         .into())
     } else {
-        Ok(last.unwrap())
+        // A faster capture can see a transition earlier than the stock dumper.
+        // Confirm unresolved UI with that original fresh path before treating
+        // it as a changed route, failed selector, or wrong destination.
+        if android.uses_fast_layout() {
+            android.use_android_cli_layout();
+            observe_layout(android, false)
+        } else {
+            Ok(last.unwrap())
+        }
     }
 }
 
@@ -125,6 +152,71 @@ mod tests {
             target
         );
         assert_eq!(android.layout_calls(), 3);
+    }
+
+    #[test]
+    fn next_selector_waits_for_a_unique_enabled_control() {
+        let ready = json!([{"text":"Next", "center":"[10,20]"}]);
+        let mut android = android(vec![
+            json!([{"text":"Loading"}]).to_string(),
+            json!([{"text":"Next", "center":"[10,20]", "enabled":false}]).to_string(),
+            ready.to_string(),
+        ]);
+        assert_eq!(observe_selector(&mut android, "text=Next").unwrap(), ready);
+        assert_eq!(android.layout_calls(), 3);
+    }
+
+    #[test]
+    fn ready_selector_needs_only_one_observation() {
+        let ready = json!([{"text":"Next", "center":"[10,20]"}]);
+        let mut android = android(vec![ready.to_string()]);
+        assert_eq!(observe_selector(&mut android, "text=Next").unwrap(), ready);
+        assert_eq!(android.layout_calls(), 1);
+    }
+
+    #[test]
+    fn unresolved_fast_frames_are_confirmed_by_a_fresh_android_cli_observation() {
+        let ready = json!([{"text":"Next", "center":"[10,20]"}]);
+        let loading = json!([{"text":"Loading"}]).to_string();
+        let mut android = android(vec![
+            "".into(), // helper upload
+            loading.clone(),
+            loading.clone(),
+            loading,
+            ready.to_string(),
+        ]);
+        android.prefer_fast_layout();
+        assert_eq!(observe_selector(&mut android, "text=Next").unwrap(), ready);
+        assert_eq!(android.layout_calls(), 4);
+        assert!(!android.uses_fast_layout());
+    }
+
+    #[test]
+    fn ambiguous_selector_stays_an_error_after_bounded_observation() {
+        let ambiguous = json!([
+            {"text":"Next", "center":"[10,20]"},
+            {"text":"Next", "center":"[30,20]"}
+        ]);
+        let mut android = android(vec![ambiguous.to_string(); 3]);
+        assert!(observe_selector(&mut android, "text=Next")
+            .unwrap_err()
+            .to_string()
+            .contains("Ambiguous selector"));
+        assert_eq!(android.layout_calls(), 3);
+    }
+
+    #[test]
+    fn overlay_prevents_replaying_an_otherwise_visible_selector() {
+        let mut android = android(vec![json!([
+            {"resource-id":"com.android.permissioncontroller:id/permission_allow_button"},
+            {"text":"Next", "center":"[10,20]"}
+        ])
+        .to_string()]);
+        assert!(observe_selector(&mut android, "text=Next")
+            .unwrap_err()
+            .to_string()
+            .contains("blocked by overlay"));
+        assert_eq!(android.layout_calls(), 1);
     }
 
     #[test]

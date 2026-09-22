@@ -357,6 +357,7 @@ dependencies = [
  "minimap-schemas",
  "serde",
  "serde_json",
+ "sha2",
  "tempfile",
 ]
 

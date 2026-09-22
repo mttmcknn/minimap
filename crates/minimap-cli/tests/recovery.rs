@@ -41,6 +41,8 @@ case "$1:$2:$3" in
   devices:*) printf 'List of devices attached\ntest-device\tdevice\n';;
   shell:wm:size) if [ -f "$SIM_ROOT/no-viewport" ]; then exit 1; fi; printf 'Physical size: 1080x2400\n';;
   shell:pidof:*) if [ -f "$SIM_ROOT/pid" ]; then cat "$SIM_ROOT/pid"; else printf '4242\n'; fi;;
+  push:*) test -f "$SIM_ROOT/fast.json";;
+  shell:CLASSPATH=*:app_process) cat "$SIM_ROOT/fast.json";;
   shell:dumpsys:*) if [ -f "$SIM_ROOT/focus" ]; then cat "$SIM_ROOT/focus"; else printf 'mCurrentFocus=Window{1 u0 com.example.app/.MainActivity}\nversionCode=1\nlastUpdateTime=fixture\n'; fi;;
   shell:input:*)
     source=$(cat "$SIM_ROOT/current-name")
@@ -587,6 +589,87 @@ fn duplicate_place_evidence_does_not_act_or_learn() {
     assert!(!fs::read_to_string(app.temp.path().join("calls"))
         .unwrap()
         .contains("shell input"));
+}
+
+#[test]
+fn fast_layout_drift_is_confirmed_before_adopting_new_screen_evidence() {
+    let app = App::new();
+    app.layout("home", screen("home", &[("Open", 10)]));
+    app.layout("target", screen("target", &[("Done", 30)]));
+    app.route("home", "tap_10_20", "target");
+    app.at("home");
+    app.command(&["whereami", "--label", "home"]);
+    app.command(&["tap", "--selector", "text=Open", "--label", "target"]);
+    let before = minimap_repo::load_graph(app.temp.path()).unwrap();
+    // Similar enough to the saved Home screen, but the new observation path
+    // presents extra evidence and a different tap point. Confirm with Android
+    // CLI before using it or persisting an alternate fingerprint.
+    fs::write(
+        app.temp.path().join("fast.json"),
+        screen("home", &[("Open", 90), ("New header", 60)]).to_string(),
+    )
+    .unwrap();
+    app.at("home");
+    fs::write(app.temp.path().join("calls"), "").unwrap();
+    let result = app.command(&["go", "target", "--expect", "text=Done"]);
+    assert_eq!(result["data"]["changed_graph"], false);
+    assert_eq!(app.current(), "target");
+    let after = minimap_repo::load_graph(app.temp.path()).unwrap();
+    for (id, place) in before.places {
+        assert_eq!(
+            serde_json::to_value(place).unwrap(),
+            serde_json::to_value(&after.places[&id]).unwrap()
+        );
+    }
+    let calls = fs::read_to_string(app.temp.path().join("calls")).unwrap();
+    assert_eq!(calls.matches("dev.minimap.MinimapLayout").count(), 1);
+    assert!(!calls.contains("input tap 90"));
+}
+
+#[test]
+fn selector_recipe_waits_for_ready_controls_without_requiring_a_viewport() {
+    let app = App::new();
+    app.layout("home", screen("home", &[("Open", 10)]));
+    app.layout("target", screen("target", &[("Done", 30)]));
+    app.route("home", "tap_10_20", "target");
+    app.at("home");
+    app.command(&["whereami", "--label", "home"]);
+    app.command(&["tap", "--selector", "text=Open", "--label", "target"]);
+
+    let graph = minimap_repo::load_graph(app.temp.path()).unwrap();
+    let mut edge = graph.edges.values().next().unwrap().clone();
+    edge.recipe.push(
+        serde_json::from_value(json!({
+            "kind":"tap", "selector":{"kind":"text", "value":"Continue"}
+        }))
+        .unwrap(),
+    );
+    minimap_repo::commit_edge(app.temp.path(), &edge).unwrap();
+    app.layout("loading", screen("menu", &[("Loading", 20)]));
+    app.layout("menu", screen("menu", &[("Continue", 20)]));
+    app.route("home", "tap_10_20", "loading");
+    app.route("menu", "tap_20_20", "target");
+    executable(
+        &app.bin.join("android"),
+        r#"#!/bin/sh
+printf 'android %s\n' "$*" >> "$SIM_ROOT/calls"
+cat "$SIM_ROOT/current.json"
+if [ "$(cat "$SIM_ROOT/current-name")" = loading ]; then
+  cp "$SIM_ROOT/layouts/menu.json" "$SIM_ROOT/current.json"
+  printf menu > "$SIM_ROOT/current-name"
+fi
+"#,
+    );
+    app.at("home");
+    fs::write(app.temp.path().join("no-viewport"), "").unwrap();
+    fs::write(app.temp.path().join("calls"), "").unwrap();
+    let result = app.command(&["go", "target", "--expect", "text=Done"]);
+    assert_eq!(result["data"]["verification"]["passed"], true);
+    assert_eq!(app.current(), "target");
+    let calls = fs::read_to_string(app.temp.path().join("calls")).unwrap();
+    assert_eq!(calls.matches("shell input tap").count(), 2);
+    assert_eq!(calls.matches("android layout").count(), 4);
+    assert!(!calls.contains("wm size"));
 }
 
 #[test]

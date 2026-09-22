@@ -13,6 +13,52 @@ effects, and learning-cost projections with explicit skill-loading overhead.
 They include PNG/SVG exports and portable CSV/JSON data; they do not claim
 measured model usage or billing savings.
 
+## Saved-route performance and AI cost
+
+[PERFORMANCE_V2.md](PERFORMANCE_V2.md) defines the September 22 experiment.
+It compares the known-route Android script, the frozen release, and the frozen
+performance candidate, using identical destinations and independent checks.
+Profiles and development pilots are kept separate from confirmation results.
+Run the two confirmation commands sequentially on a shared host:
+
+```sh
+python3 evals/replay_performance.py \
+  --baseline /absolute/path/to/released/minimap \
+  --candidate /absolute/path/to/candidate/minimap \
+  --apks /absolute/path/to/fixtures/apks \
+  --serial emulator-5556 --stage confirmation --repetitions 10 \
+  --output /absolute/path/to/confirmation-api36
+python3 evals/replay_performance.py \
+  --baseline /absolute/path/to/released/minimap \
+  --candidate /absolute/path/to/candidate/minimap \
+  --apks /absolute/path/to/fixtures/apks \
+  --serial emulator-5554 --stage confirmation --repetitions 10 --order-offset 1 \
+  --output /absolute/path/to/confirmation-api37
+python3 evals/analyze_replay.py \
+  /absolute/path/to/confirmation-api36/results.json \
+  /absolute/path/to/confirmation-api37/results.json \
+  --output /absolute/path/to/confirmation.json
+/tmp/minimap-chart-env/bin/python evals/replay_charts.py \
+  /absolute/path/to/confirmation.json --output /absolute/path/to/charts
+```
+
+Use `--stage pilot --repetitions 1` during development. Add `--profile` with
+`--stage profile` to locate subprocess overhead; these instrumented times
+cannot establish a speed claim. The analyzer rejects mixed binaries, protocols,
+or duplicate assignments. A confirmation claim requires all 180 assignments,
+correct destinations, unchanged graphs, and a lower paired median against both
+controls in every app/API case. Run `controlled_contracts.py` against each
+candidate cohort before publishing.
+
+The separate 18-trial agent experiment measures full reported input and output,
+including cached input and reasoning when available. `agent_trial.py` accepts
+`--model`, `--reasoning`, `--service-tier`, and `--ignore-user-config` to hold
+settings constant. Pass a dated `--prices` record to estimate API-equivalent
+cost bounds. `agent_cost.py` keeps incomplete usage unknown and avoids counting
+cached input or reasoning twice. These are API price scenarios, never measured
+ChatGPT subscription charges. Agent trials require explicit authorization;
+preparing the experiment does not mean it has run.
+
 ## Controlled baseline suite
 
 [SUITE_V1.md](SUITE_V1.md) defines the hypotheses, control groups, matched trial

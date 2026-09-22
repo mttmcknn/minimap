@@ -15,9 +15,9 @@ def render(data, output, medians_only=False):
     plt = setup_plotting()
     apis = sorted({group["api"] for group in data["groups"]})
     samples = ["jetsnack", "jetnews", "jetchat"]
-    fig, axes = plt.subplots(len(apis), 3, figsize=(12, 3.7 * len(apis) + 2.4),
+    fig, axes = plt.subplots(len(apis), 3, figsize=(12, 3.7 * len(apis) + 2.8),
                              squeeze=False, sharey=True)
-    fig.subplots_adjust(top=1 - 1.2 / fig.get_figheight(), bottom=1.35 / fig.get_figheight(),
+    fig.subplots_adjust(top=1 - 1.35 / fig.get_figheight(), bottom=1.9 / fig.get_figheight(),
                         left=.07, right=.98, hspace=.55, wspace=.22)
     rows = [row for row in data["trials"] if successful(row)]
     plotted = ([arm["median_successful_seconds"] for group in data["groups"]
@@ -29,8 +29,9 @@ def render(data, output, medians_only=False):
             ax = axes[y, x]
             group = next((g for g in data["groups"] if g["api"] == api and g["sample"] == sample), None)
             ax.set_title(f"{NAMES[sample]} · API {api}", loc="left", fontweight="bold")
-            labels = ("Without\nMinimap", "Previous\nMinimap", "Improved\nMinimap") if medians_only else LABELS
+            labels = ("Without\nMinimap", "Previous\nMinimap", "New\nMinimap") if medians_only else LABELS
             ax.set_xticks(range(3), labels)
+            ax.set_xlim(-.5, 2.5)
             ax.set_ylim(0, highest)
             ax.grid(axis="y", color="#E6EBEE")
             ax.set_axisbelow(True)
@@ -60,11 +61,15 @@ def render(data, output, medians_only=False):
     fig.text(.055, .965 - .43 / fig.get_figheight(),
              f"{data['successes']}/{data['planned_trials']} trials passed · same apps and destinations · {detail}",
              fontsize=12, color="#52616E", va="top")
-    note = ("Bars = typical times (medians). Previous = v0.2.0; improved = performance candidate. All runs: replay-time.png."
+    note = ("Bars = medians of successful runs. Previous = v0.2.0; new = candidate. All runs: replay-time.png."
             if medians_only else "Bars = medians of successful runs. Dots = individual runs.")
     note += "\nSetup and the separate destination checker are excluded."
-    if not data["gates"]["confirmation_eligible"]:
-        note += "\nDevelopment pilot: these results do not establish reliability or a confirmed speedup."
+    if data["stage"] != "confirmation":
+        note += "\nDevelopment run: these results do not establish reliability or a confirmed speedup."
+    elif not data["gates"]["confirmation_eligible"] or not data["gates"]["complete_assignments"]:
+        note += "\nConfirmation is incomplete; these results cannot support a speed claim."
+    elif not data["gates"]["speed_goal_met"]:
+        note += "\nSpeed target NOT met: correctness or timing checks failed."
     if data["profiled"]:
         note += "\nProfiling overhead is included; these times cannot support a speed claim."
     fig.text(.055, .04, note, fontsize=10, color="#52616E", va="bottom", linespacing=1.5)

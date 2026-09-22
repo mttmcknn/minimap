@@ -50,6 +50,23 @@ correct destinations, unchanged graphs, and a lower paired median against both
 controls in every app/API case. Run `controlled_contracts.py` against each
 candidate cohort before publishing.
 
+Use `replay_charts.py --medians-only` for a readable overview alongside the
+full plot. Failed and incomplete cohorts are labeled explicitly in both views.
+To count the exact saved navigation text without launching a model:
+
+```sh
+/tmp/minimap-chart-env/bin/python evals/replay_text.py \
+  /absolute/path/to/confirmation.json \
+  --skill /absolute/path/to/frozen/minimap-app-navigation.md \
+  --output /absolute/path/to/tool-text.json
+```
+
+The optional `--raw-root` points to an unpacked evidence archive when the
+original logs have moved. This audit verifies report hashes and stream sizes,
+counts stdout and stderr once under both reference encodings, and keeps failed
+attempts in the denominator. Setup, grader output, and skill text stay separate
+from navigation totals. These text counts are not model usage or dollar savings.
+
 The separate 18-trial agent experiment measures full reported input and output,
 including cached input and reasoning when available. `agent_trial.py` accepts
 `--model`, `--reasoning`, `--service-tier`, and `--ignore-user-config` to hold

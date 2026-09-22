@@ -175,7 +175,12 @@ fn tap_selector_with_label_creates_destination_and_edge() {
         .assert()
         .success();
     let bin = fake_bin(temp.path());
-    write_android_layout_script(&bin, &["home", "home", "search"]);
+    // whereami, pre-action Home, a delayed old Home frame, then three stable
+    // Search frames. This reproduces an action started mid-transition.
+    write_android_layout_script(
+        &bin,
+        &["home", "home", "home", "search", "search", "search"],
+    );
     write_adb_script(&bin);
 
     minimap(temp.path())
@@ -193,6 +198,8 @@ fn tap_selector_with_label_creates_destination_and_edge() {
             "search",
             "--reason",
             "open search",
+            "--stable-frames",
+            "3",
         ])
         .assert()
         .success()
@@ -203,6 +210,35 @@ fn tap_selector_with_label_creates_destination_and_edge() {
     assert_eq!(payload["status"], "ok");
     assert_eq!(payload["data"]["from"], "home");
     assert_eq!(payload["data"]["to"], "search");
+    assert_action_observation(&payload["data"]["observation"], 3);
+    let observation = &payload["data"]["observation"];
+    assert_eq!(observation["stable_frames_required"], 3);
+    assert_eq!(observation["stable_frames_observed"], 3);
+    assert_eq!(observation["frames_observed"], 4);
+    assert_eq!(observation["identity_changes_observed"], 1);
+    assert_eq!(observation["settled_after_identity_change"], true);
+    assert_ne!(
+        observation["pre_identity_hash"],
+        observation["post_identity_hash"]
+    );
+    assert_eq!(
+        observation["post_identity_hashes"]
+            .as_array()
+            .unwrap()
+            .len(),
+        4
+    );
+    assert_eq!(
+        observation["foreground_before"],
+        json!({
+            "package": "com.example.app",
+            "activity": "com.example.app.MainActivity"
+        })
+    );
+    assert_eq!(
+        observation["foreground_after"],
+        observation["foreground_before"]
+    );
     assert!(temp
         .path()
         .join(".minimap/graph/places/place_search.json")
@@ -888,6 +924,7 @@ fn scroll_between_known_places_records_direction_edge() {
     assert_eq!(payload["status"], "ok");
     assert_eq!(payload["data"]["from"], "home");
     assert_eq!(payload["data"]["to"], "search");
+    assert_action_observation(&payload["data"]["observation"], 2);
 
     let edges = edge_files(temp.path());
     assert_eq!(edges.len(), 1);
@@ -935,6 +972,7 @@ fn back_between_known_places_records_press_back_edge() {
     assert_eq!(payload["status"], "ok");
     assert_eq!(payload["data"]["from"], "search");
     assert_eq!(payload["data"]["to"], "home");
+    assert_action_observation(&payload["data"]["observation"], 2);
 
     let edges = edge_files(temp.path());
     assert_eq!(edges.len(), 1);
@@ -1899,6 +1937,36 @@ fn write_executable(path: &Path, body: &str) {
 
 fn read_json_path(path: &Path) -> Value {
     serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap()
+}
+
+fn assert_action_observation(observation: &Value, stable_frames_required: u64) {
+    assert_eq!(
+        observation["stable_frames_required"],
+        stable_frames_required
+    );
+    assert!(observation["stable_frames_observed"].as_u64().unwrap() >= stable_frames_required);
+    assert!(observation["pre_identity_hash"]
+        .as_str()
+        .unwrap()
+        .starts_with("sha256:"));
+    assert!(observation["post_identity_hash"]
+        .as_str()
+        .unwrap()
+        .starts_with("sha256:"));
+    assert!(
+        observation["post_identity_hashes"]
+            .as_array()
+            .unwrap()
+            .len()
+            >= usize::try_from(stable_frames_required).unwrap()
+    );
+    for endpoint in ["foreground_before", "foreground_after"] {
+        assert_eq!(observation[endpoint]["package"], "com.example.app");
+        assert_eq!(
+            observation[endpoint]["activity"],
+            "com.example.app.MainActivity"
+        );
+    }
 }
 
 fn edge_files(root: &Path) -> Vec<PathBuf> {

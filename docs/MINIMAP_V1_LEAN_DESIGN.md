@@ -98,9 +98,15 @@ other builds. New edges use `minimap.edge.v2` with optional `superseded_by` rout
 IDs; older v1 edges load without automatic file rewrites. Older clients reject
 v2 explicitly. Fallback paths have higher planning cost than ordinary paths.
 
-`tap` observes before the action and requires a stable usable destination
-within three post-action observations. Empty/null-root full captures have
-bounded retries; partial diffs cannot prove a destination. It supports:
+`tap` observes before the action and requires consecutive identical usable
+post-action frames. The global `--stable-frames N` option accepts `1` through
+`5`, defaults to `2`, and uses `1` as the explicit no-wait mode. The capture is
+bounded to `N + 3` observations and does not accept repeated pre-action frames
+early, so a delayed transition is not mistaken for a stable destination.
+Results record foreground package/activity, pre/post identity hashes, the
+post-action hash sequence, and the observed stability count. Empty/null-root
+full captures have bounded retries; partial diffs cannot prove a destination.
+It supports:
 
 - `--selector <kind=value>`
 - `--point <x,y>`

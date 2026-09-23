@@ -1,0 +1,36 @@
+{
+  "revision": "d3ff757b289f7036815978a8f7b16706ee3423b0",
+  "fixtures": {
+    "jetsnack-baseline": {
+      "sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+      "changes": {}
+    },
+    "jetnews-baseline": {
+      "sha256": "b734a9138759fae49c50c26adbaccf8b17111b7fcced0b2073d6480498e75ed9",
+      "changes": {}
+    },
+    "jetchat-baseline": {
+      "sha256": "1934fe9e8461de3fe99ff857864549a9015daea7b11374f8e9d65aa88a341e5c",
+      "changes": {}
+    },
+    "jetsnack-renamed": {
+      "sha256": "050c6d8e79c00b0422a4d0a72eb87b144a4147ad1ce0661eea3d9755d06a5f46",
+      "changes": {
+        "Jetsnack/app/src/main/res/values/strings.xml": "home_search: Search \u2192 Discover; route unchanged"
+      }
+    },
+    "jetsnack-relocated": {
+      "sha256": "369f2be68c45e8cedeef4b819120d1cea125293a1200accf3e612e51669cba7c",
+      "changes": {
+        "Jetsnack/app/src/main/java/com/example/jetsnack/ui/home/Home.kt": "Search tab visible from Profile or Search; layout count/index use visible tabs"
+      }
+    },
+    "jetsnack-broken": {
+      "sha256": "0ffa6e54f573940fb11fcdbe0f06095d99ccab44ec341a2ba5a976a9f27daad4",
+      "changes": {
+        "Jetsnack/app/src/main/java/com/example/jetsnack/ui/home/Home.kt": "Search callback deliberately navigates to Cart"
+      }
+    }
+  },
+  "java_home": "/Applications/Air.app/Contents/jbr/Contents/Home"
+}

@@ -1,0 +1,51 @@
+{
+  "baseline_commit": "5c9298e",
+  "binary_sha256": "a3d37837010638b9151082d99897a569c63dad2840e53fd9f9fd695b79991fac",
+  "helper_sha256": "96349a4e32ee58e4437432b9141a64768360e89dab30432927dd177f41b6aac6",
+  "source_sha256": {
+    "Cargo.lock": "c04b1aa7e63dfa1fa386561a6bcaf77083dff8f6a6ee55e9f84cb7796f92399b",
+    "Cargo.toml": "0c40fa84d2c74ef81fe8c0af8fff45bdd6008f6c51f58c08962db4a7ffc270f7",
+    "README.md": "fec5e19fabe37282ede7f71ae054a09c491353fa75d924fb91cb6d77fa1bb2fc",
+    "crates/minimap-android/Cargo.toml": "a51f37ae159d3e1453f410615c65c2c102b4b6d1c9d2c3a0cf28215370e696c4",
+    "crates/minimap-android/helper/MinimapLayout.java": "ac430b0f2ac816f2f1663c69fb8d540a0e73f80e9e0fbf338e02230a6efcbc2e",
+    "crates/minimap-android/helper/README.md": "41385bc5f920ca2afd51f4e43333311ec193df6e934087ce2b9cb7f127a9d3ab",
+    "crates/minimap-android/helper/build.py": "b4ae0f6e4b675b1a0330803d681f4366123c7a9317f4535d951bdfec8358f9b1",
+    "crates/minimap-android/helper/minimap-layout.jar": "96349a4e32ee58e4437432b9141a64768360e89dab30432927dd177f41b6aac6",
+    "crates/minimap-android/src/fast_layout.rs": "11def6e42693a8d0a0b75b534cfbc73814e04dba3e856e26ed1879d5ce4ccdee",
+    "crates/minimap-android/src/lib.rs": "b4150b0dce4f324917a4e5cd8b7a023df10ab26a6b86d7b2d5f9ed8fad9a5c34",
+    "crates/minimap-android/src/subprocess.rs": "0652e0ebe1e115681ff70ca4ba9a963914a6e7c8132b703a8e590ddada92d098",
+    "crates/minimap-cli/Cargo.toml": "13b2a54a0c578ab623dad8f8d5ebf36de48bb43659028def00f3ff6b1fa489c8",
+    "crates/minimap-cli/src/budget.rs": "876409f07f3ab7604f6a11b6ca286117d35dad577bbf3dee6323db4a9dfd084c",
+    "crates/minimap-cli/src/main.rs": "94f62f5f8dd49746dcbc773f41c77e0ef50f7134724480a7337e3fca87bc6016",
+    "crates/minimap-cli/src/navigation.rs": "48a27cb4940af2b9620f9129b41b9678ea1160da709530fb2dd42f76e99b51f9",
+    "crates/minimap-cli/src/observation.rs": "cc4baa0043ff9fabc028c7f16cfb156dbceb5def5af3c824f5a853922e014ce8",
+    "crates/minimap-cli/tests/cli_contract.rs": "75891e5eaba8987160caeb8b44612b610c4dd9f0416d630a489afc68e2aeebad",
+    "crates/minimap-cli/tests/recovery.rs": "d1b333e7ef3a8191ad8fdf461a8772d4c39974da77b975f263df9de5e3c30837",
+    "crates/minimap-core/Cargo.toml": "2b5888af46545073b3aa35c2105947197224ee10e74dcfffde33d92653bdede6",
+    "crates/minimap-core/src/lib.rs": "4761138b1f3fc43ff820d4b88142106c47f5804b313a9201933e5364c26a69f8",
+    "crates/minimap-core/tests/fixtures/jetsnack-shared-navigation.json": "a86715b77b34d1ad4b0450b6341198db59979e1bb2cc8c264fc9404b0cc4cd1d",
+    "crates/minimap-core/tests/privacy.rs": "fb3878270d0cc29f0ce0d359a08370ace6b9176e8efb064519717a434202c43e",
+    "crates/minimap-graph/Cargo.toml": "684ecc8db27bcc1ccbb63d919801012750ed09b353ad9eae69e54bae7bd60e64",
+    "crates/minimap-graph/src/lib.rs": "5d115b35b4c474577c1d11b72e2d4c91172ddb469917d64e22d322d50ccc7a3e",
+    "crates/minimap-repo/Cargo.toml": "3252bc78598cd864bf3e7026ce0ef49ffbc149721b5568cb5b183084b9bdfbf8",
+    "crates/minimap-repo/skills/minimap-app-navigation.md": "e0bdeec91d46df4be39d42d7706ac49cb7c54609efe11fadbfca0eff41330d04",
+    "crates/minimap-repo/src/lib.rs": "ccddadc655c9ca76e71d49e8c4c7a86d8d99f1552273e976b3c4bbe5d5324d51",
+    "crates/minimap-repo/src/locking.rs": "08810d46499b041dd12b416f5d21b1537c19825111432321e5b210e78b5ad7da",
+    "crates/minimap-schemas/Cargo.toml": "e411c12bcb517547b68a989cd35ef5a40cf6c61967a9e6d04550c5994f916b74",
+    "crates/minimap-schemas/src/lib.rs": "c44416fe765071774fe52770bf88389fe51f281dc1dc9ce6ab63d194ec7df522",
+    "crates/minimap-test-support/Cargo.toml": "d2ef740b10727bdcfcdd740ad3d3c9734a7e262d9238d3c9ae33fa5f091462a5",
+    "crates/minimap-test-support/src/lib.rs": "f9b80b75b72098994e45ab914aa39ef96e6b6e352e25eb291074c3996d4c878b"
+  },
+  "changes": [
+    "selector readiness replaces fixed delay",
+    "skip viewport queries for semantic routes",
+    "fresh UiAutomation captures with bounded root retries",
+    "confirm non-exact/uncertain observations with Android CLI before graph updates"
+  ],
+  "validation": [
+    "157 Rust tests passed",
+    "27 Python eval tests passed",
+    "Clippy with warnings denied",
+    "helper source-to-JAR reproducibility check"
+  ]
+}

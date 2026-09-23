@@ -1,0 +1,291 @@
+{
+  "metadata": {
+    "binary_sha256": "a3d37837010638b9151082d99897a569c63dad2840e53fd9f9fd695b79991fac",
+    "apk_sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+    "serial": "emulator-5556",
+    "repetitions": 1,
+    "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+    "token_usage": null,
+    "goal_checks": true,
+    "startup_checks": [
+      {
+        "phase": "fixture",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 8.937333708978258
+      }
+    ],
+    "relabel": {
+      "passed": true,
+      "place_id_preserved": true,
+      "edge_ids_preserved": true,
+      "edges": 2,
+      "current_exit_labels": true,
+      "teammate_status": "ok",
+      "seconds": 29.714761539944448,
+      "commands": 6,
+      "stdout_bytes": 4550,
+      "stderr_bytes": 0
+    }
+  },
+  "summary": {},
+  "trials": [],
+  "calls": [
+    {
+      "phase": "fixture",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/recovery-fixtures/apks/jetsnack-baseline.apk"
+      ],
+      "seconds": 1.810790834017098,
+      "exit_code": 0,
+      "stdout_bytes": 436,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "fixture",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.587494333041832,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "fixture",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 5.088119083084166,
+      "exit_code": 0,
+      "stdout_bytes": 3669,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "fixture",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.4822558329906315,
+      "exit_code": 0,
+      "stdout_bytes": 3669,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "fixture",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "input",
+        "tap",
+        "146",
+        "2263"
+      ],
+      "seconds": 0.0934736670460552,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "fixture",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.530054458999075,
+      "exit_code": 0,
+      "stdout_bytes": 3669,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "relabel",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-05/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "search",
+        "--expect",
+        "text=Categories"
+      ],
+      "seconds": 4.028043624944985,
+      "exit_code": 0,
+      "stdout_bytes": 804,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "relabel",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-05/minimap",
+        "--serial",
+        "emulator-5556",
+        "whereami",
+        "--label",
+        "catalog"
+      ],
+      "seconds": 3.663022125023417,
+      "exit_code": 0,
+      "stdout_bytes": 1180,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "relabel",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-05/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "home"
+      ],
+      "seconds": 3.895421791006811,
+      "exit_code": 0,
+      "stdout_bytes": 790,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "relabel",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-05/minimap",
+        "--serial",
+        "emulator-5556",
+        "whereami",
+        "--fresh"
+      ],
+      "seconds": 3.6366852909559384,
+      "exit_code": 0,
+      "stdout_bytes": 567,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "relabel",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-05/minimap",
+        "--serial",
+        "emulator-5556",
+        "tap",
+        "--selector",
+        "content_desc=SEARCH",
+        "--label",
+        "catalog"
+      ],
+      "seconds": 10.996681250049733,
+      "exit_code": 0,
+      "stdout_bytes": 419,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "relabel",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-05/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "home"
+      ],
+      "seconds": 3.4949074579635635,
+      "exit_code": 0,
+      "stdout_bytes": 790,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "teammate",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-05/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "catalog",
+        "--expect",
+        "text=Categories",
+        "--expect",
+        "text=Lifestyles"
+      ],
+      "seconds": 2.9913772920845076,
+      "exit_code": 0,
+      "stdout_bytes": 809,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.2123625410022214,
+      "exit_code": 0,
+      "stdout_bytes": 2348,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "fixture",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.4846535000251606,
+      "exit_code": 0,
+      "stdout_bytes": 2348,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "fixture",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "input",
+        "tap",
+        "107",
+        "2263"
+      ],
+      "seconds": 0.07232858298812062,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "fixture",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.622865083045326,
+      "exit_code": 0,
+      "stdout_bytes": 3669,
+      "stderr_bytes": 0,
+      "timed_out": false
+    }
+  ]
+}

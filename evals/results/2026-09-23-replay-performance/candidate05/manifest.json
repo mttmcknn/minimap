@@ -1,0 +1,33 @@
+{
+  "created_at": "2026-09-22T20:04:53.842388+00:00",
+  "source_commit": "420e791",
+  "candidate_sha256": "a3d37837010638b9151082d99897a569c63dad2840e53fd9f9fd695b79991fac",
+  "baseline_sha256": "d43ba8fa8f0a99a57ca2695a64c76dec3152a02bb9030f537e3ad18dd035cd47",
+  "harness_sha256": {
+    "PERFORMANCE_V2.md": "338e1c812ce83f9720b23ffe337cbce241c5b7a6d521cb408fb3566945e13761",
+    "replay_performance.py": "32bf318e3d7162cf9369b1502bc8da0034b781566f7f7e9e7b7dd1ddc633361a",
+    "paired_navigation.py": "c8cecdc43abf393f3264a19874e41e8fe0c26b59cf0252468084a162ce28afe0",
+    "jetsnack_smoke.py": "ff72e2faa0c3cadd630e0e814c8fe09160b6013730a556b9bf93732710231cb8",
+    "controlled_contracts.py": "4691c842beb175d23706a5e7b42653e19feaaf85dbed9b7bc8d6b07e4e9ed0bc",
+    "compose_recovery.py": "59ae688b80c587935ef75699bdaf6dc662db491f0e8e35f5986b4a06f34c682c",
+    "compose_relabel.py": "2f1a95393e3b37be2b65fa25275c3a4987e804bee3009a7195a3458c4af950da",
+    "analyze_replay.py": "5f1a5baa7f30e6b88f63ea36da0065dfc20995b1f78223bd43bdf0e89373fc3a"
+  },
+  "stage": "confirmation",
+  "planned_assignments": 180,
+  "repetitions": 10,
+  "one_device_worker_at_a_time": true,
+  "apis": [
+    {
+      "api": 36,
+      "serial": "emulator-5556",
+      "order_offset": 0
+    },
+    {
+      "api": 37,
+      "serial": "emulator-5554",
+      "order_offset": 1
+    }
+  ],
+  "note": "Metadata-only runner additions record goal checks, arm order, startup bounds, host, and adb version after pilots; measured navigation and preregistered success gates are unchanged. All product sources match frozen candidate 05; root README gained compatibility instructions."
+}

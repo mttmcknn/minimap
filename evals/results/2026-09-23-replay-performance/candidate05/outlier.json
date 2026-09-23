@@ -1,0 +1,11 @@
+{
+  "phase": "jetsnack-8-raw",
+  "api": 36,
+  "trial_seconds": 47.87606754200533,
+  "first_layout_seconds": 43.56905629101675,
+  "first_layout_call_index": 169,
+  "command_exit_code": 0,
+  "stderr_bytes": 0,
+  "retained": true,
+  "interpretation": "Delay was inside the initial Android CLI layout subprocess. It returned a valid layout without reported errors; the underlying cause was not instrumented in this confirmation run. No measured trial was retried or excluded."
+}

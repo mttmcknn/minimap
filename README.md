@@ -12,6 +12,26 @@ teammates and their AI agents can use what has already been learned.
 
 ## Results
 
+**Performance update — September 23:** the first faster test build finished
+**57 of 60 trips successfully**; both the released version and the script
+without Minimap passed 60/60. One tap missed during navigation, and two tests
+failed during setup. **This build has not passed our speed-and-correctness goal.**
+
+The graph shows its typical times for successful trips. “New Minimap” means
+that first test build, before the latest fix. Shorter bars are better, but a
+short bar does not make a failed trip count as a success.
+
+![First performance test: shorter successful trips, but three failed assignments prevent a confirmed speed claim.](evals/results/2026-09-23-performance-progress/replay-summary.png)
+
+We added a check that waits for a button to stop moving before tapping it.
+With slowed drawer animations, the old build failed all three attempts and
+the fix passed all three. The Mac also slept during overnight testing, so a
+fresh full comparison is underway with idle sleep prevented during the run.
+Full AI token usage and money savings are still unmeasured.
+
+See the [current findings, failures, every-run graph, and raw data](evals/results/2026-09-23-performance-progress/README.md).
+The results below describe the **earlier released version**, not this test build.
+
 **Saved routes returned about 83–88% less text for the AI to read.** Navigation
 was a little slower than the script without Minimap; we have not measured a
 saving on an AI bill.

@@ -1,0 +1,18 @@
+{
+  "initial_assignments": 16,
+  "initial_passes": 15,
+  "initial_setup_failures": 1,
+  "follow_up_assignments": 1,
+  "follow_up_passes": 1,
+  "total_assignments": 17,
+  "total_passes": 16,
+  "distinct_functional_cases_verified": 16,
+  "all_functional_cases_verified": true,
+  "note": "One relabel check encountered an empty screen during fixture startup, before navigation. The bounded startup-readiness fix and follow-up are separate evidence; the initial failure remains in the denominator.",
+  "reports": {
+    "controls-05-api36/results.json": "37ae80e7163d8fac67ae303bc1464ed1dc4052e35311f1b63ae245bde9c099e2",
+    "controls-05-api37/results.json": "a9fec823aa13db0d6a4ea8446d7e1be2741e64971cdaa28afd5b312158752d6e",
+    "relabel-05-api36-startup-fixed/results.json": "a35d8d78bc4d089261336f71451b4856e8f7021a59b09424c53a3852b2cca8a7"
+  },
+  "product_and_primary_timing_harness_unchanged": true
+}

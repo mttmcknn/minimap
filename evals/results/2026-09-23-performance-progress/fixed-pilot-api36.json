@@ -1,0 +1,1983 @@
+{
+  "metadata": {
+    "binary_sha256": "d43ba8fa8f0a99a57ca2695a64c76dec3152a02bb9030f537e3ad18dd035cd47",
+    "apk_sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+    "serial": "emulator-5556",
+    "repetitions": 1,
+    "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+    "token_usage": null,
+    "goal_checks": true,
+    "suite": "replay-performance-v2",
+    "stage": "pilot",
+    "profiled": false,
+    "profile_overhead_included": false,
+    "binary_sha256_by_arm": {
+      "baseline": "d43ba8fa8f0a99a57ca2695a64c76dec3152a02bb9030f537e3ad18dd035cd47",
+      "candidate": "9b96ab7c011f46540c86659e8159e939452e84bf14bde02b627a96a415d176e9"
+    },
+    "protocol_sha256": "338e1c812ce83f9720b23ffe337cbce241c5b7a6d521cb408fb3566945e13761",
+    "runner_sha256": "32bf318e3d7162cf9369b1502bc8da0034b781566f7f7e9e7b7dd1ddc633361a",
+    "planned_trials": 9,
+    "settle_override": null,
+    "arms": [
+      "raw",
+      "baseline",
+      "candidate"
+    ],
+    "order_offset": 0,
+    "startup_seconds": 30,
+    "host": {
+      "system": "Darwin",
+      "release": "25.6.0",
+      "architecture": "arm64"
+    },
+    "api_level": "36",
+    "android_version": "1.0.15498356",
+    "adb_version": "Android Debug Bridge version 1.0.41\nVersion 37.0.1-15733141\nInstalled as /opt/homebrew/bin/adb\nRunning on Darwin 25.6.0 (arm64)",
+    "viewport": "Physical size: 1080x2400",
+    "apks": {
+      "jetsnack": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+      "jetnews": "b734a9138759fae49c50c26adbaccf8b17111b7fcced0b2073d6480498e75ed9",
+      "jetchat": "1934fe9e8461de3fe99ff857864549a9015daea7b11374f8e9d65aa88a341e5c"
+    },
+    "startup_checks": [
+      {
+        "phase": "seed-setup-jetsnack",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 10.669120208011009
+      },
+      {
+        "phase": "setup-jetsnack-1-raw",
+        "attempts": 1,
+        "ready": true,
+        "seconds": 3.3236759579740465
+      },
+      {
+        "phase": "setup-jetsnack-1-baseline",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 10.028812124975957
+      },
+      {
+        "phase": "setup-jetsnack-1-candidate",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 9.384540125029162
+      },
+      {
+        "phase": "seed-setup-jetnews",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 7.4329803340369835
+      },
+      {
+        "phase": "setup-jetnews-1-raw",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 7.295004333020188
+      },
+      {
+        "phase": "setup-jetnews-1-baseline",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 7.592650125036016
+      },
+      {
+        "phase": "setup-jetnews-1-candidate",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 9.12209774996154
+      },
+      {
+        "phase": "seed-setup-jetchat",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 7.518873583059758
+      },
+      {
+        "phase": "setup-jetchat-1-raw",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 9.400727749918588
+      },
+      {
+        "phase": "setup-jetchat-1-baseline",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 7.533698625047691
+      },
+      {
+        "phase": "setup-jetchat-1-candidate",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 9.29926154203713
+      }
+    ]
+  },
+  "summary": {
+    "jetsnack": {
+      "raw": {
+        "assigned": 1,
+        "successes": 1,
+        "median_successful_seconds": 6.227428833954036
+      },
+      "baseline": {
+        "assigned": 1,
+        "successes": 1,
+        "median_successful_seconds": 8.973574250005186
+      },
+      "candidate": {
+        "assigned": 1,
+        "successes": 1,
+        "median_successful_seconds": 4.7008034160826355
+      }
+    },
+    "jetnews": {
+      "raw": {
+        "assigned": 1,
+        "successes": 1,
+        "median_successful_seconds": 16.50135783292353
+      },
+      "baseline": {
+        "assigned": 1,
+        "successes": 1,
+        "median_successful_seconds": 12.341054084012285
+      },
+      "candidate": {
+        "assigned": 1,
+        "successes": 1,
+        "median_successful_seconds": 5.647805041982792
+      }
+    },
+    "jetchat": {
+      "raw": {
+        "assigned": 1,
+        "successes": 1,
+        "median_successful_seconds": 10.752209999016486
+      },
+      "baseline": {
+        "assigned": 1,
+        "successes": 1,
+        "median_successful_seconds": 11.98501954099629
+      },
+      "candidate": {
+        "assigned": 1,
+        "successes": 1,
+        "median_successful_seconds": 5.421844457974657
+      }
+    }
+  },
+  "trials": [
+    {
+      "sample": "jetsnack",
+      "api": "36",
+      "repeat": 1,
+      "arm": "raw",
+      "phase": "jetsnack-1-raw",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "seconds": 6.227428833954036,
+      "commands": 3,
+      "stdout_bytes": 6017,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 4.485169708030298,
+        "commands": 3,
+        "stdout_bytes": 4087,
+        "stderr_bytes": 0
+      },
+      "oracle": {
+        "seconds": 3.432233833009377,
+        "commands": 1,
+        "stdout_bytes": 2348,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 14.14861016604118,
+      "graph_before": {},
+      "graph_after": {},
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetsnack",
+      "api": "36",
+      "repeat": 1,
+      "arm": "baseline",
+      "phase": "jetsnack-1-baseline",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 8.973574250005186,
+      "commands": 1,
+      "stdout_bytes": 804,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 11.417780457995832,
+        "commands": 4,
+        "stdout_bytes": 4087,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.318015292054042,
+        "commands": 1,
+        "stdout_bytes": 2348,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 23.974425290944055,
+      "graph_before": {
+        ".minimap/config.json": "a22512c3e96f0439ebae24f9173439267202e546553d8d8bd6bfd2e89d91c91a",
+        ".minimap/graph/edges/edge_home_search_tap_content_desc_SEARCH__e1e4ed1e61cbe99ae4c5e6fca4ad88eda8ffb96e26642f41fa825201d01dda9d.json": "d7b9e900df161dbe17ff4dddf0523c0fca92ff2f078e095c79dd4b1d871e6ee8",
+        ".minimap/graph/places/place_home.json": "755cdbb3f5c29e7db727ca7ec45edee2af1d08ffebd4580da3a2525f6281bb17",
+        ".minimap/graph/places/place_search.json": "a438a1604dc54721a7ed468c5b3b0c8d0af8b688c46a034439b61540bf8b26e7"
+      },
+      "graph_after": {
+        ".minimap/config.json": "a22512c3e96f0439ebae24f9173439267202e546553d8d8bd6bfd2e89d91c91a",
+        ".minimap/graph/edges/edge_home_search_tap_content_desc_SEARCH__e1e4ed1e61cbe99ae4c5e6fca4ad88eda8ffb96e26642f41fa825201d01dda9d.json": "d7b9e900df161dbe17ff4dddf0523c0fca92ff2f078e095c79dd4b1d871e6ee8",
+        ".minimap/graph/places/place_home.json": "755cdbb3f5c29e7db727ca7ec45edee2af1d08ffebd4580da3a2525f6281bb17",
+        ".minimap/graph/places/place_search.json": "a438a1604dc54721a7ed468c5b3b0c8d0af8b688c46a034439b61540bf8b26e7"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetsnack",
+      "api": "36",
+      "repeat": 1,
+      "arm": "candidate",
+      "phase": "jetsnack-1-candidate",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 4.7008034160826355,
+      "commands": 1,
+      "stdout_bytes": 804,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 10.794908165116794,
+        "commands": 4,
+        "stdout_bytes": 4087,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.37118170899339,
+        "commands": 1,
+        "stdout_bytes": 2348,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 19.13177275005728,
+      "graph_before": {
+        ".minimap/config.json": "a22512c3e96f0439ebae24f9173439267202e546553d8d8bd6bfd2e89d91c91a",
+        ".minimap/graph/edges/edge_home_search_tap_content_desc_SEARCH__e1e4ed1e61cbe99ae4c5e6fca4ad88eda8ffb96e26642f41fa825201d01dda9d.json": "d7b9e900df161dbe17ff4dddf0523c0fca92ff2f078e095c79dd4b1d871e6ee8",
+        ".minimap/graph/places/place_home.json": "755cdbb3f5c29e7db727ca7ec45edee2af1d08ffebd4580da3a2525f6281bb17",
+        ".minimap/graph/places/place_search.json": "a438a1604dc54721a7ed468c5b3b0c8d0af8b688c46a034439b61540bf8b26e7"
+      },
+      "graph_after": {
+        ".minimap/config.json": "a22512c3e96f0439ebae24f9173439267202e546553d8d8bd6bfd2e89d91c91a",
+        ".minimap/graph/edges/edge_home_search_tap_content_desc_SEARCH__e1e4ed1e61cbe99ae4c5e6fca4ad88eda8ffb96e26642f41fa825201d01dda9d.json": "d7b9e900df161dbe17ff4dddf0523c0fca92ff2f078e095c79dd4b1d871e6ee8",
+        ".minimap/graph/places/place_home.json": "755cdbb3f5c29e7db727ca7ec45edee2af1d08ffebd4580da3a2525f6281bb17",
+        ".minimap/graph/places/place_search.json": "a438a1604dc54721a7ed468c5b3b0c8d0af8b688c46a034439b61540bf8b26e7"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetnews",
+      "api": "36",
+      "repeat": 1,
+      "arm": "raw",
+      "phase": "jetnews-1-raw",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "seconds": 16.50135783292353,
+      "commands": 5,
+      "stdout_bytes": 4553,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 8.921795708010904,
+        "commands": 4,
+        "stdout_bytes": 2306,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.32030045799911,
+        "commands": 1,
+        "stdout_bytes": 2217,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 29.008115542004816,
+      "graph_before": {},
+      "graph_after": {},
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetnews",
+      "api": "36",
+      "repeat": 1,
+      "arm": "baseline",
+      "phase": "jetnews-1-baseline",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 12.341054084012285,
+      "commands": 1,
+      "stdout_bytes": 858,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 9.15314074989874,
+        "commands": 4,
+        "stdout_bytes": 2306,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.334847667021677,
+        "commands": 1,
+        "stdout_bytes": 2217,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 25.09389820904471,
+      "graph_before": {
+        ".minimap/config.json": "4db57b8892be8ae60f8a17f7aa0a253c1ba628477fa6647fac8eb4e428039325",
+        ".minimap/graph/edges/edge_home_interests_tap_content_desc_Open_navigation_drawer__d4cb9e74448f9127dc5550c29af7d4865543af04e52e6bfb8a9a91f022567b1b.json": "24b9ef24890e18f182aea3b8b83bf6a126209b753b72414553a00e871b5ca50f",
+        ".minimap/graph/places/place_home.json": "9f3b7f60cbf9d44e3d0f69b8455035925b0854892419060d0c87deddbb8bcd25",
+        ".minimap/graph/places/place_interests.json": "e76a0594c1d0070b961337a6a384594979cde9d9ae3b1ee8ef9d58080c18d1b1"
+      },
+      "graph_after": {
+        ".minimap/config.json": "4db57b8892be8ae60f8a17f7aa0a253c1ba628477fa6647fac8eb4e428039325",
+        ".minimap/graph/edges/edge_home_interests_tap_content_desc_Open_navigation_drawer__d4cb9e74448f9127dc5550c29af7d4865543af04e52e6bfb8a9a91f022567b1b.json": "24b9ef24890e18f182aea3b8b83bf6a126209b753b72414553a00e871b5ca50f",
+        ".minimap/graph/places/place_home.json": "9f3b7f60cbf9d44e3d0f69b8455035925b0854892419060d0c87deddbb8bcd25",
+        ".minimap/graph/places/place_interests.json": "e76a0594c1d0070b961337a6a384594979cde9d9ae3b1ee8ef9d58080c18d1b1"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetnews",
+      "api": "36",
+      "repeat": 1,
+      "arm": "candidate",
+      "phase": "jetnews-1-candidate",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 5.647805041982792,
+      "commands": 1,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 10.9485157080926,
+        "commands": 4,
+        "stdout_bytes": 2306,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 6.5611949160229415,
+        "commands": 1,
+        "stdout_bytes": 2217,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 23.422579125035554,
+      "graph_before": {
+        ".minimap/config.json": "4db57b8892be8ae60f8a17f7aa0a253c1ba628477fa6647fac8eb4e428039325",
+        ".minimap/graph/edges/edge_home_interests_tap_content_desc_Open_navigation_drawer__d4cb9e74448f9127dc5550c29af7d4865543af04e52e6bfb8a9a91f022567b1b.json": "24b9ef24890e18f182aea3b8b83bf6a126209b753b72414553a00e871b5ca50f",
+        ".minimap/graph/places/place_home.json": "9f3b7f60cbf9d44e3d0f69b8455035925b0854892419060d0c87deddbb8bcd25",
+        ".minimap/graph/places/place_interests.json": "e76a0594c1d0070b961337a6a384594979cde9d9ae3b1ee8ef9d58080c18d1b1"
+      },
+      "graph_after": {
+        ".minimap/config.json": "4db57b8892be8ae60f8a17f7aa0a253c1ba628477fa6647fac8eb4e428039325",
+        ".minimap/graph/edges/edge_home_interests_tap_content_desc_Open_navigation_drawer__d4cb9e74448f9127dc5550c29af7d4865543af04e52e6bfb8a9a91f022567b1b.json": "24b9ef24890e18f182aea3b8b83bf6a126209b753b72414553a00e871b5ca50f",
+        ".minimap/graph/places/place_home.json": "9f3b7f60cbf9d44e3d0f69b8455035925b0854892419060d0c87deddbb8bcd25",
+        ".minimap/graph/places/place_interests.json": "e76a0594c1d0070b961337a6a384594979cde9d9ae3b1ee8ef9d58080c18d1b1"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetchat",
+      "api": "36",
+      "repeat": 1,
+      "arm": "raw",
+      "phase": "jetchat-1-raw",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "seconds": 10.752209999016486,
+      "commands": 5,
+      "stdout_bytes": 5017,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 10.818553083925508,
+        "commands": 4,
+        "stdout_bytes": 3314,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.390239082975313,
+        "commands": 1,
+        "stdout_bytes": 1159,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 25.222650874988176,
+      "graph_before": {},
+      "graph_after": {},
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetchat",
+      "api": "36",
+      "repeat": 1,
+      "arm": "baseline",
+      "phase": "jetchat-1-baseline",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 11.98501954099629,
+      "commands": 1,
+      "stdout_bytes": 844,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 8.80265441595111,
+        "commands": 4,
+        "stdout_bytes": 3314,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.2801945839310065,
+        "commands": 1,
+        "stdout_bytes": 1159,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 24.332167625078,
+      "graph_before": {
+        ".minimap/config.json": "b7947b81d56a6b4ad30ecd5631d3c3161a69ad9257e70997b8c1945750197bd4",
+        ".minimap/graph/edges/edge_home_profile_tap_content_desc_Open_navigation_drawer__a28159dfda5f90cb4645e2d954a0b9cdef114bbc73482f0e70d1e453d001285f.json": "48247fcce5d07f6b9b7e03edc54d7d26e29b5fd5d7609cf8590a8afa895151e9",
+        ".minimap/graph/places/place_home.json": "0a467b123614908eb7977c6db3608b5c0711a3eaaf7bfb0300d2cc4c3e65fb81",
+        ".minimap/graph/places/place_profile.json": "09e6206f1090a242edbb32a094b346f7c46831c4d0413fe269734e5183f2a067"
+      },
+      "graph_after": {
+        ".minimap/config.json": "b7947b81d56a6b4ad30ecd5631d3c3161a69ad9257e70997b8c1945750197bd4",
+        ".minimap/graph/edges/edge_home_profile_tap_content_desc_Open_navigation_drawer__a28159dfda5f90cb4645e2d954a0b9cdef114bbc73482f0e70d1e453d001285f.json": "48247fcce5d07f6b9b7e03edc54d7d26e29b5fd5d7609cf8590a8afa895151e9",
+        ".minimap/graph/places/place_home.json": "0a467b123614908eb7977c6db3608b5c0711a3eaaf7bfb0300d2cc4c3e65fb81",
+        ".minimap/graph/places/place_profile.json": "09e6206f1090a242edbb32a094b346f7c46831c4d0413fe269734e5183f2a067"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetchat",
+      "api": "36",
+      "repeat": 1,
+      "arm": "candidate",
+      "phase": "jetchat-1-candidate",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 5.421844457974657,
+      "commands": 1,
+      "stdout_bytes": 843,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 10.739349458832294,
+        "commands": 4,
+        "stdout_bytes": 3314,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.4350331249879673,
+        "commands": 1,
+        "stdout_bytes": 1159,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 19.860817834036425,
+      "graph_before": {
+        ".minimap/config.json": "b7947b81d56a6b4ad30ecd5631d3c3161a69ad9257e70997b8c1945750197bd4",
+        ".minimap/graph/edges/edge_home_profile_tap_content_desc_Open_navigation_drawer__a28159dfda5f90cb4645e2d954a0b9cdef114bbc73482f0e70d1e453d001285f.json": "48247fcce5d07f6b9b7e03edc54d7d26e29b5fd5d7609cf8590a8afa895151e9",
+        ".minimap/graph/places/place_home.json": "0a467b123614908eb7977c6db3608b5c0711a3eaaf7bfb0300d2cc4c3e65fb81",
+        ".minimap/graph/places/place_profile.json": "09e6206f1090a242edbb32a094b346f7c46831c4d0413fe269734e5183f2a067"
+      },
+      "graph_after": {
+        ".minimap/config.json": "b7947b81d56a6b4ad30ecd5631d3c3161a69ad9257e70997b8c1945750197bd4",
+        ".minimap/graph/edges/edge_home_profile_tap_content_desc_Open_navigation_drawer__a28159dfda5f90cb4645e2d954a0b9cdef114bbc73482f0e70d1e453d001285f.json": "48247fcce5d07f6b9b7e03edc54d7d26e29b5fd5d7609cf8590a8afa895151e9",
+        ".minimap/graph/places/place_home.json": "0a467b123614908eb7977c6db3608b5c0711a3eaaf7bfb0300d2cc4c3e65fb81",
+        ".minimap/graph/places/place_profile.json": "09e6206f1090a242edbb32a094b346f7c46831c4d0413fe269734e5183f2a067"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    }
+  ],
+  "calls": [
+    {
+      "phase": "environment",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "getprop",
+        "ro.build.version.sdk"
+      ],
+      "seconds": 0.03528895799536258,
+      "exit_code": 0,
+      "stdout_bytes": 3,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "environment",
+      "argv": [
+        "android",
+        "--version"
+      ],
+      "seconds": 0.21924412506632507,
+      "exit_code": 0,
+      "stdout_bytes": 13,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "environment",
+      "argv": [
+        "adb",
+        "version"
+      ],
+      "seconds": 0.01241762493737042,
+      "exit_code": 0,
+      "stdout_bytes": 128,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "environment",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "wm",
+        "size"
+      ],
+      "seconds": 0.05049195804167539,
+      "exit_code": 0,
+      "stdout_bytes": 25,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-setup-jetsnack",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetsnack"
+      ],
+      "seconds": 0.12690916704013944,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-setup-jetsnack",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetsnack-baseline.apk"
+      ],
+      "seconds": 1.5947416659910232,
+      "exit_code": 0,
+      "stdout_bytes": 418,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-setup-jetsnack",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.271925166947767,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-setup-jetsnack",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 7.136013708077371,
+      "exit_code": 0,
+      "stdout_bytes": 3669,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-jetsnack",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "init",
+        "--no-skills",
+        "--package",
+        "com.example.jetsnack"
+      ],
+      "seconds": 0.034441124997101724,
+      "exit_code": 0,
+      "stdout_bytes": 551,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-jetsnack",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "whereami",
+        "--label",
+        "home"
+      ],
+      "seconds": 3.242297791992314,
+      "exit_code": 0,
+      "stdout_bytes": 1074,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-jetsnack",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "tap",
+        "--selector",
+        "content_desc=SEARCH",
+        "--label",
+        "search"
+      ],
+      "seconds": 9.46590108401142,
+      "exit_code": 0,
+      "stdout_bytes": 462,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-jetsnack",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "search",
+        "--expect",
+        "text=Categories",
+        "--expect",
+        "text=Lifestyles",
+        "--expect",
+        "text=SEARCH"
+      ],
+      "seconds": 3.1585513750324026,
+      "exit_code": 0,
+      "stdout_bytes": 551,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-oracle-jetsnack",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 2.91910595796071,
+      "exit_code": 0,
+      "stdout_bytes": 2348,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetsnack-1-raw",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetsnack"
+      ],
+      "seconds": 0.050843083998188376,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetsnack-1-raw",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetsnack-baseline.apk"
+      ],
+      "seconds": 1.1112473329994828,
+      "exit_code": 0,
+      "stdout_bytes": 418,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetsnack-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.3230792910326272,
+      "exit_code": 0,
+      "stdout_bytes": 3669,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetsnack-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.000259374966845,
+      "exit_code": 0,
+      "stdout_bytes": 3669,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetsnack-1-raw",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "input",
+        "tap",
+        "539",
+        "2263"
+      ],
+      "seconds": 0.06129774998407811,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetsnack-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.165871709003113,
+      "exit_code": 0,
+      "stdout_bytes": 2348,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-jetsnack-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.432233833009377,
+      "exit_code": 0,
+      "stdout_bytes": 2348,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetsnack-1-baseline",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetsnack"
+      ],
+      "seconds": 0.07948416704311967,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetsnack-1-baseline",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetsnack-baseline.apk"
+      ],
+      "seconds": 1.5705966670066118,
+      "exit_code": 0,
+      "stdout_bytes": 418,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetsnack-1-baseline",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.2995504579739645,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetsnack-1-baseline",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 6.468149165972136,
+      "exit_code": 0,
+      "stdout_bytes": 3669,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetsnack-1-baseline",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "search",
+        "--expect",
+        "text=Categories",
+        "--expect",
+        "text=Lifestyles",
+        "--expect",
+        "text=SEARCH"
+      ],
+      "seconds": 8.973574250005186,
+      "exit_code": 0,
+      "stdout_bytes": 804,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-jetsnack-1-baseline",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.318015292054042,
+      "exit_code": 0,
+      "stdout_bytes": 2348,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetsnack-1-candidate",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetsnack"
+      ],
+      "seconds": 0.0846091250423342,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetsnack-1-candidate",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetsnack-baseline.apk"
+      ],
+      "seconds": 1.5869547909824178,
+      "exit_code": 0,
+      "stdout_bytes": 418,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetsnack-1-candidate",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.6845124160172418,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetsnack-1-candidate",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 5.438831833074801,
+      "exit_code": 0,
+      "stdout_bytes": 3669,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetsnack-1-candidate",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-06/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "search",
+        "--expect",
+        "text=Categories",
+        "--expect",
+        "text=Lifestyles",
+        "--expect",
+        "text=SEARCH"
+      ],
+      "seconds": 4.7008034160826355,
+      "exit_code": 0,
+      "stdout_bytes": 804,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-jetsnack-1-candidate",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.37118170899339,
+      "exit_code": 0,
+      "stdout_bytes": 2348,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-setup-jetnews",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.06792562501505017,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-setup-jetnews",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.41256774996873,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-setup-jetnews",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.250025084009394,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-setup-jetnews",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.9219578750198707,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-jetnews",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "init",
+        "--no-skills",
+        "--package",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.0294856249820441,
+      "exit_code": 0,
+      "stdout_bytes": 550,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-jetnews",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "whereami",
+        "--label",
+        "home"
+      ],
+      "seconds": 5.694231124944054,
+      "exit_code": 0,
+      "stdout_bytes": 1119,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-jetnews",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "tap",
+        "--selector",
+        "content_desc=Open navigation drawer"
+      ],
+      "seconds": 12.46623795805499,
+      "exit_code": 5,
+      "stdout_bytes": 320,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-jetnews",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "tap",
+        "--selector",
+        "text=Interests",
+        "--label",
+        "interests"
+      ],
+      "seconds": 10.95427875011228,
+      "exit_code": 0,
+      "stdout_bytes": 506,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-jetnews",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 3.6832342500565574,
+      "exit_code": 0,
+      "stdout_bytes": 563,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-oracle-jetnews",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.394290874945,
+      "exit_code": 0,
+      "stdout_bytes": 2217,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetnews-1-raw",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.11027995799668133,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetnews-1-raw",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.7775110839866102,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetnews-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.3492863749852404,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetnews-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.6847182910423726,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetnews-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.300171541981399,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetnews-1-raw",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "input",
+        "tap",
+        "74",
+        "212"
+      ],
+      "seconds": 0.09151520801242441,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetnews-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 6.217596250004135,
+      "exit_code": 0,
+      "stdout_bytes": 443,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetnews-1-raw",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "input",
+        "tap",
+        "266",
+        "537"
+      ],
+      "seconds": 0.9028464579023421,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetnews-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 5.989228375023231,
+      "exit_code": 0,
+      "stdout_bytes": 2217,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-jetnews-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.32030045799911,
+      "exit_code": 0,
+      "stdout_bytes": 2217,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetnews-1-baseline",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.09122666693292558,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetnews-1-baseline",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.7302864999510348,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetnews-1-baseline",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.6299753329949453,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetnews-1-baseline",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.7016522500198334,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetnews-1-baseline",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 12.341054084012285,
+      "exit_code": 0,
+      "stdout_bytes": 858,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-jetnews-1-baseline",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.334847667021677,
+      "exit_code": 0,
+      "stdout_bytes": 2217,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetnews-1-candidate",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.08281254104804248,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetnews-1-candidate",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 2.004610167001374,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetnews-1-candidate",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.319657333078794,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetnews-1-candidate",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 5.541435666964389,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetnews-1-candidate",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-06/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 5.647805041982792,
+      "exit_code": 0,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-jetnews-1-candidate",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 6.5611949160229415,
+      "exit_code": 0,
+      "stdout_bytes": 2217,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-setup-jetchat",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.compose.jetchat"
+      ],
+      "seconds": 0.11727633303962648,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-setup-jetchat",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetchat-baseline.apk"
+      ],
+      "seconds": 1.638702042051591,
+      "exit_code": 0,
+      "stdout_bytes": 437,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-setup-jetchat",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.4398943330161273,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-setup-jetchat",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.8179337920155376,
+      "exit_code": 0,
+      "stdout_bytes": 2877,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-jetchat",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "init",
+        "--no-skills",
+        "--package",
+        "com.example.compose.jetchat"
+      ],
+      "seconds": 0.028243542066775262,
+      "exit_code": 0,
+      "stdout_bytes": 550,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-jetchat",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "whereami",
+        "--label",
+        "home"
+      ],
+      "seconds": 3.6205988329602405,
+      "exit_code": 0,
+      "stdout_bytes": 1389,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-jetchat",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "tap",
+        "--selector",
+        "content_desc=Open navigation drawer"
+      ],
+      "seconds": 10.728953500045463,
+      "exit_code": 5,
+      "stdout_bytes": 320,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-jetchat",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "tap",
+        "--selector",
+        "text=Ali Conors (you)",
+        "--label",
+        "profile"
+      ],
+      "seconds": 10.656239834032021,
+      "exit_code": 0,
+      "stdout_bytes": 498,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-jetchat",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "profile",
+        "--expect",
+        "text=Ali Conors",
+        "--expect",
+        "content_desc=Edit Profile"
+      ],
+      "seconds": 3.606662083999254,
+      "exit_code": 0,
+      "stdout_bytes": 555,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "seed-oracle-jetchat",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.2354674169328064,
+      "exit_code": 0,
+      "stdout_bytes": 1159,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetchat-1-raw",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.compose.jetchat"
+      ],
+      "seconds": 0.09139733295887709,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetchat-1-raw",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetchat-baseline.apk"
+      ],
+      "seconds": 1.584427334018983,
+      "exit_code": 0,
+      "stdout_bytes": 437,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetchat-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.3569093339610845,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetchat-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 5.7858190829865634,
+      "exit_code": 0,
+      "stdout_bytes": 2877,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetchat-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.385929874959402,
+      "exit_code": 0,
+      "stdout_bytes": 2877,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetchat-1-raw",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "input",
+        "tap",
+        "95",
+        "212"
+      ],
+      "seconds": 0.09194458299316466,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetchat-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.743671040982008,
+      "exit_code": 0,
+      "stdout_bytes": 981,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetchat-1-raw",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "input",
+        "tap",
+        "317",
+        "922"
+      ],
+      "seconds": 0.07140995806548744,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetchat-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.4592545420164242,
+      "exit_code": 0,
+      "stdout_bytes": 1159,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-jetchat-1-raw",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.390239082975313,
+      "exit_code": 0,
+      "stdout_bytes": 1159,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetchat-1-baseline",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.compose.jetchat"
+      ],
+      "seconds": 0.07986504095606506,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetchat-1-baseline",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetchat-baseline.apk"
+      ],
+      "seconds": 1.4501876250142232,
+      "exit_code": 0,
+      "stdout_bytes": 437,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetchat-1-baseline",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.3405207919422537,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetchat-1-baseline",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.9320809580385685,
+      "exit_code": 0,
+      "stdout_bytes": 2877,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetchat-1-baseline",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/baseline/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "profile",
+        "--expect",
+        "text=Ali Conors",
+        "--expect",
+        "content_desc=Edit Profile"
+      ],
+      "seconds": 11.98501954099629,
+      "exit_code": 0,
+      "stdout_bytes": 844,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-jetchat-1-baseline",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.2801945839310065,
+      "exit_code": 0,
+      "stdout_bytes": 1159,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetchat-1-candidate",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.compose.jetchat"
+      ],
+      "seconds": 0.10276029189117253,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetchat-1-candidate",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetchat-baseline.apk"
+      ],
+      "seconds": 1.5983329999726266,
+      "exit_code": 0,
+      "stdout_bytes": 437,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetchat-1-candidate",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.7176453749416396,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-jetchat-1-candidate",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 5.320610792026855,
+      "exit_code": 0,
+      "stdout_bytes": 2877,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "jetchat-1-candidate",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-06/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "profile",
+        "--expect",
+        "text=Ali Conors",
+        "--expect",
+        "content_desc=Edit Profile"
+      ],
+      "seconds": 5.421844457974657,
+      "exit_code": 0,
+      "stdout_bytes": 843,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-jetchat-1-candidate",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.4350331249879673,
+      "exit_code": 0,
+      "stdout_bytes": 1159,
+      "stderr_bytes": 0,
+      "timed_out": false
+    }
+  ]
+}

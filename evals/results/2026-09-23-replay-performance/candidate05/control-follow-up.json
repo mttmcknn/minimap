@@ -1,0 +1,12 @@
+{
+  "initial_report": "controls-05-api36/results.json",
+  "initial_error": "Expected one visible HOME control; found 0",
+  "failure_stage": "fixture setup before relabel/navigation",
+  "change": "Apply the existing bounded Home readiness check before resetting Home in the relabel evaluator. Product binary and primary timing harness unchanged.",
+  "follow_up": "relabel-05-api36-startup-fixed/results.json",
+  "harness_sha256": {
+    "compose_relabel.py": "60557dfbc3bf07a96b8dcdf3f32b4cfc6b84ae3784e412110926162888db8fe1",
+    "jetsnack_smoke.py": "ff72e2faa0c3cadd630e0e814c8fe09160b6013730a556b9bf93732710231cb8",
+    "paired_navigation.py": "c8cecdc43abf393f3264a19874e41e8fe0c26b59cf0252468084a162ce28afe0"
+  }
+}

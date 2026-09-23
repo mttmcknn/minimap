@@ -1,0 +1,77 @@
+{
+  "observed_host_sleep": [
+    "2026-09-22 17:14:28 -0400 Sleep               \tEntering Sleep state due to 'Idle Sleep':TCPKeepAlive=active Using AC (Charge:79%) 31 secs   ",
+    "2026-09-22 17:14:59 -0400 DarkWake            \tDarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using AC (Charge:79%) 45 secs   ",
+    "2026-09-22 17:15:44 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:79%) 971 secs  ",
+    "2026-09-22 17:31:55 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using AC (Charge:79%) 45 secs   ",
+    "2026-09-22 17:32:40 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:79%) 930 secs  ",
+    "2026-09-22 17:48:10 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/Maintenance Using AC (Charge:79%) 62 secs   ",
+    "2026-09-22 17:49:12 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:79%) 920 secs  ",
+    "2026-09-22 18:04:32 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/SleepService Using AC (Charge:79%) 46 secs   ",
+    "2026-09-22 18:05:18 -0400 Sleep               \tEntering Sleep state due to 'Sleep Service Back to Sleep':TCPKeepAlive=active Using AC (Charge:79%) 133 secs  ",
+    "2026-09-22 18:07:31 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using AC (Charge:79%) 45 secs   ",
+    "2026-09-22 18:08:16 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:79%) 187 secs  ",
+    "2026-09-22 18:11:23 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using AC (Charge:79%) 46 secs   ",
+    "2026-09-22 18:12:09 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:79%) 158 secs  ",
+    "2026-09-22 18:14:47 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using AC (Charge:79%) 45 secs   ",
+    "2026-09-22 18:15:32 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:79%) 911 secs  ",
+    "2026-09-22 18:30:43 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/SleepService Using AC (Charge:79%) 45 secs   ",
+    "2026-09-22 18:31:28 -0400 Sleep               \tEntering Sleep state due to 'Sleep Service Back to Sleep':TCPKeepAlive=active Using AC (Charge:79%) 574 secs  ",
+    "2026-09-22 18:41:02 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/Maintenance Using AC (Charge:79%) 46 secs   ",
+    "2026-09-22 18:41:48 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:79%) 607 secs  ",
+    "2026-09-22 18:51:55 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using AC (Charge:79%) 60 secs   ",
+    "2026-09-22 18:52:55 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:78%) 903 secs  ",
+    "2026-09-22 19:07:58 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/SleepService Using AC (Charge:78%) 46 secs   ",
+    "2026-09-22 19:08:44 -0400 Sleep               \tEntering Sleep state due to 'Sleep Service Back to Sleep':TCPKeepAlive=active Using AC (Charge:78%) 1032 secs ",
+    "2026-09-22 19:25:56 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/SleepService Using AC (Charge:78%) 45 secs   ",
+    "2026-09-22 19:26:41 -0400 Sleep               \tEntering Sleep state due to 'Sleep Service Back to Sleep':TCPKeepAlive=active Using AC (Charge:78%) 616 secs  ",
+    "2026-09-22 19:36:57 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using AC (Charge:78%) 45 secs   ",
+    "2026-09-22 19:37:42 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:78%) 260 secs  ",
+    "2026-09-22 19:42:02 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/Maintenance Using AC (Charge:78%) 45 secs   ",
+    "2026-09-22 19:42:47 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:78%) 8 secs    ",
+    "2026-09-22 19:42:55 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using AC (Charge:78%) 44 secs   ",
+    "2026-09-22 19:43:39 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:78%) 931 secs  ",
+    "2026-09-22 19:59:10 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/Maintenance Using AC (Charge:78%) 45 secs   ",
+    "2026-09-22 19:59:55 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:78%) 240 secs  ",
+    "2026-09-22 20:03:55 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using AC (Charge:78%) 45 secs   ",
+    "2026-09-22 20:04:40 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:78%) 944 secs  ",
+    "2026-09-22 20:20:24 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/SleepService Using AC (Charge:78%) 45 secs   ",
+    "2026-09-22 20:21:09 -0400 Sleep               \tEntering Sleep state due to 'Sleep Service Back to Sleep':TCPKeepAlive=active Using AC (Charge:78%) 958 secs  ",
+    "2026-09-22 20:37:07 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/Maintenance Using AC (Charge:78%) 46 secs   ",
+    "2026-09-22 20:37:53 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:78%) 309 secs  ",
+    "2026-09-22 20:43:02 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/Maintenance Using AC (Charge:78%) 61 secs   ",
+    "2026-09-22 20:44:03 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:78%) 949 secs  ",
+    "2026-09-22 20:59:52 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/Maintenance Using AC (Charge:78%) 45 secs   ",
+    "2026-09-22 21:00:37 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:78%) 926 secs  ",
+    "2026-09-22 21:16:03 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/SleepService Using AC (Charge:78%) 45 secs   ",
+    "2026-09-22 21:16:48 -0400 Sleep               \tEntering Sleep state due to 'Sleep Service Back to Sleep':TCPKeepAlive=active Using AC (Charge:78%) 917 secs  ",
+    "2026-09-22 21:32:05 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/Maintenance Using AC (Charge:78%) 45 secs   ",
+    "2026-09-22 21:32:50 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:78%) 672 secs  ",
+    "2026-09-22 21:44:02 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/Maintenance Using AC (Charge:78%) 61 secs   ",
+    "2026-09-22 21:45:03 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:78%) 594 secs  ",
+    "2026-09-22 21:54:57 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using AC (Charge:78%) 46 secs   ",
+    "2026-09-22 21:55:43 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:78%) 257 secs  ",
+    "2026-09-22 22:00:00 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/Maintenance Using AC (Charge:78%) 45 secs   ",
+    "2026-09-22 22:00:45 -0400 Sleep               \tEntering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using AC (Charge:78%) 939 secs  ",
+    "2026-09-22 22:16:24 -0400 DarkWake            \tDarkWake from Deep Idle [CDNPB] : due to NUB.SPMI0Sw3IRQ nub-spmi0.0x02 rtc/SleepService Using AC (Charge:78%) 44 secs   "
+  ],
+  "seed_call_output_times": [
+    {
+      "index": 70,
+      "finished_at": "2026-09-23T02:00:24.062603+00:00"
+    },
+    {
+      "index": 71,
+      "finished_at": "2026-09-23T02:00:34.367283+00:00"
+    },
+    {
+      "index": 72,
+      "finished_at": "2026-09-23T02:00:44.371809+00:00"
+    },
+    {
+      "index": 73,
+      "finished_at": "2026-09-23T02:16:25.000849+00:00"
+    }
+  ],
+  "note": "Power log records sleep during the candidate05 confirmation and candidate06 diagnostic/pilots. Candidate06 API37 Jetchat seed go returned recovery_exhausted despite 3.52s of monotonic subprocess time. Keep these trials; use a process-scoped idle-sleep assertion for the next cohort, without changing navigation budgets or permanent power settings."
+}

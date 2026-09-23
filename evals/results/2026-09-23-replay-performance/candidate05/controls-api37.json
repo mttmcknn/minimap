@@ -1,0 +1,325 @@
+{
+  "binary_sha256": "a3d37837010638b9151082d99897a569c63dad2840e53fd9f9fd695b79991fac",
+  "serial": "emulator-5554",
+  "paired_report_sha256": "7c9b3581e5b79db559a6c9199e7e97ce9f062c6dd9e62628ece9e522b7e36980",
+  "apks": {
+    "jetchat-baseline.apk": "1934fe9e8461de3fe99ff857864549a9015daea7b11374f8e9d65aa88a341e5c",
+    "jetnews-baseline.apk": "b734a9138759fae49c50c26adbaccf8b17111b7fcced0b2073d6480498e75ed9",
+    "jetsnack-baseline.apk": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+    "jetsnack-broken.apk": "0ffa6e54f573940fb11fcdbe0f06095d99ccab44ec341a2ba5a976a9f27daad4",
+    "jetsnack-relocated.apk": "369f2be68c45e8cedeef4b819120d1cea125293a1200accf3e612e51669cba7c",
+    "jetsnack-renamed.apk": "050c6d8e79c00b0422a4d0a72eb87b144a4147ad1ce0661eea3d9755d06a5f46"
+  },
+  "runs": [
+    {
+      "name": "recovery",
+      "output": "/private/tmp/minimap-performance-20260922/controls-05-api37/recovery",
+      "completed": true,
+      "metadata": {
+        "binary_sha256": "a3d37837010638b9151082d99897a569c63dad2840e53fd9f9fd695b79991fac",
+        "apk_sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+        "serial": "emulator-5554",
+        "repetitions": 1,
+        "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+        "token_usage": null,
+        "goal_checks": true,
+        "fixture_manifest": {
+          "revision": "d3ff757b289f7036815978a8f7b16706ee3423b0",
+          "fixtures": {
+            "jetsnack-baseline": {
+              "sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+              "changes": {}
+            },
+            "jetnews-baseline": {
+              "sha256": "b734a9138759fae49c50c26adbaccf8b17111b7fcced0b2073d6480498e75ed9",
+              "changes": {}
+            },
+            "jetchat-baseline": {
+              "sha256": "1934fe9e8461de3fe99ff857864549a9015daea7b11374f8e9d65aa88a341e5c",
+              "changes": {}
+            },
+            "jetsnack-renamed": {
+              "sha256": "050c6d8e79c00b0422a4d0a72eb87b144a4147ad1ce0661eea3d9755d06a5f46",
+              "changes": {
+                "Jetsnack/app/src/main/res/values/strings.xml": "home_search: Search \u2192 Discover; route unchanged"
+              }
+            },
+            "jetsnack-relocated": {
+              "sha256": "369f2be68c45e8cedeef4b819120d1cea125293a1200accf3e612e51669cba7c",
+              "changes": {
+                "Jetsnack/app/src/main/java/com/example/jetsnack/ui/home/Home.kt": "Search tab visible from Profile or Search; layout count/index use visible tabs"
+              }
+            },
+            "jetsnack-broken": {
+              "sha256": "0ffa6e54f573940fb11fcdbe0f06095d99ccab44ec341a2ba5a976a9f27daad4",
+              "changes": {
+                "Jetsnack/app/src/main/java/com/example/jetsnack/ui/home/Home.kt": "Search callback deliberately navigates to Cart"
+              }
+            }
+          },
+          "java_home": "/Applications/Air.app/Contents/jbr/Contents/Home"
+        },
+        "apks": {
+          "baseline": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+          "renamed": "050c6d8e79c00b0422a4d0a72eb87b144a4147ad1ce0661eea3d9755d06a5f46",
+          "relocated": "369f2be68c45e8cedeef4b819120d1cea125293a1200accf3e612e51669cba7c",
+          "broken": "0ffa6e54f573940fb11fcdbe0f06095d99ccab44ec341a2ba5a976a9f27daad4"
+        },
+        "startup_checks": [
+          {
+            "phase": "fixture",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 7.92273779201787
+          },
+          {
+            "phase": "fixture",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 8.39100929198321
+          },
+          {
+            "phase": "fixture",
+            "attempts": 1,
+            "ready": true,
+            "seconds": 3.122656207997352
+          },
+          {
+            "phase": "fixture",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 8.512160666985437
+          },
+          {
+            "phase": "fixture",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 8.090800459031016
+          },
+          {
+            "phase": "fixture",
+            "attempts": 1,
+            "ready": true,
+            "seconds": 3.1044843329582363
+          },
+          {
+            "phase": "fixture",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 8.315566458040848
+          },
+          {
+            "phase": "fixture",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 8.230855916044675
+          },
+          {
+            "phase": "fixture",
+            "attempts": 1,
+            "ready": true,
+            "seconds": 3.2472444580635056
+          },
+          {
+            "phase": "fixture",
+            "attempts": 1,
+            "ready": true,
+            "seconds": 3.228004415985197
+          },
+          {
+            "phase": "fixture",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 8.635336417006329
+          }
+        ],
+        "learning": {
+          "seconds": 25.287998500163667,
+          "commands": 4,
+          "stdout_bytes": 2504,
+          "stderr_bytes": 0
+        },
+        "host_budgets": {
+          "renamed_control": {
+            "actions_used": 7,
+            "action_limit": 32,
+            "seconds_limit": 180,
+            "elapsed_seconds": 99.36706370790489
+          },
+          "relocated_route": {
+            "actions_used": 10,
+            "action_limit": 32,
+            "seconds_limit": 180,
+            "elapsed_seconds": 99.57255895901471
+          },
+          "wrong_callback": {
+            "actions_used": 2,
+            "action_limit": 32,
+            "seconds_limit": 180,
+            "elapsed_seconds": 36.29915166692808
+          }
+        },
+        "scenarios": [
+          {
+            "scenario": "renamed_control",
+            "passed": true,
+            "initial_status": "action_failed",
+            "repaired_steps": 1,
+            "teammate_status": "ok",
+            "older_build_status": "ok",
+            "fallback_used": true,
+            "user_interventions": 0,
+            "seconds": 56.9516732088523,
+            "commands": 8,
+            "stdout_bytes": 11211,
+            "stderr_bytes": 0
+          },
+          {
+            "scenario": "relocated_route",
+            "passed": true,
+            "initial_status": "action_failed",
+            "repaired_steps": 2,
+            "teammate_status": "ok",
+            "older_build_status": "ok",
+            "fallback_used": false,
+            "user_interventions": 0,
+            "seconds": 60.34252812387422,
+            "commands": 8,
+            "stdout_bytes": 11613,
+            "stderr_bytes": 0
+          },
+          {
+            "scenario": "wrong_callback",
+            "passed": true,
+            "statuses": [
+              "unknown",
+              "needs_label"
+            ],
+            "graph_unchanged": true,
+            "diagnosis": "Reproduced twice; fixture source maps Search to Cart. Escalate the product bug, preserve the original target.",
+            "seconds": 19.653431958984584,
+            "commands": 2,
+            "stdout_bytes": 2305,
+            "stderr_bytes": 0
+          }
+        ]
+      },
+      "results_sha256": "5a60e1d145f4ee8e3e847025e46314e67c5b3a6b3eaaefa1f060f86f0439494e"
+    },
+    {
+      "name": "negative",
+      "output": "/private/tmp/minimap-performance-20260922/controls-05-api37/negative",
+      "completed": true,
+      "metadata": {
+        "binary_sha256": "a3d37837010638b9151082d99897a569c63dad2840e53fd9f9fd695b79991fac",
+        "apk_sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+        "serial": "emulator-5554",
+        "repetitions": 1,
+        "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+        "token_usage": null,
+        "goal_checks": false,
+        "suite": "controlled-v1.2-negatives",
+        "checks": [
+          {
+            "case": "wrong-person-1",
+            "passed": true,
+            "status": "goal_mismatch",
+            "graph_unchanged": true,
+            "seconds": 4.4934427089756355,
+            "commands": 2,
+            "stdout_bytes": 2275,
+            "stderr_bytes": 0
+          },
+          {
+            "case": "wrong-person-2",
+            "passed": true,
+            "status": "goal_mismatch",
+            "graph_unchanged": true,
+            "seconds": 5.254736500908621,
+            "commands": 2,
+            "stdout_bytes": 2275,
+            "stderr_bytes": 0
+          },
+          {
+            "case": "wrong-person-3",
+            "passed": true,
+            "status": "goal_mismatch",
+            "graph_unchanged": true,
+            "seconds": 4.435065498924814,
+            "commands": 2,
+            "stdout_bytes": 2275,
+            "stderr_bytes": 0
+          },
+          {
+            "case": "external-navigation",
+            "passed": true,
+            "status": "ok",
+            "graph_unchanged": true,
+            "planned_path": [
+              "edge_search_home_tap_content_desc_HOME__13062887aaf09266c046e7f722c707a98c8b38fd103c418228e3f4dd25130444"
+            ],
+            "seconds": 3.3879675830248743,
+            "commands": 1,
+            "stdout_bytes": 790,
+            "stderr_bytes": 0
+          }
+        ],
+        "startup_checks": [
+          {
+            "phase": "fixture",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 7.190478959004395
+          },
+          {
+            "phase": "fixture",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 7.196911917068064
+          },
+          {
+            "phase": "fixture",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 7.289814167073928
+          },
+          {
+            "phase": "fixture",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 8.031110625015572
+          }
+        ]
+      },
+      "results_sha256": "073382fad7c43932dc944250f57512280e5768aed11e43bd5dad94a8da7f5364"
+    },
+    {
+      "name": "relabel",
+      "output": "/private/tmp/minimap-performance-20260922/controls-05-api37/relabel",
+      "completed": true,
+      "metadata": {
+        "binary_sha256": "a3d37837010638b9151082d99897a569c63dad2840e53fd9f9fd695b79991fac",
+        "apk_sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+        "serial": "emulator-5554",
+        "repetitions": 1,
+        "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+        "token_usage": null,
+        "goal_checks": true,
+        "relabel": {
+          "passed": true,
+          "place_id_preserved": true,
+          "edge_ids_preserved": true,
+          "edges": 2,
+          "current_exit_labels": true,
+          "teammate_status": "ok",
+          "seconds": 27.485725458012894,
+          "commands": 6,
+          "stdout_bytes": 4550,
+          "stderr_bytes": 0
+        }
+      },
+      "results_sha256": "6a9bd7a47a664a923bc27e0d306372380d3b19958ec72dc0b9e1b919823dacb0"
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,19 @@
+{
+  "created_at": "2026-09-23T14:56:04.841136+00:00",
+  "reason": "Host idle sleep interrupted the overnight candidate06 pilot. Preserve all results and restart only preflight in new directories before the still-unstarted confirmation.",
+  "change": "Wrap the sequential runner with /usr/bin/caffeinate -i; no persistent power-setting change.",
+  "product_binary_unchanged": true,
+  "primary_harness_unchanged": true,
+  "protocol_unchanged": true,
+  "retained_pilots": [
+    "pilot-06-api36/results.json",
+    "pilot-06-api37/results.json"
+  ],
+  "fresh_pilots": [
+    "pilot-06-awake-api36/results.json",
+    "pilot-06-awake-api37/results.json"
+  ],
+  "confirmation_planned_assignments": 180,
+  "additional_gate": "Inspect host power events over the confirmation interval before claiming a speedup; host-sleep-affected cohorts remain ineligible.",
+  "runner_sha256": "139a8407d0fe9436fdf06d82ebf361b5853dc5978a652df536b25e52ed629bc6"
+}

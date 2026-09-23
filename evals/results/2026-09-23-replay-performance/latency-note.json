@@ -1,0 +1,35 @@
+{
+  "case": "Jetsnack API36 repeat3",
+  "rows": [
+    {
+      "phase": "jetsnack-3-candidate",
+      "arm": "candidate",
+      "seconds": 13.059958374942653,
+      "success": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "graph_unchanged": true
+    },
+    {
+      "phase": "jetsnack-3-raw",
+      "arm": "raw",
+      "seconds": 7.940639208070934,
+      "success": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "graph_unchanged": true
+    },
+    {
+      "phase": "jetsnack-3-baseline",
+      "arm": "baseline",
+      "seconds": 8.735028208931908,
+      "success": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "graph_unchanged": true
+    }
+  ],
+  "call_index": 57,
+  "stdout_sha256": "c593fed9e4a8ab52f0998d97eeb9cfecbb9e6d7118cd384604ff41b9515090d0",
+  "note": "Candidate replay passed all destination and graph checks but took13.05996s, slower than both paired controls. Subprocess-level profiling was intentionally disabled in confirmation; the cause is uninstrumented. Retain in all trial data, ranges, graphs, and paired comparisons."
+}

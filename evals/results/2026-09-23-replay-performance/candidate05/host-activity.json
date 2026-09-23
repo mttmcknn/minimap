@@ -1,0 +1,17 @@
+{
+  "activity": "Offline regression validation of a proposed stable-selector fix while the frozen candidate05 cohort finishes. No additional device worker; candidate05 binary and primary harness remain unchanged. The cohort already has a retained correctness failure and is ineligible for a success claim.",
+  "started_at": "2026-09-22T20:43:22.099519+00:00",
+  "finished_at": "2026-09-22T20:50:18.979036+00:00",
+  "validation": [
+    "159 Rust tests passed after making two replay fixtures advance only on input",
+    "Clippy passed",
+    "Frozen candidate05 failed the moving-selector integration regression; current debug binary passed and was restored after comparison"
+  ],
+  "additional_activity": [
+    {
+      "activity": "Build candidate06 release binary from committed selector-stability fix; original failed candidate05 cohort continues with its frozen binary.",
+      "started_at": "2026-09-22T20:59:01.743877+00:00",
+      "finished_at": "2026-09-22T21:04:20.904979+00:00"
+    }
+  ]
+}

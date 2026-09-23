@@ -1,0 +1,73 @@
+{
+  "cohort": "confirmation-06",
+  "api": 36,
+  "sample": "jetchat",
+  "repeat": 5,
+  "arm": "baseline",
+  "trial": {
+    "sample": "jetchat",
+    "api": "36",
+    "repeat": 5,
+    "arm": "baseline",
+    "phase": "jetchat-5-baseline",
+    "setup_passed": true,
+    "reported_ok": true,
+    "oracle_reached_target": null,
+    "error": null,
+    "status": "ok",
+    "oracle_error": "Command failed: ['android', 'layout', '--device=emulator-5556']; see output 558",
+    "seconds": 14.40382862498518,
+    "commands": 1,
+    "stdout_bytes": 844,
+    "stderr_bytes": 0,
+    "setup": {
+      "seconds": 20.070507457014173,
+      "commands": 6,
+      "stdout_bytes": 3314,
+      "stderr_bytes": 261
+    },
+    "oracle": {
+      "seconds": 60.004245874937624,
+      "commands": 1,
+      "stdout_bytes": 1159,
+      "stderr_bytes": 0
+    },
+    "total_seconds_including_setup_oracle": 95.26507679198403,
+    "graph_before": {
+      ".minimap/config.json": "b7947b81d56a6b4ad30ecd5631d3c3161a69ad9257e70997b8c1945750197bd4",
+      ".minimap/graph/edges/edge_home_profile_tap_content_desc_Open_navigation_drawer__a28159dfda5f90cb4645e2d954a0b9cdef114bbc73482f0e70d1e453d001285f.json": "48247fcce5d07f6b9b7e03edc54d7d26e29b5fd5d7609cf8590a8afa895151e9",
+      ".minimap/graph/places/place_home.json": "0a467b123614908eb7977c6db3608b5c0711a3eaaf7bfb0300d2cc4c3e65fb81",
+      ".minimap/graph/places/place_profile.json": "09e6206f1090a242edbb32a094b346f7c46831c4d0413fe269734e5183f2a067"
+    },
+    "graph_after": {
+      ".minimap/config.json": "b7947b81d56a6b4ad30ecd5631d3c3161a69ad9257e70997b8c1945750197bd4",
+      ".minimap/graph/edges/edge_home_profile_tap_content_desc_Open_navigation_drawer__a28159dfda5f90cb4645e2d954a0b9cdef114bbc73482f0e70d1e453d001285f.json": "48247fcce5d07f6b9b7e03edc54d7d26e29b5fd5d7609cf8590a8afa895151e9",
+      ".minimap/graph/places/place_home.json": "0a467b123614908eb7977c6db3608b5c0711a3eaaf7bfb0300d2cc4c3e65fb81",
+      ".minimap/graph/places/place_profile.json": "09e6206f1090a242edbb32a094b346f7c46831c4d0413fe269734e5183f2a067"
+    },
+    "graph_unchanged": true,
+    "success": false,
+    "false_success": false
+  },
+  "oracle_call_index": 558,
+  "oracle_call": {
+    "phase": "oracle-jetchat-5-baseline",
+    "argv": [
+      "android",
+      "layout",
+      "--device=emulator-5556"
+    ],
+    "seconds": 60.004245874937624,
+    "exit_code": 124,
+    "stdout_bytes": 1159,
+    "stderr_bytes": 0,
+    "timed_out": true
+  },
+  "retained_output_anchor_counts": {
+    "Ali Conors": 1,
+    "Edit Profile": 1
+  },
+  "stdout_sha256": "fa21c2e6df197e617cce8754c4a8c954a97e5ef36e0483f750f025389b5d18fe",
+  "interpretation": "The independent Android CLI checker printed a valid JSON layout containing both unique destination anchors, but did not exit within its 60-second command limit. The original strict grade remains unverified and unsuccessful; retained output is diagnostic evidence only. No retry or post-hoc conversion to success.",
+  "underlying_timeout_cause": "Not instrumented."
+}

@@ -1,0 +1,361 @@
+{
+  "planned": 18,
+  "recorded": 0,
+  "successes": 0,
+  "confirmed_false_successes": 0,
+  "gates": {
+    "registered_matrix_complete": true,
+    "all_correct": false,
+    "complete_usage": false,
+    "lower_median_tokens_every_app": false,
+    "lower_median_time_every_app": false,
+    "lower_median_cost_even_at_bounds_every_app": false
+  },
+  "groups": [
+    {
+      "sample": "jetchat",
+      "arms": {
+        "raw": {
+          "planned": 3,
+          "recorded": 0,
+          "successes": 0,
+          "complete_usage": 0,
+          "median_successful_seconds": null,
+          "median_successful_total_tokens": null
+        },
+        "reused_graph": {
+          "planned": 3,
+          "recorded": 0,
+          "successes": 0,
+          "complete_usage": 0,
+          "median_successful_seconds": null,
+          "median_successful_total_tokens": null
+        }
+      },
+      "pairs": [],
+      "median_seconds_saved": null,
+      "median_tokens_saved": null,
+      "median_api_equivalent_usd_saved_min": null,
+      "median_api_equivalent_usd_saved_max": null
+    },
+    {
+      "sample": "jetnews",
+      "arms": {
+        "raw": {
+          "planned": 3,
+          "recorded": 0,
+          "successes": 0,
+          "complete_usage": 0,
+          "median_successful_seconds": null,
+          "median_successful_total_tokens": null
+        },
+        "reused_graph": {
+          "planned": 3,
+          "recorded": 0,
+          "successes": 0,
+          "complete_usage": 0,
+          "median_successful_seconds": null,
+          "median_successful_total_tokens": null
+        }
+      },
+      "pairs": [],
+      "median_seconds_saved": null,
+      "median_tokens_saved": null,
+      "median_api_equivalent_usd_saved_min": null,
+      "median_api_equivalent_usd_saved_max": null
+    },
+    {
+      "sample": "jetsnack",
+      "arms": {
+        "raw": {
+          "planned": 3,
+          "recorded": 0,
+          "successes": 0,
+          "complete_usage": 0,
+          "median_successful_seconds": null,
+          "median_successful_total_tokens": null
+        },
+        "reused_graph": {
+          "planned": 3,
+          "recorded": 0,
+          "successes": 0,
+          "complete_usage": 0,
+          "median_successful_seconds": null,
+          "median_successful_total_tokens": null
+        }
+      },
+      "pairs": [],
+      "median_seconds_saved": null,
+      "median_tokens_saved": null,
+      "median_api_equivalent_usd_saved_min": null,
+      "median_api_equivalent_usd_saved_max": null
+    }
+  ],
+  "trials": [
+    {
+      "id": "jetsnack-1-raw",
+      "sample": "jetsnack",
+      "repeat": 1,
+      "arm": "raw",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetsnack-1-reused_graph",
+      "sample": "jetsnack",
+      "repeat": 1,
+      "arm": "reused_graph",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetnews-1-raw",
+      "sample": "jetnews",
+      "repeat": 1,
+      "arm": "raw",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetnews-1-reused_graph",
+      "sample": "jetnews",
+      "repeat": 1,
+      "arm": "reused_graph",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetchat-1-raw",
+      "sample": "jetchat",
+      "repeat": 1,
+      "arm": "raw",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetchat-1-reused_graph",
+      "sample": "jetchat",
+      "repeat": 1,
+      "arm": "reused_graph",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetsnack-2-reused_graph",
+      "sample": "jetsnack",
+      "repeat": 2,
+      "arm": "reused_graph",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetsnack-2-raw",
+      "sample": "jetsnack",
+      "repeat": 2,
+      "arm": "raw",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetnews-2-reused_graph",
+      "sample": "jetnews",
+      "repeat": 2,
+      "arm": "reused_graph",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetnews-2-raw",
+      "sample": "jetnews",
+      "repeat": 2,
+      "arm": "raw",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetchat-2-reused_graph",
+      "sample": "jetchat",
+      "repeat": 2,
+      "arm": "reused_graph",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetchat-2-raw",
+      "sample": "jetchat",
+      "repeat": 2,
+      "arm": "raw",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetsnack-3-raw",
+      "sample": "jetsnack",
+      "repeat": 3,
+      "arm": "raw",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetsnack-3-reused_graph",
+      "sample": "jetsnack",
+      "repeat": 3,
+      "arm": "reused_graph",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetnews-3-raw",
+      "sample": "jetnews",
+      "repeat": 3,
+      "arm": "raw",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetnews-3-reused_graph",
+      "sample": "jetnews",
+      "repeat": 3,
+      "arm": "reused_graph",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetchat-3-raw",
+      "sample": "jetchat",
+      "repeat": 3,
+      "arm": "raw",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    },
+    {
+      "id": "jetchat-3-reused_graph",
+      "sample": "jetchat",
+      "repeat": 3,
+      "arm": "reused_graph",
+      "recorded": false,
+      "success": false,
+      "false_success": false,
+      "usage": null,
+      "api_equivalent_cost": null,
+      "elapsed_seconds": null,
+      "evidence_errors": []
+    }
+  ],
+  "price_record": {
+    "as_of": "2026-09-22",
+    "source": "https://developers.openai.com/api/docs/pricing",
+    "cache_accounting_source": "https://developers.openai.com/api/docs/guides/prompt-caching",
+    "model": "gpt-6-astra",
+    "service_tier": "default",
+    "assumptions": "API-equivalent Standard processing, no regional uplift, no tool fees; not subscription billing. Context tiers are scenarios unless per-request evidence is supplied.",
+    "usd_per_million_tokens": {
+      "short": {
+        "input": 10,
+        "cached_input": 1,
+        "cache_write": 12.5,
+        "output": 50
+      },
+      "long": {
+        "input": 20,
+        "cached_input": 2,
+        "cache_write": 25,
+        "output": 75
+      }
+    }
+  },
+  "price_record_sha256": "ce39e14a19e69f7d94c9d670e68df3f945a7424550516cc040441ccfaec22b73",
+  "subscription_charge": null,
+  "codex_version": null,
+  "limits": [
+    "API-equivalent bounds are conditional price scenarios, not subscription charges.",
+    "Medians use successful trials with complete evidence; missing and failed assignments remain in all gates.",
+    "Cached input and reasoning are subsets of input and output, never extra tokens."
+  ],
+  "plan_sha256": "710826cc5390b9b19eb4205e11a88208c65213e157957c4ed7357841b23d6c49"
+}

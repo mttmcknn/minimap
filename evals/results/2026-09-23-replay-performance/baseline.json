@@ -1,0 +1,10 @@
+{
+  "baseline_commit": "5c9298e",
+  "baseline_binary_sha256": "d43ba8fa8f0a99a57ca2695a64c76dec3152a02bb9030f537e3ad18dd035cd47",
+  "apks": {
+    "jetsnack": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+    "jetnews": "b734a9138759fae49c50c26adbaccf8b17111b7fcced0b2073d6480498e75ed9",
+    "jetchat": "1934fe9e8461de3fe99ff857864549a9015daea7b11374f8e9d65aa88a341e5c"
+  },
+  "apk_source": "pulled from both test emulators; byte-identical to the recorded September 16 baseline APKs"
+}

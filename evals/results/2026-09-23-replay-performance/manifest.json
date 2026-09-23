@@ -1,0 +1,41 @@
+{
+  "created_at": "2026-09-22T21:07:25.429026+00:00",
+  "source_commit": "ce3ed5325c0e76d6bb846cf6ac38702baa9f4d3f",
+  "candidate_sha256": "9b96ab7c011f46540c86659e8159e939452e84bf14bde02b627a96a415d176e9",
+  "baseline_sha256": "d43ba8fa8f0a99a57ca2695a64c76dec3152a02bb9030f537e3ad18dd035cd47",
+  "harness_sha256": {
+    "PERFORMANCE_V2.md": "338e1c812ce83f9720b23ffe337cbce241c5b7a6d521cb408fb3566945e13761",
+    "replay_performance.py": "32bf318e3d7162cf9369b1502bc8da0034b781566f7f7e9e7b7dd1ddc633361a",
+    "paired_navigation.py": "c8cecdc43abf393f3264a19874e41e8fe0c26b59cf0252468084a162ce28afe0",
+    "jetsnack_smoke.py": "ff72e2faa0c3cadd630e0e814c8fe09160b6013730a556b9bf93732710231cb8",
+    "controlled_contracts.py": "4691c842beb175d23706a5e7b42653e19feaaf85dbed9b7bc8d6b07e4e9ed0bc",
+    "compose_recovery.py": "59ae688b80c587935ef75699bdaf6dc662db491f0e8e35f5986b4a06f34c682c",
+    "compose_relabel.py": "60557dfbc3bf07a96b8dcdf3f32b4cfc6b84ae3784e412110926162888db8fe1",
+    "analyze_replay.py": "5f1a5baa7f30e6b88f63ea36da0065dfc20995b1f78223bd43bdf0e89373fc3a"
+  },
+  "diagnostic_sha256": "f404a786b1c4c7b516c58cf0c7391a2b06f8a82f7904f40ff7d5b30df450b447",
+  "orchestrator_sha256": "fe3123c3cb8de32281c956df5a47dc851014262c48bc8289a5cadc824dd21a76",
+  "stage": "confirmation",
+  "planned_assignments": 180,
+  "repetitions": 10,
+  "one_device_worker_at_a_time": true,
+  "apis": [
+    {
+      "api": 36,
+      "serial": "emulator-5556",
+      "order_offset": 0
+    },
+    {
+      "api": 37,
+      "serial": "emulator-5554",
+      "order_offset": 1
+    }
+  ],
+  "prerequisites": {
+    "diagnostic": 12,
+    "pilot": 18,
+    "controls": 16,
+    "candidate06_failures_allowed": 0
+  },
+  "note": "Separate cohort for stable selector positions. Retain the failed candidate05 cohort unchanged. No profile wrappers in confirmation. All pilot/control/diagnostic failures are retained; confirmation is not started unless the new candidate passes them."
+}

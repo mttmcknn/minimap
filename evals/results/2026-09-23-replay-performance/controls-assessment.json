@@ -1,0 +1,42 @@
+{
+  "created_at": "2026-09-23T15:25:37.892130+00:00",
+  "planned": 16,
+  "recorded": 16,
+  "passed": 16,
+  "by_api": [
+    {
+      "api": 36,
+      "cases": [
+        "renamed_control",
+        "relocated_route",
+        "wrong_callback",
+        "wrong-person-1",
+        "wrong-person-2",
+        "wrong-person-3",
+        "external-navigation",
+        "relabel"
+      ],
+      "passed": 8,
+      "report": "controls-06-api36/results.json",
+      "sha256": "b82fd235da4cea25eb6761f2d654fb5deb034a03caf1903ed68ba77448cfbaf1"
+    },
+    {
+      "api": 37,
+      "cases": [
+        "renamed_control",
+        "relocated_route",
+        "wrong_callback",
+        "wrong-person-1",
+        "wrong-person-2",
+        "wrong-person-3",
+        "external-navigation",
+        "relabel"
+      ],
+      "passed": 8,
+      "report": "controls-06-api37/results.json",
+      "sha256": "7dc4333e0496bf05827b8da75d43b19cfe66c262cf3a3125d4f143a029cfd3d0"
+    }
+  ],
+  "binary_sha256": "9b96ab7c011f46540c86659e8159e939452e84bf14bde02b627a96a415d176e9",
+  "scope": "Scripted recovery and rejection controls; does not establish independent-agent recovery performance."
+}

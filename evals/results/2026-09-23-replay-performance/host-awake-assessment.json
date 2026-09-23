@@ -1,0 +1,24 @@
+{
+  "started_at": "2026-09-23T15:24:52.981503+00:00",
+  "finished_at": "2026-09-23T16:36:39.895042+00:00",
+  "power_events": [],
+  "clock_checks": [
+    {
+      "stage": "confirmation-awake-api36",
+      "elapsed_wall_seconds": 2347.332005,
+      "active_host_seconds": 2347.3366481669946,
+      "clock_difference_seconds": -0.004643166994355852,
+      "within_two_seconds": true
+    },
+    {
+      "stage": "confirmation-awake-api37",
+      "elapsed_wall_seconds": 1959.580778,
+      "active_host_seconds": 1959.5866025409196,
+      "clock_difference_seconds": -0.0058245409195478715,
+      "within_two_seconds": true
+    }
+  ],
+  "no_host_sleep_observed": true,
+  "host_continuity_gate_passed": true,
+  "scope": "Whole confirmation interval, including the transition between the two sequential emulator workers; does not alter or exclude any trial."
+}

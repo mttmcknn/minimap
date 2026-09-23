@@ -22,6 +22,7 @@ pub trait CommandRunner {
     fn run(&mut self, args: &[String], env: &[(String, String)]) -> Result<CommandResult>;
 }
 
+mod fast_layout;
 mod subprocess;
 pub use subprocess::SubprocessRunner;
 
@@ -67,6 +68,7 @@ pub struct AndroidCli<R> {
     android_bin: String,
     serial: Option<String>,
     layout_calls: u32,
+    fast_layout: Option<fast_layout::FastLayout>,
 }
 
 impl<R: CommandRunner> AndroidCli<R> {
@@ -76,6 +78,7 @@ impl<R: CommandRunner> AndroidCli<R> {
             android_bin: "android".to_string(),
             serial,
             layout_calls: 0,
+            fast_layout: None,
         }
     }
 
@@ -97,6 +100,23 @@ impl<R: CommandRunner> AndroidCli<R> {
         self.layout_calls
     }
 
+    /// Enable short-lived captures for replay on an explicitly selected device.
+    /// Other commands keep their existing observation behavior.
+    pub fn prefer_fast_layout(&mut self) {
+        if self.serial.is_some() {
+            self.fast_layout = Some(fast_layout::FastLayout::default());
+        }
+    }
+
+    /// Confirm a slow or unexpected frame with the original observation path.
+    pub fn use_android_cli_layout(&mut self) {
+        self.fast_layout = None;
+    }
+
+    pub fn uses_fast_layout(&self) -> bool {
+        self.fast_layout.is_some()
+    }
+
     pub fn pause(&self, duration: std::time::Duration) -> Result<()> {
         let duration = self.runner.deadline().map_or(duration, |deadline| {
             duration.min(deadline.saturating_duration_since(Instant::now()))
@@ -114,6 +134,24 @@ impl<R: CommandRunner> AndroidCli<R> {
 
     pub fn layout(&mut self, diff: bool) -> Result<CommandResult> {
         self.layout_calls += 1;
+        if !diff {
+            if let Some(fast) = self.fast_layout.as_mut() {
+                match fast.capture(&mut self.runner, self.serial.as_ref().unwrap()) {
+                    Ok(output) => return Ok(output),
+                    Err(error) => {
+                        self.fast_layout = None;
+                        if self
+                            .runner
+                            .deadline()
+                            .is_some_and(|deadline| Instant::now() >= deadline)
+                        {
+                            return Err(error);
+                        }
+                        // This is a fresh fallback capture, never a cached tree.
+                    }
+                }
+            }
+        }
         let mut args = vec![self.android_bin.clone(), "layout".to_string()];
         if diff {
             args.push("--diff".to_string());
@@ -785,6 +823,97 @@ mod tests {
         let result = layout_result(&mut android, true).unwrap();
         assert_eq!(result["kind"], "android_layout_diff");
         assert_eq!(result["diff_scope"], "android_in_session");
+    }
+
+    #[test]
+    fn fast_layout_pushes_once_and_observes_fresh_on_the_selected_device() {
+        let mut runner = FakeRunner::new(vec![
+            ok(&[], ""),
+            ok(&[], r#"[{"text":"Home"}]"#),
+            ok(&[], r#"[{"text":"Next"}]"#),
+        ]);
+        {
+            let mut android = AndroidCli::new(&mut runner, Some("fixture-device".into()));
+            android.prefer_fast_layout();
+            assert!(android.layout(false).unwrap().stdout.contains("Home"));
+            assert!(android.layout(false).unwrap().stdout.contains("Next"));
+            assert_eq!(android.layout_calls(), 2);
+        }
+        assert_eq!(runner.calls.len(), 3);
+        assert!(runner
+            .calls
+            .iter()
+            .all(|args| args[..3] == ["adb", "-s", "fixture-device"]));
+        assert_eq!(runner.calls[0][3], "push");
+        assert_eq!(runner.calls[1], runner.calls[2]);
+        assert_eq!(runner.calls[1].last().unwrap(), "dev.minimap.MinimapLayout");
+    }
+
+    #[test]
+    fn failed_or_malformed_fast_layout_falls_back_once_without_reusing_a_frame() {
+        for bad in ["not JSON", "[]", "{\"error\":\"unavailable\"}"] {
+            let mut runner = FakeRunner::new(vec![
+                ok(&[], ""),
+                ok(&[], bad),
+                ok(&[], r#"[{"text":"Home"}]"#),
+                ok(&[], r#"[{"text":"Next"}]"#),
+            ]);
+            {
+                let mut android = AndroidCli::new(&mut runner, Some("fixture-device".into()));
+                android.prefer_fast_layout();
+                assert!(android.layout(false).unwrap().stdout.contains("Home"));
+                assert!(!android.uses_fast_layout());
+                assert!(android.layout(false).unwrap().stdout.contains("Next"));
+            }
+            assert_eq!(
+                runner.calls[2],
+                ["android", "layout", "--device=fixture-device"]
+            );
+            assert_eq!(runner.calls[2], runner.calls[3]);
+        }
+    }
+
+    #[test]
+    fn fast_layout_never_uses_an_implicit_device_and_diff_stays_with_android_cli() {
+        let mut runner = FakeRunner::new(vec![ok(&[], "[]"), ok(&[], "[]")]);
+        {
+            let mut android = AndroidCli::new(&mut runner, None);
+            android.prefer_fast_layout();
+            assert!(!android.uses_fast_layout());
+            android.layout(false).unwrap();
+        }
+        {
+            let mut android = AndroidCli::new(&mut runner, Some("fixture-device".into()));
+            android.prefer_fast_layout();
+            android.layout(true).unwrap();
+        }
+        assert_eq!(runner.calls[0], ["android", "layout"]);
+        assert_eq!(
+            runner.calls[1],
+            ["android", "layout", "--diff", "--device=fixture-device"]
+        );
+    }
+
+    #[test]
+    fn fast_layout_cannot_start_a_fallback_after_the_deadline_expires() {
+        struct Expires(Option<Instant>);
+        impl CommandRunner for Expires {
+            fn deadline(&self) -> Option<Instant> {
+                self.0
+            }
+            fn run(&mut self, _: &[String], _: &[(String, String)]) -> Result<CommandResult> {
+                assert!(self.0.is_none(), "unexpected fallback after deadline");
+                self.0 = Some(Instant::now());
+                Err(DriverError("Navigation deadline exhausted".into()).into())
+            }
+        }
+        let mut android = AndroidCli::new(Expires(None), Some("fixture-device".into()));
+        android.prefer_fast_layout();
+        assert!(android
+            .layout(false)
+            .unwrap_err()
+            .to_string()
+            .contains("deadline"));
     }
 
     #[test]

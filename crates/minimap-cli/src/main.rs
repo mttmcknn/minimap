@@ -111,6 +111,9 @@ enum Commands {
         max_actions: u32,
         #[arg(long, default_value_t = 60, value_parser = clap::value_parser!(u64).range(1..=300))]
         recovery_seconds: u64,
+        /// Use Android CLI observations throughout (compatibility/diagnostics).
+        #[arg(long)]
+        android_cli_layout: bool,
     },
     /// Tap by selector, coordinate, or screenshot label; --label names the destination.
     Tap {
@@ -410,8 +413,12 @@ fn run(mut cli: Cli) -> Result<i32> {
                 supersede,
                 max_actions,
                 recovery_seconds,
+                android_cli_layout,
             } => {
                 let mut android = AndroidCli::new(runner(), serial.clone());
+                if !android_cli_layout {
+                    android.prefer_fast_layout();
+                }
                 let mut adb = configured_adb(&root, serial, deadline, budget.clone())?;
                 if let Some(budget) = &budget {
                     expectations.extend(budget.borrow().expectations_for(&target));
@@ -1629,13 +1636,19 @@ fn execute_recipe<AR: CommandRunner, DR: CommandRunner>(
     deadline: std::time::Instant,
 ) -> Result<()> {
     let mut cached_layout = initial_layout.cloned();
-    let current_display_size = adb.display_size().ok();
+    let current_display_size = if recipe.iter().any(ActionStep::is_geometry) {
+        adb.display_size().ok()
+    } else {
+        None
+    };
     for (index, step) in recipe.iter().enumerate() {
         anyhow::ensure!(
             std::time::Instant::now() < deadline,
             "navigation deadline exhausted"
         );
-        if index > 0 {
+        // Selector steps wait for fresh, actionable UI below. Coordinate and
+        // gesture steps have no such condition, so retain their settling delay.
+        if index > 0 && step.selector.is_none() {
             thread::sleep(
                 Duration::from_millis(action_settle_ms())
                     .min(deadline.saturating_duration_since(std::time::Instant::now())),
@@ -1644,14 +1657,10 @@ fn execute_recipe<AR: CommandRunner, DR: CommandRunner>(
         match step.kind.as_str() {
             "tap" => {
                 if let Some(selector) = &step.selector {
-                    let layout = match cached_layout.take() {
-                        Some(layout) => layout,
-                        None => observe_layout(android, false)?,
-                    };
-                    let point = resolve_selector_point(
-                        &layout,
-                        &format!("{}={}", selector.kind, selector.value),
-                    )?;
+                    let selector = format!("{}={}", selector.kind, selector.value);
+                    let layout =
+                        observation::observe_selector(android, &selector, cached_layout.take())?;
+                    let point = resolve_selector_point(&layout, &selector)?;
                     adb.tap(point)?;
                 } else if let Some(point) = step.point {
                     if step.is_geometry()

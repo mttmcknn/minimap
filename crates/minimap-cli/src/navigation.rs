@@ -125,9 +125,18 @@ fn navigate<AR: CommandRunner, DR: CommandRunner>(
     // Always observe, including a zero-edge plan; TTL cannot prove ownership.
     let mut layout = observe_layout(android, false)?;
     adb.ensure_foreground()?;
+    let mut graph = load_graph(root)?;
+    if detect_overlay(&layout).is_none()
+        && android.uses_fast_layout()
+        && !exactly_known(&graph, &layout)
+    {
+        android.use_android_cli_layout();
+        layout = observe_layout(android, false)?;
+        adb.ensure_foreground()?;
+    }
     let orientation = orient_layout(root, &layout, None, false, false, adb)?;
     let mut current = orientation.matched_place;
-    let mut graph = load_graph(root)?;
+    graph = load_graph(root)?;
     recovery.reoriented = cached.is_some_and(|cached| {
         current
             .as_ref()
@@ -154,7 +163,17 @@ fn navigate<AR: CommandRunner, DR: CommandRunner>(
         );
         recovery.excluded.insert(id.to_string());
     }
-    let viewport = adb.display_size().ok();
+    // Semantic selectors do not depend on screen size. Only coordinate paths
+    // need a viewport to decide whether their recorded geometry is compatible.
+    let viewport = if graph
+        .edges
+        .values()
+        .any(|edge| edge.recipe.iter().any(|step| step.is_geometry()))
+    {
+        adb.display_size().ok()
+    } else {
+        None
+    };
     loop {
         if let Some(reason) = detect_overlay(&layout) {
             return Ok(recovery.result("blocked_by_overlay", &reason, &layout, None));
@@ -253,10 +272,12 @@ fn navigate<AR: CommandRunner, DR: CommandRunner>(
         }
         recovery.actions += needed;
         let execution = execute_recipe(android, adb, &edge.recipe, Some(&layout), deadline);
+        let fast_observation = android.uses_fast_layout();
         layout = match super::observation::observe_destination(
             android,
             |layout| {
-                observed_place(&graph, layout).is_some_and(|place| place.id == edge.to.id)
+                (!fast_observation || exactly_known(&graph, layout))
+                    && observed_place(&graph, layout).is_some_and(|place| place.id == edge.to.id)
                     && (edge.to.slug != normalize_label(target)
                         || minimap_android::verify_expectations(
                             layout,
@@ -305,6 +326,10 @@ fn navigate<AR: CommandRunner, DR: CommandRunner>(
             }));
         }
     }
+}
+
+fn exactly_known(graph: &Graph, layout: &Value) -> bool {
+    match_place(&fingerprint_layout(layout), graph.places.values().cloned()).hash_matched
 }
 
 fn observed_place(graph: &Graph, layout: &Value) -> Option<Place> {

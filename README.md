@@ -116,6 +116,11 @@ Reuse the graph:
 minimap go search --expect "text=Categories"
 ```
 
+Saved-route replay uses fresh UI observations and waits for stable tap positions
+before acting. If its faster observer cannot recognize a screen, it
+automatically checks again using Android CLI. Use `go --android-cli-layout`
+to select Android CLI throughout when diagnosing device compatibility.
+
 Use raw layout only when the agent needs details Minimap does not model:
 
 ```bash

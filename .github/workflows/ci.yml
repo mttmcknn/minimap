@@ -6,6 +6,21 @@ on:
     branches: [main]
 
 jobs:
+  layout-helper:
+    name: Reproducible layout helper
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+      - run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Verify bundled helper matches source
+        run: python3 crates/minimap-android/helper/build.py --check
   rust:
     name: Rust
     runs-on: ${{ matrix.os }}

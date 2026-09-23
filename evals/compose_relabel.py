@@ -5,12 +5,14 @@ import json
 from pathlib import Path
 
 from jetsnack_smoke import Eval
+from paired_navigation import PairedEval
 
 
 class RelabelEval(Eval):
     def execute(self):
         self.metadata["goal_checks"] = True
         self.run("fixture", ["android", "run", f"--device={self.args.serial}", f"--apks={self.args.apk}"])
+        PairedEval.wait_for_start(self, {"home": ["content_desc=HOME"]}, "fixture")
         self.reset_home()
         repo = self.copy_graph(self.args.seed, "relabeled")
         edges = repo / ".minimap/graph/edges"
@@ -40,7 +42,10 @@ def main():
     for name in ["binary", "apk", "seed", "output"]:
         parser.add_argument(f"--{name}", type=Path, required=True)
     parser.add_argument("--serial", required=True)
+    parser.add_argument("--startup-seconds", type=float, default=30)
     args = parser.parse_args()
+    if not 0 < args.startup_seconds <= 60:
+        parser.error("Use a 1–60 second startup bound")
     args.binary, args.apk, args.seed = args.binary.resolve(), args.apk.resolve(), args.seed.resolve()
     args.repetitions = 1
     evaluation = RelabelEval(args)

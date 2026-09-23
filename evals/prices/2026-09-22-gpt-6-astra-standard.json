@@ -1,0 +1,12 @@
+{
+  "as_of": "2026-09-22",
+  "source": "https://developers.openai.com/api/docs/pricing",
+  "cache_accounting_source": "https://developers.openai.com/api/docs/guides/prompt-caching",
+  "model": "gpt-6-astra",
+  "service_tier": "default",
+  "assumptions": "API-equivalent Standard processing, no regional uplift, no tool fees; not subscription billing. Context tiers are scenarios unless per-request evidence is supplied.",
+  "usd_per_million_tokens": {
+    "short": {"input": 10, "cached_input": 1, "cache_write": 12.5, "output": 50},
+    "long": {"input": 20, "cached_input": 2, "cache_write": 25, "output": 75}
+  }
+}

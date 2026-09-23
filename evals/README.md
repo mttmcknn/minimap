@@ -50,8 +50,18 @@ correct destinations, unchanged graphs, and a lower paired median against both
 controls in every app/API case. Run `controlled_contracts.py` against each
 candidate cohort before publishing.
 
+Keep the host awake for the whole confirmation interval and audit its power
+events and elapsed wall time afterward. On macOS, `caffeinate -i` can hold a
+temporary idle-sleep assertion for the worker process. Suspended-host time can
+be missing from the monotonic subprocess clock, so an uninterrupted timing
+claim also requires a passing host-continuity audit. Retain interrupted runs
+separately instead of pooling them with a fresh cohort.
+
 Use `replay_charts.py --medians-only` for a readable overview alongside the
 full plot. Failed and incomplete cohorts are labeled explicitly in both views.
+Use `--paired` to show each verified matched comparison around a zero-savings
+line; slower candidate trips remain visible. Both members must pass to form a
+pair, and missing pairs remain in the full acceptance gate.
 To count the exact saved navigation text without launching a model:
 
 ```sh
@@ -59,6 +69,9 @@ To count the exact saved navigation text without launching a model:
   /absolute/path/to/confirmation.json \
   --skill /absolute/path/to/frozen/minimap-app-navigation.md \
   --output /absolute/path/to/tool-text.json
+/tmp/minimap-chart-env/bin/python evals/replay_charts.py \
+  /absolute/path/to/tool-text.json --text-tokens \
+  --output /absolute/path/to/text-charts
 ```
 
 The optional `--raw-root` points to an unpacked evidence archive when the

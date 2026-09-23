@@ -1,0 +1,1399 @@
+{
+  "stage": "pilot",
+  "profiled": false,
+  "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+  "planned_trials": 18,
+  "recorded_trials": 18,
+  "successes": 18,
+  "confirmed_false_successes": 0,
+  "unverified_successes": 0,
+  "gates": {
+    "complete_assignments": true,
+    "all_correct_and_graphs_unchanged": true,
+    "lower_paired_median_than_both_controls_every_case": true,
+    "confirmation_eligible": false,
+    "speed_goal_met": false
+  },
+  "model_usage": null,
+  "api_cost_saving": null,
+  "groups": [
+    {
+      "api": "36",
+      "sample": "jetchat",
+      "arms": {
+        "raw": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 9.732289957115427,
+          "range_successful_seconds": [
+            9.732289957115427,
+            9.732289957115427
+          ]
+        },
+        "baseline": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 11.36607499991078,
+          "range_successful_seconds": [
+            11.36607499991078,
+            11.36607499991078
+          ]
+        },
+        "candidate": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 6.503505208995193,
+          "range_successful_seconds": [
+            6.503505208995193,
+            6.503505208995193
+          ]
+        }
+      },
+      "paired": {
+        "raw": {
+          "pairs": [
+            {
+              "repeat": 1,
+              "seconds": -3.2287847481202334,
+              "percent": -33.17600238327897
+            }
+          ],
+          "blocks": 1,
+          "median_seconds": -3.2287847481202334,
+          "median_percent": -33.17600238327897
+        },
+        "baseline": {
+          "pairs": [
+            {
+              "repeat": 1,
+              "seconds": -4.862569790915586,
+              "percent": -42.781433264814424
+            }
+          ],
+          "blocks": 1,
+          "median_seconds": -4.862569790915586,
+          "median_percent": -42.781433264814424
+        }
+      }
+    },
+    {
+      "api": "36",
+      "sample": "jetnews",
+      "arms": {
+        "raw": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 9.600125375087373,
+          "range_successful_seconds": [
+            9.600125375087373,
+            9.600125375087373
+          ]
+        },
+        "baseline": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 11.434738958021626,
+          "range_successful_seconds": [
+            11.434738958021626,
+            11.434738958021626
+          ]
+        },
+        "candidate": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 6.4190840839874,
+          "range_successful_seconds": [
+            6.4190840839874,
+            6.4190840839874
+          ]
+        }
+      },
+      "paired": {
+        "raw": {
+          "pairs": [
+            {
+              "repeat": 1,
+              "seconds": -3.181041291099973,
+              "percent": -33.135414036934094
+            }
+          ],
+          "blocks": 1,
+          "median_seconds": -3.181041291099973,
+          "median_percent": -33.135414036934094
+        },
+        "baseline": {
+          "pairs": [
+            {
+              "repeat": 1,
+              "seconds": -5.015654874034226,
+              "percent": -43.86330892596087
+            }
+          ],
+          "blocks": 1,
+          "median_seconds": -5.015654874034226,
+          "median_percent": -43.86330892596087
+        }
+      }
+    },
+    {
+      "api": "36",
+      "sample": "jetsnack",
+      "arms": {
+        "raw": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 6.864258666173555,
+          "range_successful_seconds": [
+            6.864258666173555,
+            6.864258666173555
+          ]
+        },
+        "baseline": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 7.500054833013564,
+          "range_successful_seconds": [
+            7.500054833013564,
+            7.500054833013564
+          ]
+        },
+        "candidate": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 5.469838541932404,
+          "range_successful_seconds": [
+            5.469838541932404,
+            5.469838541932404
+          ]
+        }
+      },
+      "paired": {
+        "raw": {
+          "pairs": [
+            {
+              "repeat": 1,
+              "seconds": -1.394420124241151,
+              "percent": -20.314212969751956
+            }
+          ],
+          "blocks": 1,
+          "median_seconds": -1.394420124241151,
+          "median_percent": -20.314212969751956
+        },
+        "baseline": {
+          "pairs": [
+            {
+              "repeat": 1,
+              "seconds": -2.0302162910811603,
+              "percent": -27.069352641858057
+            }
+          ],
+          "blocks": 1,
+          "median_seconds": -2.0302162910811603,
+          "median_percent": -27.069352641858057
+        }
+      }
+    },
+    {
+      "api": "37",
+      "sample": "jetchat",
+      "arms": {
+        "raw": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 10.0335666249739,
+          "range_successful_seconds": [
+            10.0335666249739,
+            10.0335666249739
+          ]
+        },
+        "baseline": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 11.553107999963686,
+          "range_successful_seconds": [
+            11.553107999963686,
+            11.553107999963686
+          ]
+        },
+        "candidate": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 5.431115416926332,
+          "range_successful_seconds": [
+            5.431115416926332,
+            5.431115416926332
+          ]
+        }
+      },
+      "paired": {
+        "raw": {
+          "pairs": [
+            {
+              "repeat": 1,
+              "seconds": -4.602451208047569,
+              "percent": -45.87054015859032
+            }
+          ],
+          "blocks": 1,
+          "median_seconds": -4.602451208047569,
+          "median_percent": -45.87054015859032
+        },
+        "baseline": {
+          "pairs": [
+            {
+              "repeat": 1,
+              "seconds": -6.121992583037354,
+              "percent": -52.990005659573136
+            }
+          ],
+          "blocks": 1,
+          "median_seconds": -6.121992583037354,
+          "median_percent": -52.990005659573136
+        }
+      }
+    },
+    {
+      "api": "37",
+      "sample": "jetnews",
+      "arms": {
+        "raw": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 8.6544178329641,
+          "range_successful_seconds": [
+            8.6544178329641,
+            8.6544178329641
+          ]
+        },
+        "baseline": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 10.108544624992646,
+          "range_successful_seconds": [
+            10.108544624992646,
+            10.108544624992646
+          ]
+        },
+        "candidate": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 3.404350792057812,
+          "range_successful_seconds": [
+            3.404350792057812,
+            3.404350792057812
+          ]
+        }
+      },
+      "paired": {
+        "raw": {
+          "pairs": [
+            {
+              "repeat": 1,
+              "seconds": -5.250067040906288,
+              "percent": -60.663433892793265
+            }
+          ],
+          "blocks": 1,
+          "median_seconds": -5.250067040906288,
+          "median_percent": -60.663433892793265
+        },
+        "baseline": {
+          "pairs": [
+            {
+              "repeat": 1,
+              "seconds": -6.704193832934834,
+              "percent": -66.32204814488526
+            }
+          ],
+          "blocks": 1,
+          "median_seconds": -6.704193832934834,
+          "median_percent": -66.32204814488526
+        }
+      }
+    },
+    {
+      "api": "37",
+      "sample": "jetsnack",
+      "arms": {
+        "raw": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 5.806832416914403,
+          "range_successful_seconds": [
+            5.806832416914403,
+            5.806832416914403
+          ]
+        },
+        "baseline": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 6.24732279102318,
+          "range_successful_seconds": [
+            6.24732279102318,
+            6.24732279102318
+          ]
+        },
+        "candidate": {
+          "planned": 1,
+          "recorded": 1,
+          "successes": 1,
+          "failures": 0,
+          "missing": 0,
+          "median_successful_seconds": 2.102780250017531,
+          "range_successful_seconds": [
+            2.102780250017531,
+            2.102780250017531
+          ]
+        }
+      },
+      "paired": {
+        "raw": {
+          "pairs": [
+            {
+              "repeat": 1,
+              "seconds": -3.7040521668968722,
+              "percent": -63.787826149546554
+            }
+          ],
+          "blocks": 1,
+          "median_seconds": -3.7040521668968722,
+          "median_percent": -63.787826149546554
+        },
+        "baseline": {
+          "pairs": [
+            {
+              "repeat": 1,
+              "seconds": -4.144542541005649,
+              "percent": -66.34109809342603
+            }
+          ],
+          "blocks": 1,
+          "median_seconds": -4.144542541005649,
+          "median_percent": -66.34109809342603
+        }
+      }
+    }
+  ],
+  "trials": [
+    {
+      "sample": "jetsnack",
+      "api": "36",
+      "repeat": 1,
+      "arm": "raw",
+      "phase": "jetsnack-1-raw",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "seconds": 6.864258666173555,
+      "commands": 3,
+      "stdout_bytes": 6017,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 8.388534082914703,
+        "commands": 4,
+        "stdout_bytes": 4087,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.1070054159499705,
+        "commands": 1,
+        "stdout_bytes": 2348,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 18.62195558298845,
+      "graph_before": {},
+      "graph_after": {},
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetsnack",
+      "api": "36",
+      "repeat": 1,
+      "arm": "baseline",
+      "phase": "jetsnack-1-baseline",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 7.500054833013564,
+      "commands": 1,
+      "stdout_bytes": 804,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 8.408118292107247,
+        "commands": 4,
+        "stdout_bytes": 4087,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.136905207997188,
+        "commands": 1,
+        "stdout_bytes": 2348,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 19.3073315420188,
+      "graph_before": {
+        ".minimap/config.json": "a22512c3e96f0439ebae24f9173439267202e546553d8d8bd6bfd2e89d91c91a",
+        ".minimap/graph/edges/edge_home_search_tap_content_desc_SEARCH__e1e4ed1e61cbe99ae4c5e6fca4ad88eda8ffb96e26642f41fa825201d01dda9d.json": "d7b9e900df161dbe17ff4dddf0523c0fca92ff2f078e095c79dd4b1d871e6ee8",
+        ".minimap/graph/places/place_home.json": "755cdbb3f5c29e7db727ca7ec45edee2af1d08ffebd4580da3a2525f6281bb17",
+        ".minimap/graph/places/place_search.json": "a438a1604dc54721a7ed468c5b3b0c8d0af8b688c46a034439b61540bf8b26e7"
+      },
+      "graph_after": {
+        ".minimap/config.json": "a22512c3e96f0439ebae24f9173439267202e546553d8d8bd6bfd2e89d91c91a",
+        ".minimap/graph/edges/edge_home_search_tap_content_desc_SEARCH__e1e4ed1e61cbe99ae4c5e6fca4ad88eda8ffb96e26642f41fa825201d01dda9d.json": "d7b9e900df161dbe17ff4dddf0523c0fca92ff2f078e095c79dd4b1d871e6ee8",
+        ".minimap/graph/places/place_home.json": "755cdbb3f5c29e7db727ca7ec45edee2af1d08ffebd4580da3a2525f6281bb17",
+        ".minimap/graph/places/place_search.json": "a438a1604dc54721a7ed468c5b3b0c8d0af8b688c46a034439b61540bf8b26e7"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetsnack",
+      "api": "36",
+      "repeat": 1,
+      "arm": "candidate",
+      "phase": "jetsnack-1-candidate",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 5.469838541932404,
+      "commands": 1,
+      "stdout_bytes": 804,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 8.32575141696725,
+        "commands": 4,
+        "stdout_bytes": 4087,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.166085332981311,
+        "commands": 1,
+        "stdout_bytes": 2348,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 17.22510295896791,
+      "graph_before": {
+        ".minimap/config.json": "a22512c3e96f0439ebae24f9173439267202e546553d8d8bd6bfd2e89d91c91a",
+        ".minimap/graph/edges/edge_home_search_tap_content_desc_SEARCH__e1e4ed1e61cbe99ae4c5e6fca4ad88eda8ffb96e26642f41fa825201d01dda9d.json": "d7b9e900df161dbe17ff4dddf0523c0fca92ff2f078e095c79dd4b1d871e6ee8",
+        ".minimap/graph/places/place_home.json": "755cdbb3f5c29e7db727ca7ec45edee2af1d08ffebd4580da3a2525f6281bb17",
+        ".minimap/graph/places/place_search.json": "a438a1604dc54721a7ed468c5b3b0c8d0af8b688c46a034439b61540bf8b26e7"
+      },
+      "graph_after": {
+        ".minimap/config.json": "a22512c3e96f0439ebae24f9173439267202e546553d8d8bd6bfd2e89d91c91a",
+        ".minimap/graph/edges/edge_home_search_tap_content_desc_SEARCH__e1e4ed1e61cbe99ae4c5e6fca4ad88eda8ffb96e26642f41fa825201d01dda9d.json": "d7b9e900df161dbe17ff4dddf0523c0fca92ff2f078e095c79dd4b1d871e6ee8",
+        ".minimap/graph/places/place_home.json": "755cdbb3f5c29e7db727ca7ec45edee2af1d08ffebd4580da3a2525f6281bb17",
+        ".minimap/graph/places/place_search.json": "a438a1604dc54721a7ed468c5b3b0c8d0af8b688c46a034439b61540bf8b26e7"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetnews",
+      "api": "36",
+      "repeat": 1,
+      "arm": "raw",
+      "phase": "jetnews-1-raw",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "seconds": 9.600125375087373,
+      "commands": 5,
+      "stdout_bytes": 4553,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 8.041707457974553,
+        "commands": 4,
+        "stdout_bytes": 2306,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.1128793749958277,
+        "commands": 1,
+        "stdout_bytes": 2217,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 21.02240333298687,
+      "graph_before": {},
+      "graph_after": {},
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetnews",
+      "api": "36",
+      "repeat": 1,
+      "arm": "baseline",
+      "phase": "jetnews-1-baseline",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 11.434738958021626,
+      "commands": 1,
+      "stdout_bytes": 858,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 7.904515750007704,
+        "commands": 4,
+        "stdout_bytes": 2306,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.0758940839441493,
+        "commands": 1,
+        "stdout_bytes": 2217,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 22.681482375017367,
+      "graph_before": {
+        ".minimap/config.json": "4db57b8892be8ae60f8a17f7aa0a253c1ba628477fa6647fac8eb4e428039325",
+        ".minimap/graph/edges/edge_home_interests_tap_content_desc_Open_navigation_drawer__d4cb9e74448f9127dc5550c29af7d4865543af04e52e6bfb8a9a91f022567b1b.json": "24b9ef24890e18f182aea3b8b83bf6a126209b753b72414553a00e871b5ca50f",
+        ".minimap/graph/places/place_home.json": "9f3b7f60cbf9d44e3d0f69b8455035925b0854892419060d0c87deddbb8bcd25",
+        ".minimap/graph/places/place_interests.json": "e76a0594c1d0070b961337a6a384594979cde9d9ae3b1ee8ef9d58080c18d1b1"
+      },
+      "graph_after": {
+        ".minimap/config.json": "4db57b8892be8ae60f8a17f7aa0a253c1ba628477fa6647fac8eb4e428039325",
+        ".minimap/graph/edges/edge_home_interests_tap_content_desc_Open_navigation_drawer__d4cb9e74448f9127dc5550c29af7d4865543af04e52e6bfb8a9a91f022567b1b.json": "24b9ef24890e18f182aea3b8b83bf6a126209b753b72414553a00e871b5ca50f",
+        ".minimap/graph/places/place_home.json": "9f3b7f60cbf9d44e3d0f69b8455035925b0854892419060d0c87deddbb8bcd25",
+        ".minimap/graph/places/place_interests.json": "e76a0594c1d0070b961337a6a384594979cde9d9ae3b1ee8ef9d58080c18d1b1"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetnews",
+      "api": "36",
+      "repeat": 1,
+      "arm": "candidate",
+      "phase": "jetnews-1-candidate",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 6.4190840839874,
+      "commands": 1,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 8.037111415877007,
+        "commands": 4,
+        "stdout_bytes": 2306,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.1793826249195263,
+        "commands": 1,
+        "stdout_bytes": 2217,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 17.903121375013143,
+      "graph_before": {
+        ".minimap/config.json": "4db57b8892be8ae60f8a17f7aa0a253c1ba628477fa6647fac8eb4e428039325",
+        ".minimap/graph/edges/edge_home_interests_tap_content_desc_Open_navigation_drawer__d4cb9e74448f9127dc5550c29af7d4865543af04e52e6bfb8a9a91f022567b1b.json": "24b9ef24890e18f182aea3b8b83bf6a126209b753b72414553a00e871b5ca50f",
+        ".minimap/graph/places/place_home.json": "9f3b7f60cbf9d44e3d0f69b8455035925b0854892419060d0c87deddbb8bcd25",
+        ".minimap/graph/places/place_interests.json": "e76a0594c1d0070b961337a6a384594979cde9d9ae3b1ee8ef9d58080c18d1b1"
+      },
+      "graph_after": {
+        ".minimap/config.json": "4db57b8892be8ae60f8a17f7aa0a253c1ba628477fa6647fac8eb4e428039325",
+        ".minimap/graph/edges/edge_home_interests_tap_content_desc_Open_navigation_drawer__d4cb9e74448f9127dc5550c29af7d4865543af04e52e6bfb8a9a91f022567b1b.json": "24b9ef24890e18f182aea3b8b83bf6a126209b753b72414553a00e871b5ca50f",
+        ".minimap/graph/places/place_home.json": "9f3b7f60cbf9d44e3d0f69b8455035925b0854892419060d0c87deddbb8bcd25",
+        ".minimap/graph/places/place_interests.json": "e76a0594c1d0070b961337a6a384594979cde9d9ae3b1ee8ef9d58080c18d1b1"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetchat",
+      "api": "36",
+      "repeat": 1,
+      "arm": "raw",
+      "phase": "jetchat-1-raw",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "seconds": 9.732289957115427,
+      "commands": 5,
+      "stdout_bytes": 5017,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 7.998712459113449,
+        "commands": 4,
+        "stdout_bytes": 3314,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.0086403749883175,
+        "commands": 1,
+        "stdout_bytes": 1159,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 21.00047737499699,
+      "graph_before": {},
+      "graph_after": {},
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetchat",
+      "api": "36",
+      "repeat": 1,
+      "arm": "baseline",
+      "phase": "jetchat-1-baseline",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 11.36607499991078,
+      "commands": 1,
+      "stdout_bytes": 844,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 7.976642500027083,
+        "commands": 4,
+        "stdout_bytes": 3314,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 2.9974630000069737,
+        "commands": 1,
+        "stdout_bytes": 1159,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 22.607649458921514,
+      "graph_before": {
+        ".minimap/config.json": "b7947b81d56a6b4ad30ecd5631d3c3161a69ad9257e70997b8c1945750197bd4",
+        ".minimap/graph/edges/edge_home_profile_tap_content_desc_Open_navigation_drawer__a28159dfda5f90cb4645e2d954a0b9cdef114bbc73482f0e70d1e453d001285f.json": "48247fcce5d07f6b9b7e03edc54d7d26e29b5fd5d7609cf8590a8afa895151e9",
+        ".minimap/graph/places/place_home.json": "0a467b123614908eb7977c6db3608b5c0711a3eaaf7bfb0300d2cc4c3e65fb81",
+        ".minimap/graph/places/place_profile.json": "09e6206f1090a242edbb32a094b346f7c46831c4d0413fe269734e5183f2a067"
+      },
+      "graph_after": {
+        ".minimap/config.json": "b7947b81d56a6b4ad30ecd5631d3c3161a69ad9257e70997b8c1945750197bd4",
+        ".minimap/graph/edges/edge_home_profile_tap_content_desc_Open_navigation_drawer__a28159dfda5f90cb4645e2d954a0b9cdef114bbc73482f0e70d1e453d001285f.json": "48247fcce5d07f6b9b7e03edc54d7d26e29b5fd5d7609cf8590a8afa895151e9",
+        ".minimap/graph/places/place_home.json": "0a467b123614908eb7977c6db3608b5c0711a3eaaf7bfb0300d2cc4c3e65fb81",
+        ".minimap/graph/places/place_profile.json": "09e6206f1090a242edbb32a094b346f7c46831c4d0413fe269734e5183f2a067"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetchat",
+      "api": "36",
+      "repeat": 1,
+      "arm": "candidate",
+      "phase": "jetchat-1-candidate",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 6.503505208995193,
+      "commands": 1,
+      "stdout_bytes": 843,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 7.773978957906365,
+        "commands": 4,
+        "stdout_bytes": 3314,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.1221107080345973,
+        "commands": 1,
+        "stdout_bytes": 1159,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 17.667039500083774,
+      "graph_before": {
+        ".minimap/config.json": "b7947b81d56a6b4ad30ecd5631d3c3161a69ad9257e70997b8c1945750197bd4",
+        ".minimap/graph/edges/edge_home_profile_tap_content_desc_Open_navigation_drawer__a28159dfda5f90cb4645e2d954a0b9cdef114bbc73482f0e70d1e453d001285f.json": "48247fcce5d07f6b9b7e03edc54d7d26e29b5fd5d7609cf8590a8afa895151e9",
+        ".minimap/graph/places/place_home.json": "0a467b123614908eb7977c6db3608b5c0711a3eaaf7bfb0300d2cc4c3e65fb81",
+        ".minimap/graph/places/place_profile.json": "09e6206f1090a242edbb32a094b346f7c46831c4d0413fe269734e5183f2a067"
+      },
+      "graph_after": {
+        ".minimap/config.json": "b7947b81d56a6b4ad30ecd5631d3c3161a69ad9257e70997b8c1945750197bd4",
+        ".minimap/graph/edges/edge_home_profile_tap_content_desc_Open_navigation_drawer__a28159dfda5f90cb4645e2d954a0b9cdef114bbc73482f0e70d1e453d001285f.json": "48247fcce5d07f6b9b7e03edc54d7d26e29b5fd5d7609cf8590a8afa895151e9",
+        ".minimap/graph/places/place_home.json": "0a467b123614908eb7977c6db3608b5c0711a3eaaf7bfb0300d2cc4c3e65fb81",
+        ".minimap/graph/places/place_profile.json": "09e6206f1090a242edbb32a094b346f7c46831c4d0413fe269734e5183f2a067"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetsnack",
+      "api": "37",
+      "repeat": 1,
+      "arm": "baseline",
+      "phase": "jetsnack-1-baseline",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 6.24732279102318,
+      "commands": 1,
+      "stdout_bytes": 804,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 4.296089208917692,
+        "commands": 3,
+        "stdout_bytes": 4087,
+        "stderr_bytes": 0
+      },
+      "oracle": {
+        "seconds": 2.8344576250528917,
+        "commands": 1,
+        "stdout_bytes": 2348,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 13.384207875002176,
+      "graph_before": {
+        ".minimap/config.json": "a22512c3e96f0439ebae24f9173439267202e546553d8d8bd6bfd2e89d91c91a",
+        ".minimap/graph/edges/edge_home_search_tap_content_desc_SEARCH__e1e4ed1e61cbe99ae4c5e6fca4ad88eda8ffb96e26642f41fa825201d01dda9d.json": "d7b9e900df161dbe17ff4dddf0523c0fca92ff2f078e095c79dd4b1d871e6ee8",
+        ".minimap/graph/places/place_home.json": "755cdbb3f5c29e7db727ca7ec45edee2af1d08ffebd4580da3a2525f6281bb17",
+        ".minimap/graph/places/place_search.json": "a438a1604dc54721a7ed468c5b3b0c8d0af8b688c46a034439b61540bf8b26e7"
+      },
+      "graph_after": {
+        ".minimap/config.json": "a22512c3e96f0439ebae24f9173439267202e546553d8d8bd6bfd2e89d91c91a",
+        ".minimap/graph/edges/edge_home_search_tap_content_desc_SEARCH__e1e4ed1e61cbe99ae4c5e6fca4ad88eda8ffb96e26642f41fa825201d01dda9d.json": "d7b9e900df161dbe17ff4dddf0523c0fca92ff2f078e095c79dd4b1d871e6ee8",
+        ".minimap/graph/places/place_home.json": "755cdbb3f5c29e7db727ca7ec45edee2af1d08ffebd4580da3a2525f6281bb17",
+        ".minimap/graph/places/place_search.json": "a438a1604dc54721a7ed468c5b3b0c8d0af8b688c46a034439b61540bf8b26e7"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetsnack",
+      "api": "37",
+      "repeat": 1,
+      "arm": "candidate",
+      "phase": "jetsnack-1-candidate",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 2.102780250017531,
+      "commands": 1,
+      "stdout_bytes": 804,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 4.299990167142823,
+        "commands": 3,
+        "stdout_bytes": 4087,
+        "stderr_bytes": 0
+      },
+      "oracle": {
+        "seconds": 2.8490328749176115,
+        "commands": 1,
+        "stdout_bytes": 2348,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 9.257658833055757,
+      "graph_before": {
+        ".minimap/config.json": "a22512c3e96f0439ebae24f9173439267202e546553d8d8bd6bfd2e89d91c91a",
+        ".minimap/graph/edges/edge_home_search_tap_content_desc_SEARCH__e1e4ed1e61cbe99ae4c5e6fca4ad88eda8ffb96e26642f41fa825201d01dda9d.json": "d7b9e900df161dbe17ff4dddf0523c0fca92ff2f078e095c79dd4b1d871e6ee8",
+        ".minimap/graph/places/place_home.json": "755cdbb3f5c29e7db727ca7ec45edee2af1d08ffebd4580da3a2525f6281bb17",
+        ".minimap/graph/places/place_search.json": "a438a1604dc54721a7ed468c5b3b0c8d0af8b688c46a034439b61540bf8b26e7"
+      },
+      "graph_after": {
+        ".minimap/config.json": "a22512c3e96f0439ebae24f9173439267202e546553d8d8bd6bfd2e89d91c91a",
+        ".minimap/graph/edges/edge_home_search_tap_content_desc_SEARCH__e1e4ed1e61cbe99ae4c5e6fca4ad88eda8ffb96e26642f41fa825201d01dda9d.json": "d7b9e900df161dbe17ff4dddf0523c0fca92ff2f078e095c79dd4b1d871e6ee8",
+        ".minimap/graph/places/place_home.json": "755cdbb3f5c29e7db727ca7ec45edee2af1d08ffebd4580da3a2525f6281bb17",
+        ".minimap/graph/places/place_search.json": "a438a1604dc54721a7ed468c5b3b0c8d0af8b688c46a034439b61540bf8b26e7"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetsnack",
+      "api": "37",
+      "repeat": 1,
+      "arm": "raw",
+      "phase": "jetsnack-1-raw",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "seconds": 5.806832416914403,
+      "commands": 3,
+      "stdout_bytes": 6017,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 4.285056458902545,
+        "commands": 3,
+        "stdout_bytes": 4087,
+        "stderr_bytes": 0
+      },
+      "oracle": {
+        "seconds": 2.8362209999468178,
+        "commands": 1,
+        "stdout_bytes": 2348,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 12.933047750033438,
+      "graph_before": {},
+      "graph_after": {},
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetnews",
+      "api": "37",
+      "repeat": 1,
+      "arm": "baseline",
+      "phase": "jetnews-1-baseline",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 10.108544624992646,
+      "commands": 1,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 4.051389999920502,
+        "commands": 3,
+        "stdout_bytes": 2306,
+        "stderr_bytes": 0
+      },
+      "oracle": {
+        "seconds": 2.815085375099443,
+        "commands": 1,
+        "stdout_bytes": 2217,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 16.98145991691854,
+      "graph_before": {
+        ".minimap/config.json": "4db57b8892be8ae60f8a17f7aa0a253c1ba628477fa6647fac8eb4e428039325",
+        ".minimap/graph/edges/edge_home_interests_tap_content_desc_Open_navigation_drawer__d4cb9e74448f9127dc5550c29af7d4865543af04e52e6bfb8a9a91f022567b1b.json": "24b9ef24890e18f182aea3b8b83bf6a126209b753b72414553a00e871b5ca50f",
+        ".minimap/graph/places/place_home.json": "9f3b7f60cbf9d44e3d0f69b8455035925b0854892419060d0c87deddbb8bcd25",
+        ".minimap/graph/places/place_interests.json": "e76a0594c1d0070b961337a6a384594979cde9d9ae3b1ee8ef9d58080c18d1b1"
+      },
+      "graph_after": {
+        ".minimap/config.json": "4db57b8892be8ae60f8a17f7aa0a253c1ba628477fa6647fac8eb4e428039325",
+        ".minimap/graph/edges/edge_home_interests_tap_content_desc_Open_navigation_drawer__d4cb9e74448f9127dc5550c29af7d4865543af04e52e6bfb8a9a91f022567b1b.json": "24b9ef24890e18f182aea3b8b83bf6a126209b753b72414553a00e871b5ca50f",
+        ".minimap/graph/places/place_home.json": "9f3b7f60cbf9d44e3d0f69b8455035925b0854892419060d0c87deddbb8bcd25",
+        ".minimap/graph/places/place_interests.json": "e76a0594c1d0070b961337a6a384594979cde9d9ae3b1ee8ef9d58080c18d1b1"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetnews",
+      "api": "37",
+      "repeat": 1,
+      "arm": "candidate",
+      "phase": "jetnews-1-candidate",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 3.404350792057812,
+      "commands": 1,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 4.046441332902759,
+        "commands": 3,
+        "stdout_bytes": 2306,
+        "stderr_bytes": 0
+      },
+      "oracle": {
+        "seconds": 2.844136583036743,
+        "commands": 1,
+        "stdout_bytes": 2217,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 10.301329499925487,
+      "graph_before": {
+        ".minimap/config.json": "4db57b8892be8ae60f8a17f7aa0a253c1ba628477fa6647fac8eb4e428039325",
+        ".minimap/graph/edges/edge_home_interests_tap_content_desc_Open_navigation_drawer__d4cb9e74448f9127dc5550c29af7d4865543af04e52e6bfb8a9a91f022567b1b.json": "24b9ef24890e18f182aea3b8b83bf6a126209b753b72414553a00e871b5ca50f",
+        ".minimap/graph/places/place_home.json": "9f3b7f60cbf9d44e3d0f69b8455035925b0854892419060d0c87deddbb8bcd25",
+        ".minimap/graph/places/place_interests.json": "e76a0594c1d0070b961337a6a384594979cde9d9ae3b1ee8ef9d58080c18d1b1"
+      },
+      "graph_after": {
+        ".minimap/config.json": "4db57b8892be8ae60f8a17f7aa0a253c1ba628477fa6647fac8eb4e428039325",
+        ".minimap/graph/edges/edge_home_interests_tap_content_desc_Open_navigation_drawer__d4cb9e74448f9127dc5550c29af7d4865543af04e52e6bfb8a9a91f022567b1b.json": "24b9ef24890e18f182aea3b8b83bf6a126209b753b72414553a00e871b5ca50f",
+        ".minimap/graph/places/place_home.json": "9f3b7f60cbf9d44e3d0f69b8455035925b0854892419060d0c87deddbb8bcd25",
+        ".minimap/graph/places/place_interests.json": "e76a0594c1d0070b961337a6a384594979cde9d9ae3b1ee8ef9d58080c18d1b1"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetnews",
+      "api": "37",
+      "repeat": 1,
+      "arm": "raw",
+      "phase": "jetnews-1-raw",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "seconds": 8.6544178329641,
+      "commands": 5,
+      "stdout_bytes": 4553,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 4.077148291864432,
+        "commands": 3,
+        "stdout_bytes": 2306,
+        "stderr_bytes": 0
+      },
+      "oracle": {
+        "seconds": 2.8566701660165563,
+        "commands": 1,
+        "stdout_bytes": 2217,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 15.594136000028811,
+      "graph_before": {},
+      "graph_after": {},
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetchat",
+      "api": "37",
+      "repeat": 1,
+      "arm": "baseline",
+      "phase": "jetchat-1-baseline",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 11.553107999963686,
+      "commands": 1,
+      "stdout_bytes": 844,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 8.484985250979662,
+        "commands": 4,
+        "stdout_bytes": 3315,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.104465708951466,
+        "commands": 1,
+        "stdout_bytes": 1159,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 23.40986158302985,
+      "graph_before": {
+        ".minimap/config.json": "b7947b81d56a6b4ad30ecd5631d3c3161a69ad9257e70997b8c1945750197bd4",
+        ".minimap/graph/edges/edge_home_profile_tap_content_desc_Open_navigation_drawer__a28159dfda5f90cb4645e2d954a0b9cdef114bbc73482f0e70d1e453d001285f.json": "48247fcce5d07f6b9b7e03edc54d7d26e29b5fd5d7609cf8590a8afa895151e9",
+        ".minimap/graph/places/place_home.json": "0a467b123614908eb7977c6db3608b5c0711a3eaaf7bfb0300d2cc4c3e65fb81",
+        ".minimap/graph/places/place_profile.json": "09e6206f1090a242edbb32a094b346f7c46831c4d0413fe269734e5183f2a067"
+      },
+      "graph_after": {
+        ".minimap/config.json": "b7947b81d56a6b4ad30ecd5631d3c3161a69ad9257e70997b8c1945750197bd4",
+        ".minimap/graph/edges/edge_home_profile_tap_content_desc_Open_navigation_drawer__a28159dfda5f90cb4645e2d954a0b9cdef114bbc73482f0e70d1e453d001285f.json": "48247fcce5d07f6b9b7e03edc54d7d26e29b5fd5d7609cf8590a8afa895151e9",
+        ".minimap/graph/places/place_home.json": "0a467b123614908eb7977c6db3608b5c0711a3eaaf7bfb0300d2cc4c3e65fb81",
+        ".minimap/graph/places/place_profile.json": "09e6206f1090a242edbb32a094b346f7c46831c4d0413fe269734e5183f2a067"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetchat",
+      "api": "37",
+      "repeat": 1,
+      "arm": "candidate",
+      "phase": "jetchat-1-candidate",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 5.431115416926332,
+      "commands": 1,
+      "stdout_bytes": 843,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 8.975739208981395,
+        "commands": 4,
+        "stdout_bytes": 3315,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.1974410000257194,
+        "commands": 1,
+        "stdout_bytes": 1159,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 17.87263666698709,
+      "graph_before": {
+        ".minimap/config.json": "b7947b81d56a6b4ad30ecd5631d3c3161a69ad9257e70997b8c1945750197bd4",
+        ".minimap/graph/edges/edge_home_profile_tap_content_desc_Open_navigation_drawer__a28159dfda5f90cb4645e2d954a0b9cdef114bbc73482f0e70d1e453d001285f.json": "48247fcce5d07f6b9b7e03edc54d7d26e29b5fd5d7609cf8590a8afa895151e9",
+        ".minimap/graph/places/place_home.json": "0a467b123614908eb7977c6db3608b5c0711a3eaaf7bfb0300d2cc4c3e65fb81",
+        ".minimap/graph/places/place_profile.json": "09e6206f1090a242edbb32a094b346f7c46831c4d0413fe269734e5183f2a067"
+      },
+      "graph_after": {
+        ".minimap/config.json": "b7947b81d56a6b4ad30ecd5631d3c3161a69ad9257e70997b8c1945750197bd4",
+        ".minimap/graph/edges/edge_home_profile_tap_content_desc_Open_navigation_drawer__a28159dfda5f90cb4645e2d954a0b9cdef114bbc73482f0e70d1e453d001285f.json": "48247fcce5d07f6b9b7e03edc54d7d26e29b5fd5d7609cf8590a8afa895151e9",
+        ".minimap/graph/places/place_home.json": "0a467b123614908eb7977c6db3608b5c0711a3eaaf7bfb0300d2cc4c3e65fb81",
+        ".minimap/graph/places/place_profile.json": "09e6206f1090a242edbb32a094b346f7c46831c4d0413fe269734e5183f2a067"
+      },
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    },
+    {
+      "sample": "jetchat",
+      "api": "37",
+      "repeat": 1,
+      "arm": "raw",
+      "phase": "jetchat-1-raw",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "seconds": 10.0335666249739,
+      "commands": 5,
+      "stdout_bytes": 5018,
+      "stderr_bytes": 0,
+      "setup": {
+        "seconds": 8.318042166880332,
+        "commands": 4,
+        "stdout_bytes": 3315,
+        "stderr_bytes": 87
+      },
+      "oracle": {
+        "seconds": 3.079298415919766,
+        "commands": 1,
+        "stdout_bytes": 1159,
+        "stderr_bytes": 0
+      },
+      "total_seconds_including_setup_oracle": 21.697947832988575,
+      "graph_before": {},
+      "graph_after": {},
+      "graph_unchanged": true,
+      "success": true,
+      "false_success": false
+    }
+  ],
+  "inputs": [
+    {
+      "path": "/private/tmp/minimap-performance-20260922/pilot-06-awake-api36/results.json",
+      "sha256": "0d1c5aad43a95219d4bd8b8c1fa304dc1d091ba0fe7b5e2a81ab0b7d0e20e034",
+      "metadata": {
+        "binary_sha256": "d43ba8fa8f0a99a57ca2695a64c76dec3152a02bb9030f537e3ad18dd035cd47",
+        "apk_sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+        "serial": "emulator-5556",
+        "repetitions": 1,
+        "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+        "token_usage": null,
+        "goal_checks": true,
+        "suite": "replay-performance-v2",
+        "stage": "pilot",
+        "profiled": false,
+        "profile_overhead_included": false,
+        "binary_sha256_by_arm": {
+          "baseline": "d43ba8fa8f0a99a57ca2695a64c76dec3152a02bb9030f537e3ad18dd035cd47",
+          "candidate": "9b96ab7c011f46540c86659e8159e939452e84bf14bde02b627a96a415d176e9"
+        },
+        "protocol_sha256": "338e1c812ce83f9720b23ffe337cbce241c5b7a6d521cb408fb3566945e13761",
+        "runner_sha256": "32bf318e3d7162cf9369b1502bc8da0034b781566f7f7e9e7b7dd1ddc633361a",
+        "planned_trials": 9,
+        "settle_override": null,
+        "arms": [
+          "raw",
+          "baseline",
+          "candidate"
+        ],
+        "order_offset": 0,
+        "startup_seconds": 30,
+        "host": {
+          "system": "Darwin",
+          "release": "25.6.0",
+          "architecture": "arm64"
+        },
+        "api_level": "36",
+        "android_version": "1.0.15498356",
+        "adb_version": "Android Debug Bridge version 1.0.41\nVersion 37.0.1-15733141\nInstalled as /opt/homebrew/bin/adb\nRunning on Darwin 25.6.0 (arm64)",
+        "viewport": "Physical size: 1080x2400",
+        "apks": {
+          "jetsnack": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+          "jetnews": "b734a9138759fae49c50c26adbaccf8b17111b7fcced0b2073d6480498e75ed9",
+          "jetchat": "1934fe9e8461de3fe99ff857864549a9015daea7b11374f8e9d65aa88a341e5c"
+        },
+        "startup_checks": [
+          {
+            "phase": "seed-setup-jetsnack",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 8.249013083055615
+          },
+          {
+            "phase": "setup-jetsnack-1-raw",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 7.161435749963857
+          },
+          {
+            "phase": "setup-jetsnack-1-baseline",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 6.950949417077936
+          },
+          {
+            "phase": "setup-jetsnack-1-candidate",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 6.983938040910289
+          },
+          {
+            "phase": "seed-setup-jetnews",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 6.531093291938305
+          },
+          {
+            "phase": "setup-jetnews-1-raw",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 6.538613916025497
+          },
+          {
+            "phase": "setup-jetnews-1-baseline",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 6.622698792023584
+          },
+          {
+            "phase": "setup-jetnews-1-candidate",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 6.707550125080161
+          },
+          {
+            "phase": "seed-setup-jetchat",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 6.6547363749705255
+          },
+          {
+            "phase": "setup-jetchat-1-raw",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 6.657075666938908
+          },
+          {
+            "phase": "setup-jetchat-1-baseline",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 6.6991454580565915
+          },
+          {
+            "phase": "setup-jetchat-1-candidate",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 6.468848124961369
+          }
+        ]
+      }
+    },
+    {
+      "path": "/private/tmp/minimap-performance-20260922/pilot-06-awake-api37/results.json",
+      "sha256": "7d0f4a061396f16654d426c17fc13a3f95bdf95e38394596446f5047d5648f11",
+      "metadata": {
+        "binary_sha256": "d43ba8fa8f0a99a57ca2695a64c76dec3152a02bb9030f537e3ad18dd035cd47",
+        "apk_sha256": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+        "serial": "emulator-5554",
+        "repetitions": 1,
+        "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+        "token_usage": null,
+        "goal_checks": true,
+        "suite": "replay-performance-v2",
+        "stage": "pilot",
+        "profiled": false,
+        "profile_overhead_included": false,
+        "binary_sha256_by_arm": {
+          "baseline": "d43ba8fa8f0a99a57ca2695a64c76dec3152a02bb9030f537e3ad18dd035cd47",
+          "candidate": "9b96ab7c011f46540c86659e8159e939452e84bf14bde02b627a96a415d176e9"
+        },
+        "protocol_sha256": "338e1c812ce83f9720b23ffe337cbce241c5b7a6d521cb408fb3566945e13761",
+        "runner_sha256": "32bf318e3d7162cf9369b1502bc8da0034b781566f7f7e9e7b7dd1ddc633361a",
+        "planned_trials": 9,
+        "settle_override": null,
+        "arms": [
+          "raw",
+          "baseline",
+          "candidate"
+        ],
+        "order_offset": 1,
+        "startup_seconds": 30,
+        "host": {
+          "system": "Darwin",
+          "release": "25.6.0",
+          "architecture": "arm64"
+        },
+        "api_level": "37",
+        "android_version": "1.0.15498356",
+        "adb_version": "Android Debug Bridge version 1.0.41\nVersion 37.0.1-15733141\nInstalled as /opt/homebrew/bin/adb\nRunning on Darwin 25.6.0 (arm64)",
+        "viewport": "Physical size: 1080x2424",
+        "apks": {
+          "jetsnack": "78dfd1f74d9d56f84f4701afdea179360ae675aac6ed0112f590978821860f0b",
+          "jetnews": "b734a9138759fae49c50c26adbaccf8b17111b7fcced0b2073d6480498e75ed9",
+          "jetchat": "1934fe9e8461de3fe99ff857864549a9015daea7b11374f8e9d65aa88a341e5c"
+        },
+        "startup_checks": [
+          {
+            "phase": "seed-setup-jetsnack",
+            "attempts": 1,
+            "ready": true,
+            "seconds": 3.180869457894005
+          },
+          {
+            "phase": "setup-jetsnack-1-baseline",
+            "attempts": 1,
+            "ready": true,
+            "seconds": 3.13540849997662
+          },
+          {
+            "phase": "setup-jetsnack-1-candidate",
+            "attempts": 1,
+            "ready": true,
+            "seconds": 3.2012315000174567
+          },
+          {
+            "phase": "setup-jetsnack-1-raw",
+            "attempts": 1,
+            "ready": true,
+            "seconds": 3.1667389170033857
+          },
+          {
+            "phase": "seed-setup-jetnews",
+            "attempts": 1,
+            "ready": true,
+            "seconds": 2.913314750068821
+          },
+          {
+            "phase": "setup-jetnews-1-baseline",
+            "attempts": 1,
+            "ready": true,
+            "seconds": 2.919552000006661
+          },
+          {
+            "phase": "setup-jetnews-1-candidate",
+            "attempts": 1,
+            "ready": true,
+            "seconds": 2.8916917090537027
+          },
+          {
+            "phase": "setup-jetnews-1-raw",
+            "attempts": 1,
+            "ready": true,
+            "seconds": 2.9155997920315713
+          },
+          {
+            "phase": "seed-setup-jetchat",
+            "attempts": 1,
+            "ready": true,
+            "seconds": 2.927798124961555
+          },
+          {
+            "phase": "setup-jetchat-1-baseline",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 7.009493084042333
+          },
+          {
+            "phase": "setup-jetchat-1-candidate",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 7.646190584055148
+          },
+          {
+            "phase": "setup-jetchat-1-raw",
+            "attempts": 2,
+            "ready": true,
+            "seconds": 6.937430458026938
+          }
+        ]
+      }
+    }
+  ]
+}

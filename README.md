@@ -12,101 +12,66 @@ teammates and their AI agents can use what has already been learned.
 
 ## Results
 
-**Performance update — September 23:** the first faster test build finished
-**57 of 60 trips successfully**; both the released version and the script
-without Minimap passed 60/60. One tap missed during navigation, and two tests
-failed during setup. **This build has not passed our speed-and-correctness goal.**
+**Our latest test build reused saved routes in about 4–7 seconds, compared
+with 7–11 seconds without Minimap.** It reached the right screen in **60/60
+trips**. Across the six app/Android combinations, the middle time saving in
+matched runs was **30–45%**.
 
-The graph shows its typical times for successful trips. “New Minimap” means
-that first test build, before the latest fix. Shorter bars are better, but a
-short bar does not make a failed trip count as a success.
+These results are from the experimental build in [PR #12](https://github.com/mttmcknn/minimap/pull/12),
+which has not been released. The full comparison was **179/180 verified**:
+one released-version control's separate screen checker timed out. That means
+our strict rule that every test must pass **has not been met**.
 
-![First performance test: shorter successful trips, but three failed assignments prevent a confirmed speed claim.](evals/results/2026-09-23-performance-progress/replay-summary.png)
+### Navigation time
 
-We added a check that waits for a button to stop moving before tapping it.
-With slowed drawer animations, the old build failed all three attempts and
-the fix passed all three. The Mac also slept during overnight testing, so a
-fresh full comparison is underway with idle sleep prevented during the run.
-Full AI token usage and money savings are still unmeasured.
-
-See the [current findings, failures, every-run graph, and raw data](evals/results/2026-09-23-performance-progress/README.md).
-The results below describe the **earlier released version**, not this test build.
-
-**Saved routes returned about 83–88% less text for the AI to read.** Navigation
-was a little slower than the script without Minimap; we have not measured a
-saving on an AI bill.
-
-We tested three Android sample apps on two emulators running different Android
-versions (APIs 36 and 37). Each trip took one or two taps, and every test script
-already knew the route. We compared three ways to make the same trip:
+We tested the same short routes in three Android sample apps on two emulators
+running different Android versions (APIs 36 and 37). Each route took one or two
+taps. Every method already knew the route; no AI chose the individual steps.
 
 | Method | What it does |
 | --- | --- |
-| Without Minimap | Uses regular Android tools to follow the route and check the screen. |
-| Record a route | Sets up Minimap and saves the steps for the first time. |
-| Reuse a route | Follows a fresh copy of the saved route, like a teammate using it. |
+| Without Minimap | Uses regular Android tools to follow the known route and check the screen. |
+| Previous Minimap | Reuses the saved route with released Minimap v0.2.0. |
+| New Minimap | Reuses the same route with faster screen reads and a check that buttons have stopped moving before a tap. |
 
-**All 90 navigation tests reached the right destination:** 30 tests per method,
-with five repeats for each app on each Android version.
+![Typical navigation times: the new test build takes about 4–7 seconds, compared with 7–11 seconds without Minimap; one released-version checker timed out.](evals/results/2026-09-23-replay-performance/replay-summary.png)
+
+Each bar is the **middle result (median)** from up to ten successful runs for
+that app and Android version. Shorter bars are better. Startup, the one-time
+work of recording the route, and the separate test checker are outside these
+times. The new build was faster in **58 of 60 matched trips** against the
+no-Minimap script; the two slower trips remain in the detailed graphs.
+
+A saved route still runs through one `minimap go` call. Minimap reads the
+screen, taps, and verifies the destination without asking an LLM to decide
+each step. Much of this build's speed improvement comes from faster screen reads.
 
 ### Less text for the AI to read
 
-A *token* is a small chunk of text an AI reads. We counted the text returned by
-the navigation tools. For roughly every 100 tokens returned without Minimap,
-reusing a saved route returned just **12–17**.
+A *token* is a small chunk of text an AI reads. In this run, the new build
+returned **about 83–88% less navigation-tool text** than the tools used without
+Minimap.
 
-![Saved routes return less text: Jetsnack drops from about 1,979 to 244 tokens, JetNews from 1,471 to 257, and Jetchat from 1,599 to 244.](docs/images/benchmark-text.png)
+![Navigation-tool tokens: Jetsnack drops from 1,979 to 244, JetNews from 1,471 to 257, and Jetchat from 1,598 to 244.](evals/results/2026-09-23-replay-performance/replay-text.png)
 
-### Recording takes time; reusing is quicker
-
-Recording a route took about **19–29 seconds**. Reusing one took about
-**9–12 seconds**, compared with **8–11 seconds** without Minimap.
-The benefit shown here is less text for the AI to read; these scripts did not
-finish faster with Minimap.
-
-![Navigation time in seconds, without Minimap / recording / reusing: Jetsnack 8.2 / 19.2 / 8.6; JetNews 10.5 / 28.8 / 12.1; Jetchat 10.5 / 28.1 / 12.0.](docs/images/benchmark-time.png)
-
-Each bar shows the **middle result (median)** from 10 runs per app and method,
-combining both Android versions. Times cover navigation, including recording
-when needed; they leave out app startup and the separate test checker.
+These bars combine both Android versions and count each tool response once.
+**We have not measured the full AI-token cost or money saved.** Instructions,
+reasoning, previous conversation text, and caching also affect the total.
+Loading the full Minimap instructions for every short task can erase the
+saving shown here.
 
 ### What still needs testing?
 
-- **The full AI cost:** these counts leave out instructions, the AI's thinking, and other conversation text, so fewer tool tokens do not yet prove a lower bill.
-- **The cost of repeated instructions:** our estimates show that loading Minimap's full instructions for every task can erase the text savings in JetNews and Jetchat.
-- **An AI handling surprises on its own:** all 16 scripted change and error checks passed, including moved buttons and wrong profiles, but independent AI discovery and repair have not been tested.
-- **More kinds of trips:** these were short routes in three sample apps on one computer, so we still need longer routes and more devices and app states.
+- **The full AI task:** the prepared agent comparison must measure actual input, output, timing, and API-equivalent cost, including instructions and reasoning.
+- **Recovery without help:** all 16 scripted change/error checks passed, but an AI discovering and repairing unexpected navigation on its own remains untested.
+- **Broader use:** these were short routes on two emulators, so longer routes, physical devices, larger graphs, and more app states still need evaluation.
 
-An earlier run had app-startup failures. The 90/90 result above is from a
-separate run that waited for the app to be ready; the earlier failures remain
-in the report.
-
-See the [full results and every test](evals/results/2026-09-17-benchmarks/README.md)
-for the detailed graphs, data, and cost estimates.
-
-<details>
-<summary>How these graphs were made</summary>
-
-These graphs summarize the September 16–17, 2026 experiment using its
-[saved measurements](evals/results/2026-09-17-benchmarks/benchmark.json).
-They do not represent a new test run. Each bar combines five runs on API 36
-and five on API 37; token labels are rounded to whole tokens and times to a
-tenth of a second. Percentage labels compare the unrounded token medians.
-Tokens use the `o200k_base` counting method; they are not measured model usage.
-
-To rebuild the README images from the repository root:
-
-```bash
-python3 -m venv /tmp/minimap-chart-env
-/tmp/minimap-chart-env/bin/pip install -r evals/requirements-benchmarks.txt
-/tmp/minimap-chart-env/bin/python evals/readme_charts.py
-```
-
-The [chart script](evals/readme_charts.py) reads the existing measurements and
-updates only the two README images. The detailed report keeps the results for
-each Android version separate and shows every run.
-
-</details>
+See the [complete results, every-run graphs, failures, and raw evidence](evals/results/2026-09-23-replay-performance/README.md),
+including a graph showing the time saved or lost in each matched trip and
+instructions for rebuilding all the graphs.
+The [earlier failed test build](evals/results/2026-09-23-performance-progress/README.md)
+and the [released-version benchmark](evals/results/2026-09-17-benchmarks/README.md)
+remain available with their original results.
 
 ## Install
 

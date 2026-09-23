@@ -1,0 +1,1568 @@
+{
+  "metadata": {
+    "binary_sha256": "9b96ab7c011f46540c86659e8159e939452e84bf14bde02b627a96a415d176e9",
+    "apk_sha256": "b734a9138759fae49c50c26adbaccf8b17111b7fcced0b2073d6480498e75ed9",
+    "serial": "emulator-5556",
+    "repetitions": 3,
+    "timing_scope": "top-level subprocess wall time; excludes fixture setup and independent oracle",
+    "token_usage": null,
+    "goal_checks": false,
+    "suite": "drawer-stability-diagnostic",
+    "planned_trials": 12,
+    "created_at": "2026-09-22T22:52:37.629596+00:00",
+    "original_animator_duration_scale": "null",
+    "binary_sha256_by_arm": {
+      "candidate-05": "a3d37837010638b9151082d99897a569c63dad2840e53fd9f9fd695b79991fac",
+      "candidate-06": "9b96ab7c011f46540c86659e8159e939452e84bf14bde02b627a96a415d176e9"
+    },
+    "seed_graph_sha256": {
+      ".minimap/config.json": "4db57b8892be8ae60f8a17f7aa0a253c1ba628477fa6647fac8eb4e428039325",
+      ".minimap/graph/edges/edge_home_interests_tap_content_desc_Open_navigation_drawer__d4cb9e74448f9127dc5550c29af7d4865543af04e52e6bfb8a9a91f022567b1b.json": "24b9ef24890e18f182aea3b8b83bf6a126209b753b72414553a00e871b5ca50f",
+      ".minimap/graph/places/place_home.json": "9f3b7f60cbf9d44e3d0f69b8455035925b0854892419060d0c87deddbb8bcd25",
+      ".minimap/graph/places/place_interests.json": "e76a0594c1d0070b961337a6a384594979cde9d9ae3b1ee8ef9d58080c18d1b1"
+    },
+    "profile_overhead_included": true,
+    "speed_claim_eligible": false,
+    "note": "A small diagnostic, not a reliability estimate; the moving-drawer cause is a hypothesis until traced.",
+    "settings_restored": true,
+    "startup_checks": [
+      {
+        "phase": "setup-normal-1-candidate-05",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 7.412981832982041
+      },
+      {
+        "phase": "setup-normal-1-candidate-06",
+        "attempts": 3,
+        "ready": true,
+        "seconds": 12.838259374955669
+      },
+      {
+        "phase": "setup-normal-2-candidate-06",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 7.198886458063498
+      },
+      {
+        "phase": "setup-normal-2-candidate-05",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 7.223632207955234
+      },
+      {
+        "phase": "setup-normal-3-candidate-05",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 7.5763629169669
+      },
+      {
+        "phase": "setup-normal-3-candidate-06",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 6.968834541970864
+      },
+      {
+        "phase": "setup-slow-1-candidate-05",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 9.711224084021524
+      },
+      {
+        "phase": "setup-slow-1-candidate-06",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 7.294174124952406
+      },
+      {
+        "phase": "setup-slow-2-candidate-06",
+        "attempts": 3,
+        "ready": true,
+        "seconds": 11.302446875022724
+      },
+      {
+        "phase": "setup-slow-2-candidate-05",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 7.700575708062388
+      },
+      {
+        "phase": "setup-slow-3-candidate-05",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 7.3893237500451505
+      },
+      {
+        "phase": "setup-slow-3-candidate-06",
+        "attempts": 2,
+        "ready": true,
+        "seconds": 7.575065166922286
+      }
+    ]
+  },
+  "trials": [
+    {
+      "phase": "normal-1-candidate-05",
+      "arm": "candidate-05",
+      "repeat": 1,
+      "scale": "null",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 4.316696375026368,
+      "commands": 1,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "graph_unchanged": true,
+      "false_success": false,
+      "success": true
+    },
+    {
+      "phase": "normal-1-candidate-06",
+      "arm": "candidate-06",
+      "repeat": 1,
+      "scale": "null",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 5.925222208024934,
+      "commands": 1,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "graph_unchanged": true,
+      "false_success": false,
+      "success": true
+    },
+    {
+      "phase": "normal-2-candidate-06",
+      "arm": "candidate-06",
+      "repeat": 2,
+      "scale": "null",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 5.657853291952051,
+      "commands": 1,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "graph_unchanged": true,
+      "false_success": false,
+      "success": true
+    },
+    {
+      "phase": "normal-2-candidate-05",
+      "arm": "candidate-05",
+      "repeat": 2,
+      "scale": "null",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 6.237810666905716,
+      "commands": 1,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "graph_unchanged": true,
+      "false_success": false,
+      "success": true
+    },
+    {
+      "phase": "normal-3-candidate-05",
+      "arm": "candidate-05",
+      "repeat": 3,
+      "scale": "null",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 4.1595561660360545,
+      "commands": 1,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "graph_unchanged": true,
+      "false_success": false,
+      "success": true
+    },
+    {
+      "phase": "normal-3-candidate-06",
+      "arm": "candidate-06",
+      "repeat": 3,
+      "scale": "null",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 5.647142958943732,
+      "commands": 1,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "graph_unchanged": true,
+      "false_success": false,
+      "success": true
+    },
+    {
+      "phase": "slow-1-candidate-05",
+      "arm": "candidate-05",
+      "repeat": 1,
+      "scale": "5",
+      "setup_passed": true,
+      "reported_ok": false,
+      "oracle_reached_target": false,
+      "error": null,
+      "status": "unknown",
+      "seconds": 9.396023791981861,
+      "commands": 1,
+      "stdout_bytes": 1478,
+      "stderr_bytes": 0,
+      "graph_unchanged": true,
+      "false_success": false,
+      "success": false
+    },
+    {
+      "phase": "slow-1-candidate-06",
+      "arm": "candidate-06",
+      "repeat": 1,
+      "scale": "5",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 9.179337542038411,
+      "commands": 1,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "graph_unchanged": true,
+      "false_success": false,
+      "success": true
+    },
+    {
+      "phase": "slow-2-candidate-06",
+      "arm": "candidate-06",
+      "repeat": 2,
+      "scale": "5",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 9.330829999991693,
+      "commands": 1,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "graph_unchanged": true,
+      "false_success": false,
+      "success": true
+    },
+    {
+      "phase": "slow-2-candidate-05",
+      "arm": "candidate-05",
+      "repeat": 2,
+      "scale": "5",
+      "setup_passed": true,
+      "reported_ok": false,
+      "oracle_reached_target": false,
+      "error": null,
+      "status": "unknown",
+      "seconds": 9.087515666964464,
+      "commands": 1,
+      "stdout_bytes": 1478,
+      "stderr_bytes": 0,
+      "graph_unchanged": true,
+      "false_success": false,
+      "success": false
+    },
+    {
+      "phase": "slow-3-candidate-05",
+      "arm": "candidate-05",
+      "repeat": 3,
+      "scale": "5",
+      "setup_passed": true,
+      "reported_ok": false,
+      "oracle_reached_target": false,
+      "error": null,
+      "status": "unknown",
+      "seconds": 9.532078208052553,
+      "commands": 1,
+      "stdout_bytes": 1478,
+      "stderr_bytes": 0,
+      "graph_unchanged": true,
+      "false_success": false,
+      "success": false
+    },
+    {
+      "phase": "slow-3-candidate-06",
+      "arm": "candidate-06",
+      "repeat": 3,
+      "scale": "5",
+      "setup_passed": true,
+      "reported_ok": true,
+      "oracle_reached_target": true,
+      "error": null,
+      "status": "ok",
+      "seconds": 8.963276208029129,
+      "commands": 1,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "graph_unchanged": true,
+      "false_success": false,
+      "success": true
+    }
+  ],
+  "calls": [
+    {
+      "phase": "environment",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "settings",
+        "get",
+        "global",
+        "animator_duration_scale"
+      ],
+      "seconds": 0.06228420906700194,
+      "exit_code": 0,
+      "stdout_bytes": 5,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "fixture-setting",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "settings",
+        "delete",
+        "global",
+        "animator_duration_scale"
+      ],
+      "seconds": 0.057073541916906834,
+      "exit_code": 0,
+      "stdout_bytes": 15,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "fixture-setting",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "settings",
+        "get",
+        "global",
+        "animator_duration_scale"
+      ],
+      "seconds": 0.051326584070920944,
+      "exit_code": 0,
+      "stdout_bytes": 5,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-1-candidate-05",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.07025891693774611,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-1-candidate-05",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.500291790929623,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-1-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.6386634170776233,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-1-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.5187259160447866,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "normal-1-candidate-05",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-05/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 4.316696375026368,
+      "exit_code": 0,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-normal-1-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.3532574579585344,
+      "exit_code": 0,
+      "stdout_bytes": 2217,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-1-candidate-06",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.07725583296269178,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-1-candidate-06",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.712410792009905,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-1-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 4.250287542003207,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-1-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 4.5779860420152545,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-1-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.4974703749176115,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "normal-1-candidate-06",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-06/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 5.925222208024934,
+      "exit_code": 0,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-normal-1-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.3231997090624645,
+      "exit_code": 0,
+      "stdout_bytes": 2217,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-2-candidate-06",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.0748938750475645,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-2-candidate-06",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.743733249953948,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-2-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.2914418330183253,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-2-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.6464134170673788,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "normal-2-candidate-06",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-06/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 5.657853291952051,
+      "exit_code": 0,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-normal-2-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.3669306659139693,
+      "exit_code": 0,
+      "stdout_bytes": 2217,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-2-candidate-05",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.08958858402911574,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-2-candidate-05",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.630027582985349,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-2-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.431176000041887,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-2-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.5315316250780597,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "normal-2-candidate-05",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-05/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 6.237810666905716,
+      "exit_code": 0,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-normal-2-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.4233243750641122,
+      "exit_code": 0,
+      "stdout_bytes": 2217,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-3-candidate-05",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.08882054197601974,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-3-candidate-05",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.5304836250143126,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-3-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.4479057919234037,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-3-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.8718634580727667,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "normal-3-candidate-05",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-05/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 4.1595561660360545,
+      "exit_code": 0,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-normal-3-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.346192124998197,
+      "exit_code": 0,
+      "stdout_bytes": 2217,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-3-candidate-06",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.0893420830834657,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-3-candidate-06",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.6287932909326628,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-3-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.2590543340193108,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-normal-3-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.4545192500809208,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "normal-3-candidate-06",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-06/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 5.647142958943732,
+      "exit_code": 0,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-normal-3-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.2928011670010164,
+      "exit_code": 0,
+      "stdout_bytes": 2217,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "fixture-setting",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "settings",
+        "put",
+        "global",
+        "animator_duration_scale",
+        "5"
+      ],
+      "seconds": 0.05607229191809893,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "fixture-setting",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "settings",
+        "get",
+        "global",
+        "animator_duration_scale"
+      ],
+      "seconds": 0.06268220802303404,
+      "exit_code": 0,
+      "stdout_bytes": 2,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-1-candidate-05",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.07643645803909749,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-1-candidate-05",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.7625929160276428,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-1-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 5.33840050001163,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-1-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 4.120554250082932,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "slow-1-candidate-05",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-05/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 9.396023791981861,
+      "exit_code": 5,
+      "stdout_bytes": 1478,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-slow-1-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.2079155000392348,
+      "exit_code": 0,
+      "stdout_bytes": 443,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-1-candidate-06",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.1198043329641223,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-1-candidate-06",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.4739769159350544,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-1-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.359386874944903,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-1-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.67916087503545,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "slow-1-candidate-06",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-06/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 9.179337542038411,
+      "exit_code": 0,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-slow-1-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.396147375111468,
+      "exit_code": 0,
+      "stdout_bytes": 2217,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-2-candidate-06",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.12545562500599772,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-2-candidate-06",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.4606757500441745,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-2-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 4.077846041065641,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-2-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.2724383330205455,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-2-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.4306182080181316,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "slow-2-candidate-06",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-06/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 9.330829999991693,
+      "exit_code": 0,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-slow-2-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.400037124985829,
+      "exit_code": 0,
+      "stdout_bytes": 2217,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-2-candidate-05",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.09418133297003806,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-2-candidate-05",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.5129227919969708,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-2-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.66916275001131,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-2-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.7795346250059083,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "slow-2-candidate-05",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-05/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 9.087515666964464,
+      "exit_code": 5,
+      "stdout_bytes": 1478,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-slow-2-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.165869417018257,
+      "exit_code": 0,
+      "stdout_bytes": 443,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-3-candidate-05",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.07603366603143513,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-3-candidate-05",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.5409091670298949,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-3-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.35850454098545,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-3-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.7697877919999883,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "slow-3-candidate-05",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-05/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 9.532078208052553,
+      "exit_code": 5,
+      "stdout_bytes": 1478,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-slow-3-candidate-05",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.204523708089255,
+      "exit_code": 0,
+      "stdout_bytes": 443,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-3-candidate-06",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "am",
+        "force-stop",
+        "com.example.jetnews"
+      ],
+      "seconds": 0.07348487491253763,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-3-candidate-06",
+      "argv": [
+        "android",
+        "run",
+        "--device=emulator-5556",
+        "--apks=/private/tmp/minimap-performance-20260922/apks/jetnews-baseline.apk"
+      ],
+      "seconds": 1.5826307910028845,
+      "exit_code": 0,
+      "stdout_bytes": 413,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-3-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.4140456250170246,
+      "exit_code": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 87,
+      "timed_out": false
+    },
+    {
+      "phase": "setup-slow-3-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.8999232079368085,
+      "exit_code": 0,
+      "stdout_bytes": 1893,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "slow-3-candidate-06",
+      "argv": [
+        "/private/tmp/minimap-performance-20260922/candidate-06/minimap",
+        "--serial",
+        "emulator-5556",
+        "go",
+        "interests",
+        "--expect",
+        "text=Topics",
+        "--expect",
+        "text=People",
+        "--expect",
+        "text=Publications"
+      ],
+      "seconds": 8.963276208029129,
+      "exit_code": 0,
+      "stdout_bytes": 857,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "oracle-slow-3-candidate-06",
+      "argv": [
+        "android",
+        "layout",
+        "--device=emulator-5556"
+      ],
+      "seconds": 3.476354958023876,
+      "exit_code": 0,
+      "stdout_bytes": 2217,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "restore-setting",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "settings",
+        "delete",
+        "global",
+        "animator_duration_scale"
+      ],
+      "seconds": 0.054612500010989606,
+      "exit_code": 0,
+      "stdout_bytes": 15,
+      "stderr_bytes": 0,
+      "timed_out": false
+    },
+    {
+      "phase": "restore-setting",
+      "argv": [
+        "adb",
+        "-s",
+        "emulator-5556",
+        "shell",
+        "settings",
+        "get",
+        "global",
+        "animator_duration_scale"
+      ],
+      "seconds": 0.052086333045735955,
+      "exit_code": 0,
+      "stdout_bytes": 5,
+      "stderr_bytes": 0,
+      "timed_out": false
+    }
+  ]
+}

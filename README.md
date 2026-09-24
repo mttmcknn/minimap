@@ -163,6 +163,10 @@ IDs survive relabeling, and runtime caches are scoped to the repo, device,
 package, process, and installed build. Commit `.minimap/` for teammates to reuse;
 run `minimap doctor --repo-only` in CI without an emulator.
 Recipes are validated before any input, and post-action learning requires stable UI.
+Direct `tap`, `scroll`, and `back` results include pre/post identity hashes and
+foreground package/activity metadata. They require two identical usable frames
+by default; use global `--stable-frames N` (`1`–`5`) to tune the requirement,
+with `1` explicitly accepting the first usable post-action frame.
 Editable/password content is redacted before caching and fingerprinting;
 obvious sensitive labels, intents, and selectors are rejected. Unmarked personal
 text still needs agent judgment.

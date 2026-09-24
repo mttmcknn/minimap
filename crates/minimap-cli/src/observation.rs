@@ -5,6 +5,13 @@ use minimap_schemas::PlaceBaseline;
 use serde_json::Value;
 use std::time::Duration;
 
+#[derive(Debug, Clone)]
+pub(super) struct StableObservation {
+    pub layout: Value,
+    pub identity_hashes: Vec<String>,
+    pub stable_frames_observed: usize,
+}
+
 pub(super) fn observe_layout<R: CommandRunner>(
     android: &mut AndroidCli<R>,
     diff: bool,
@@ -38,9 +45,61 @@ pub(super) fn observe_layout<R: CommandRunner>(
 /// destination is verified. Neither path turns an unsettled frame into a place.
 pub(super) fn observe_after_action<R: CommandRunner>(
     android: &mut AndroidCli<R>,
-    _previous: Option<&PlaceBaseline>,
-) -> Result<Value> {
-    observe_destination(android, |_| false, true)
+    previous: Option<&PlaceBaseline>,
+    stable_frames_required: usize,
+) -> Result<StableObservation> {
+    let stable_frames_required = stable_frames_required.clamp(1, 5);
+    let max_attempts = stable_frames_required + 3;
+    let previous_hash = previous.map(|baseline| baseline.identity_hash.as_str());
+    let mut identity_hashes = Vec::with_capacity(max_attempts);
+    let mut last_hash: Option<String> = None;
+    let mut stable_frames_observed = 0;
+
+    for attempt in 0..max_attempts {
+        let layout = observe_layout(android, false)?;
+        let baseline = fingerprint_layout(&layout);
+        if last_hash.as_deref() == Some(&baseline.identity_hash) {
+            stable_frames_observed += 1;
+        } else {
+            stable_frames_observed = 1;
+        }
+        last_hash = Some(baseline.identity_hash.clone());
+        identity_hashes.push(baseline.identity_hash.clone());
+
+        if detect_overlay(&layout).is_some() {
+            return Ok(StableObservation {
+                layout,
+                identity_hashes,
+                stable_frames_observed,
+            });
+        }
+
+        let still_pre_action = previous_hash == Some(baseline.identity_hash.as_str());
+        let stable =
+            fingerprint_usable(&baseline) && stable_frames_observed >= stable_frames_required;
+        // A delayed transition can yield the old screen for several consecutive
+        // frames. Do not call that stable until a different identity appears or
+        // the bounded capture window is exhausted. `--stable-frames 1` is the
+        // explicit opt-out and accepts the first usable post-action frame.
+        if stable
+            && (stable_frames_required == 1 || !still_pre_action || attempt + 1 == max_attempts)
+        {
+            return Ok(StableObservation {
+                layout,
+                identity_hashes,
+                stable_frames_observed,
+            });
+        }
+
+        if attempt + 1 < max_attempts {
+            android.pause(Duration::from_millis(super::action_settle_ms().min(250)))?;
+        }
+    }
+
+    Err(DriverError(format!(
+        "UI did not produce {stable_frames_required} identical usable post-action frames; no destination was learned"
+    ))
+    .into())
 }
 
 pub(super) fn observe_destination<R: CommandRunner>(
@@ -133,7 +192,45 @@ mod tests {
             json!([{"text":"Loading one"}]).to_string(),
             json!([{"text":"Loading two"}]).to_string(),
             json!([{"text":"Loading three"}]).to_string(),
+            json!([{"text":"Loading four"}]).to_string(),
+            json!([{"text":"Loading five"}]).to_string(),
         ]);
-        assert!(observe_after_action(&mut android, None).is_err());
+        assert!(observe_after_action(&mut android, None, 2).is_err());
+    }
+
+    #[test]
+    fn learning_waits_past_repeated_pre_action_frames_for_the_destination() {
+        let home = json!([{"text":"Home"}]);
+        let detail = json!([{"text":"Detail"}]);
+        let previous = fingerprint_layout(&home);
+        let mut android = android(vec![
+            home.to_string(),
+            home.to_string(),
+            detail.to_string(),
+            detail.to_string(),
+        ]);
+
+        let observed = observe_after_action(&mut android, Some(&previous), 2).unwrap();
+
+        assert_eq!(observed.layout, detail);
+        assert_eq!(observed.identity_hashes.len(), 4);
+        assert_eq!(observed.stable_frames_observed, 2);
+        assert_ne!(observed.identity_hashes[1], observed.identity_hashes[2]);
+    }
+
+    #[test]
+    fn learning_can_require_three_identical_frames() {
+        let target = json!([{"text":"Ready"}]);
+        let mut android = android(vec![
+            target.to_string(),
+            target.to_string(),
+            target.to_string(),
+        ]);
+
+        let observed = observe_after_action(&mut android, None, 3).unwrap();
+
+        assert_eq!(observed.layout, target);
+        assert_eq!(observed.identity_hashes.len(), 3);
+        assert_eq!(observed.stable_frames_observed, 3);
     }
 }

@@ -40,6 +40,12 @@ pub struct TapPoint {
     pub y: i64,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct ForegroundWindow {
+    pub package: String,
+    pub activity: String,
+}
+
 pub fn parse_input_tap(output: &str) -> Result<TapPoint> {
     let words: Vec<_> = output.split_whitespace().collect();
     for window in words.windows(4) {
@@ -206,18 +212,24 @@ impl<R: CommandRunner> Adb<R> {
         self.cache_context.as_deref()
     }
 
-    pub fn ensure_foreground(&mut self) -> Result<()> {
-        let Some(expected) = self.expected_package.clone() else {
-            return Ok(());
-        };
+    pub fn foreground_window(&mut self) -> Result<ForegroundWindow> {
         let mut args = self.base_args();
         args.extend(["shell".into(), "dumpsys".into(), "window".into()]);
         let output = run_checked(&mut self.runner, args, &[])?;
-        let actual = foreground_package(&output.stdout);
-        if actual.as_deref() != Some(expected.as_str()) {
-            return Err(DriverError(format!("Expected foreground app {expected}; observed {}. Restore the intended app before continuing.", actual.as_deref().unwrap_or("unknown"))).into());
+        let actual = parse_foreground_window(&output.stdout);
+        if let Some(expected) = self.expected_package.as_deref() {
+            if actual.as_ref().map(|window| window.package.as_str()) != Some(expected) {
+                return Err(DriverError(format!("Expected foreground app {expected}; observed {}. Restore the intended app before continuing.", actual.as_ref().map(|window| window.package.as_str()).unwrap_or("unknown"))).into());
+            }
         }
-        Ok(())
+        actual.context("Could not identify the foreground package/activity")
+    }
+
+    pub fn ensure_foreground(&mut self) -> Result<()> {
+        if self.expected_package.is_none() {
+            return Ok(());
+        }
+        self.foreground_window().map(|_| ())
     }
 
     /// The adb invocation prefix: the binary plus `-s <serial>` when a serial
@@ -309,18 +321,38 @@ impl<R: CommandRunner> Adb<R> {
     }
 }
 
-pub fn foreground_package(output: &str) -> Option<String> {
+pub fn parse_foreground_window(output: &str) -> Option<ForegroundWindow> {
     let focus = output
         .lines()
-        .find(|line| line.contains("mCurrentFocus="))?;
+        .find(|line| line.contains("mCurrentFocus=") || line.contains("mResumedActivity:"))?;
     focus.split_whitespace().find_map(|word| {
-        let (package, _) = word.split_once('/')?;
-        (!package.is_empty()
-            && package
-                .chars()
-                .all(|ch| ch.is_ascii_alphanumeric() || ch == '.' || ch == '_'))
-        .then(|| package.to_string())
+        let component = word.trim_matches(|ch: char| {
+            !ch.is_ascii_alphanumeric() && ch != '.' && ch != '_' && ch != '/' && ch != '$'
+        });
+        let (package, activity) = component.split_once('/')?;
+        let valid = |value: &str| {
+            !value.is_empty()
+                && value
+                    .chars()
+                    .all(|ch| ch.is_ascii_alphanumeric() || ch == '.' || ch == '_' || ch == '$')
+        };
+        if !valid(package) || !valid(activity) {
+            return None;
+        }
+        let activity = if activity.starts_with('.') {
+            format!("{package}{activity}")
+        } else {
+            activity.to_string()
+        };
+        Some(ForegroundWindow {
+            package: package.to_string(),
+            activity,
+        })
     })
+}
+
+pub fn foreground_package(output: &str) -> Option<String> {
+    parse_foreground_window(output).map(|window| window.package)
 }
 
 /// Parse `adb shell wm size` output. When `Override size:` is present it wins
@@ -847,6 +879,26 @@ mod tests {
         );
         assert!(parse_center_string("1006,147").is_none());
         assert!(parse_center_string("[abc,def]").is_none());
+    }
+
+    #[test]
+    fn foreground_window_reports_package_and_expanded_activity() {
+        assert_eq!(
+            parse_foreground_window("mCurrentFocus=Window{42 u0 com.example.app/.MainActivity}\n"),
+            Some(ForegroundWindow {
+                package: "com.example.app".into(),
+                activity: "com.example.app.MainActivity".into(),
+            })
+        );
+        assert_eq!(
+            parse_foreground_window(
+                "mResumedActivity: ActivityRecord{a1 u0 com.example.app/com.example.Detail t8}\n"
+            ),
+            Some(ForegroundWindow {
+                package: "com.example.app".into(),
+                activity: "com.example.Detail".into(),
+            })
+        );
     }
 
     #[test]

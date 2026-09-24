@@ -1,13 +1,13 @@
 mod budget;
 mod navigation;
 mod observation;
-use observation::{observe_after_action, observe_layout};
+use observation::{observe_after_action, observe_layout, StableObservation};
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use minimap_android::{
-    parse_input_tap, resolve_selector_point, Adb, AndroidCli, CommandRunner, SubprocessRunner,
-    TapPoint,
+    parse_input_tap, resolve_selector_point, Adb, AndroidCli, CommandRunner, ForegroundWindow,
+    SubprocessRunner, TapPoint,
 };
 use minimap_core::{
     detect_overlay, fingerprint_layout, fingerprint_usable, match_place, normalize_label,
@@ -54,6 +54,10 @@ struct Cli {
     /// Continue a goal using the token returned in data.recovery.
     #[arg(long, global = true)]
     recovery: Option<String>,
+    /// Consecutive identical usable frames required after a direct UI action.
+    /// Set to 1 to accept the first usable post-action frame.
+    #[arg(long, global = true, default_value_t = 2, value_parser = clap::value_parser!(u8).range(1..=5))]
+    stable_frames: u8,
     #[command(subcommand)]
     command: Commands,
 }
@@ -182,6 +186,7 @@ struct TapRequest<'a> {
     label: Option<&'a str>,
     reason: Option<&'a str>,
     allow_duplicate_label: bool,
+    stable_frames_required: usize,
 }
 
 fn main() {
@@ -248,6 +253,7 @@ fn run(mut cli: Cli) -> Result<i32> {
             })
             .unwrap_or(Duration::from_secs(2))
     };
+    let stable_frames_required = usize::from(cli.stable_frames);
     let serial = cli.serial;
     // Device first, repository second is the global lock order. OS locks are
     // released on error or process death and never enter the committed graph.
@@ -468,6 +474,7 @@ fn run(mut cli: Cli) -> Result<i32> {
                         label: label.as_deref(),
                         reason: reason.as_deref(),
                         allow_duplicate_label,
+                        stable_frames_required,
                     },
                 )?;
                 let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
@@ -477,7 +484,13 @@ fn run(mut cli: Cli) -> Result<i32> {
             Commands::Scroll { direction } => {
                 let mut android = AndroidCli::new(runner(), serial.clone());
                 let mut adb = configured_adb(&root, serial, deadline, budget.clone())?;
-                let result = scroll_result(&root, &mut android, &mut adb, &direction)?;
+                let result = scroll_result(
+                    &root,
+                    &mut android,
+                    &mut adb,
+                    &direction,
+                    stable_frames_required,
+                )?;
                 let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
                 print(&result);
                 Ok(code)
@@ -485,7 +498,7 @@ fn run(mut cli: Cli) -> Result<i32> {
             Commands::Back => {
                 let mut android = AndroidCli::new(runner(), serial.clone());
                 let mut adb = configured_adb(&root, serial, deadline, budget.clone())?;
-                let result = back_result(&root, &mut android, &mut adb)?;
+                let result = back_result(&root, &mut android, &mut adb, stable_frames_required)?;
                 let code = exit_code_for_status(result["status"].as_str().unwrap_or("ok"));
                 print(&result);
                 Ok(code)
@@ -543,6 +556,36 @@ fn action_settle_ms() -> u64 {
         .and_then(|value| value.parse::<u64>().ok())
         .unwrap_or(DEFAULT_ACTION_SETTLE_MS)
         .min(2_000)
+}
+
+fn action_observation_json(
+    foreground_before: &ForegroundWindow,
+    foreground_after: &ForegroundWindow,
+    pre_baseline: &PlaceBaseline,
+    post_baseline: &PlaceBaseline,
+    observed: &StableObservation,
+    stable_frames_required: usize,
+) -> Value {
+    let mut identity_changes_observed = 0;
+    let mut previous = pre_baseline.identity_hash.as_str();
+    for identity_hash in &observed.identity_hashes {
+        if identity_hash != previous {
+            identity_changes_observed += 1;
+        }
+        previous = identity_hash;
+    }
+    json!({
+        "foreground_before": foreground_before,
+        "foreground_after": foreground_after,
+        "pre_identity_hash": pre_baseline.identity_hash,
+        "post_identity_hash": post_baseline.identity_hash,
+        "post_identity_hashes": observed.identity_hashes,
+        "frames_observed": observed.identity_hashes.len(),
+        "stable_frames_required": stable_frames_required,
+        "stable_frames_observed": observed.stable_frames_observed,
+        "identity_changes_observed": identity_changes_observed,
+        "settled_after_identity_change": identity_changes_observed > 0
+    })
 }
 
 fn confirm_place_result<AR: CommandRunner, DR: CommandRunner>(
@@ -1037,6 +1080,7 @@ fn record_tap<AR: CommandRunner, DR: CommandRunner>(
 
     let pre_layout = observe_layout(android, false)?;
     let pre_orientation = orient_layout(root, &pre_layout, None, false, false, adb)?;
+    let foreground_before = adb.foreground_window()?;
     let pre_pending = load_pending(root, adb)?;
     let source_place = match pre_orientation.matched_place.clone() {
         Some(place) => place,
@@ -1107,16 +1151,29 @@ fn record_tap<AR: CommandRunner, DR: CommandRunner>(
             .as_ref()
             .and_then(|pending| pending.intent.as_deref())
     });
-    let post_layout = observe_after_action(android, Some(&pre_orientation.baseline))?;
-    adb.ensure_foreground()?;
+    let post_observation = observe_after_action(
+        android,
+        Some(&pre_orientation.baseline),
+        request.stable_frames_required,
+    )?;
+    let post_layout = post_observation.layout.clone();
+    let foreground_after = adb.foreground_window()?;
     let post_baseline = fingerprint_layout(&post_layout);
+    let action_observation = action_observation_json(
+        &foreground_before,
+        &foreground_after,
+        &pre_orientation.baseline,
+        &post_baseline,
+        &post_observation,
+        request.stable_frames_required,
+    );
     if let Some(reason) = detect_overlay(&post_layout) {
         clear_pending(root, adb)?;
         clear_session_place(root, adb)?;
         return Ok(result_with_data(
             "blocked_by_overlay",
             &reason,
-            json!({"reason": reason, "changed_graph": !pre_orientation.changed_files.is_empty(),
+            json!({"reason": reason, "observation": action_observation, "changed_graph": !pre_orientation.changed_files.is_empty(),
                    "changed_files": changed_files_json(&pre_orientation.changed_files)}),
         ));
     }
@@ -1129,7 +1186,7 @@ fn record_tap<AR: CommandRunner, DR: CommandRunner>(
         return Ok(result_with_data(
             "ambiguous",
             "destination matches multiple places; inspect fresh UI before learning",
-            json!({"changed_graph": !changed_files.is_empty(), "changed_files": changed_files_json(&changed_files)}),
+            json!({"observation": action_observation, "changed_graph": !changed_files.is_empty(), "changed_files": changed_files_json(&changed_files)}),
         ));
     }
     let matched_post = if matches!(post_match.status.as_str(), "unknown" | "ambiguous") {
@@ -1169,6 +1226,7 @@ fn record_tap<AR: CommandRunner, DR: CommandRunner>(
             "tap retained in the pending transition; destination unchanged",
             json!({
                 "source": source_place.slug,
+                "observation": action_observation,
                 "changed_graph": false,
                 "changed_files": []
             }),
@@ -1192,6 +1250,7 @@ fn record_tap<AR: CommandRunner, DR: CommandRunner>(
                         json!({
                             "requested_label": slug,
                             "observed": observed.slug,
+                            "observation": action_observation,
                             "changed_graph": false,
                             "changed_files": []
                         }),
@@ -1207,7 +1266,7 @@ fn record_tap<AR: CommandRunner, DR: CommandRunner>(
                         return Ok(result_with_data(
                             "unknown",
                             "destination layout has no usable fingerprint",
-                            json!({"changed_graph": false, "changed_files": []}),
+                            json!({"observation": action_observation, "changed_graph": false, "changed_files": []}),
                         ));
                     }
                     if remember_place_observation(&mut target, &post_baseline) {
@@ -1228,6 +1287,7 @@ fn record_tap<AR: CommandRunner, DR: CommandRunner>(
                             json!({
                                 "requested_label": slug,
                                 "collides_with": target.slug,
+                                "observation": action_observation,
                                 "changed_graph": false,
                                 "changed_files": []
                             }),
@@ -1238,7 +1298,7 @@ fn record_tap<AR: CommandRunner, DR: CommandRunner>(
                         return Ok(result_with_data(
                             "unknown",
                             "destination layout has no usable fingerprint",
-                            json!({"changed_graph": false, "changed_files": []}),
+                            json!({"observation": action_observation, "changed_graph": false, "changed_files": []}),
                         ));
                     }
                     let unique = unique_label(&graph, label, &slug);
@@ -1254,6 +1314,7 @@ fn record_tap<AR: CommandRunner, DR: CommandRunner>(
                         json!({
                             "requested_label": slug,
                             "observed": observed.slug,
+                            "observation": action_observation,
                             "changed_graph": false,
                             "changed_files": []
                         }),
@@ -1265,7 +1326,7 @@ fn record_tap<AR: CommandRunner, DR: CommandRunner>(
                         return Ok(result_with_data(
                             "unknown",
                             "destination layout has no usable fingerprint",
-                            json!({"changed_graph": false, "changed_files": []}),
+                            json!({"observation": action_observation, "changed_graph": false, "changed_files": []}),
                         ));
                     }
                     let place = new_place(&graph, label, &post_baseline);
@@ -1285,6 +1346,7 @@ fn record_tap<AR: CommandRunner, DR: CommandRunner>(
                         "a blocking overlay (e.g. a permission dialog) intercepted the transition; no edge recorded",
                         json!({
                             "reason": reason,
+                            "observation": action_observation,
                             "changed_graph": false,
                             "changed_files": []
                         }),
@@ -1306,6 +1368,7 @@ fn record_tap<AR: CommandRunner, DR: CommandRunner>(
                     "tap reached an unknown destination; rerun whereami --label to commit it",
                     json!({
                         "source": source_place.slug,
+                        "observation": action_observation,
                         "changed_graph": false,
                         "changed_files": []
                     }),
@@ -1337,6 +1400,7 @@ fn record_tap<AR: CommandRunner, DR: CommandRunner>(
             "from": edge_source.slug,
             "to": destination.slug,
             "edge": edge.id,
+            "observation": action_observation,
             "changed_graph": !changed_files.is_empty(),
             "changed_files": changed_files_json(&changed_files)
         }),
@@ -1432,12 +1496,13 @@ fn scroll_result<AR: CommandRunner, DR: CommandRunner>(
     android: &mut AndroidCli<AR>,
     adb: &mut Adb<DR>,
     direction: &str,
+    stable_frames_required: usize,
 ) -> Result<Value> {
     anyhow::ensure!(
         ["up", "down", "left", "right"].contains(&direction),
         "unsupported scroll direction"
     );
-    let result = record_scroll(root, android, adb, direction);
+    let result = record_scroll(root, android, adb, direction, stable_frames_required);
     action_outcome(root, adb, result)
 }
 
@@ -1446,9 +1511,11 @@ fn record_scroll<AR: CommandRunner, DR: CommandRunner>(
     android: &mut AndroidCli<AR>,
     adb: &mut Adb<DR>,
     direction: &str,
+    stable_frames_required: usize,
 ) -> Result<Value> {
     let pre_layout = observe_layout(android, false)?;
     let pre_orientation = orient_layout(root, &pre_layout, None, false, false, adb)?;
+    let foreground_before = adb.foreground_window()?;
     let pending = load_pending(root, adb)?.filter(|pending| {
         pending.destination.identity_hash == pre_orientation.baseline.identity_hash
     });
@@ -1460,9 +1527,22 @@ fn record_scroll<AR: CommandRunner, DR: CommandRunner>(
     let viewport = adb.display_size()?;
     let (sx, sy, ex, ey) = swipe_for_direction(direction, viewport);
     adb.swipe(sx, sy, ex, ey, 350)?;
-    let post_layout = observe_after_action(android, Some(&pre_orientation.baseline))?;
-    adb.ensure_foreground()?;
+    let post_observation = observe_after_action(
+        android,
+        Some(&pre_orientation.baseline),
+        stable_frames_required,
+    )?;
+    let post_layout = post_observation.layout.clone();
+    let foreground_after = adb.foreground_window()?;
     let post_orientation = orient_layout(root, &post_layout, None, false, true, adb)?;
+    let action_observation = action_observation_json(
+        &foreground_before,
+        &foreground_after,
+        &pre_orientation.baseline,
+        &post_orientation.baseline,
+        &post_observation,
+        stable_frames_required,
+    );
     if matches!(
         post_orientation.status.as_str(),
         "ambiguous" | "blocked_by_overlay"
@@ -1470,7 +1550,7 @@ fn record_scroll<AR: CommandRunner, DR: CommandRunner>(
         return Ok(result_with_data(
             &post_orientation.status,
             "fresh observation requires agent recovery",
-            json!({"changed_graph": false, "changed_files": []}),
+            json!({"observation": action_observation, "changed_graph": false, "changed_files": []}),
         ));
     }
     let step = ActionStep {
@@ -1511,6 +1591,7 @@ fn record_scroll<AR: CommandRunner, DR: CommandRunner>(
                     "from": source.slug,
                     "to": dest.slug,
                     "edge": edge.id,
+                    "observation": action_observation,
                     "changed_graph": !paths.is_empty(),
                     "changed_files": changed_files_json(&paths)
                 }),
@@ -1533,6 +1614,7 @@ fn record_scroll<AR: CommandRunner, DR: CommandRunner>(
         "scroll executed",
         json!({
             "place": post_orientation.matched_place.map(|place| place.slug),
+            "observation": action_observation,
             "changed_graph": !post_orientation.changed_files.is_empty(),
             "changed_files": changed_files_json(&post_orientation.changed_files)
         }),
@@ -1543,8 +1625,9 @@ fn back_result<AR: CommandRunner, DR: CommandRunner>(
     root: &Path,
     android: &mut AndroidCli<AR>,
     adb: &mut Adb<DR>,
+    stable_frames_required: usize,
 ) -> Result<Value> {
-    let result = record_back(root, android, adb);
+    let result = record_back(root, android, adb, stable_frames_required);
     action_outcome(root, adb, result)
 }
 
@@ -1552,14 +1635,29 @@ fn record_back<AR: CommandRunner, DR: CommandRunner>(
     root: &Path,
     android: &mut AndroidCli<AR>,
     adb: &mut Adb<DR>,
+    stable_frames_required: usize,
 ) -> Result<Value> {
     clear_pending(root, adb)?;
     let pre_layout = observe_layout(android, false)?;
     let pre_orientation = orient_layout(root, &pre_layout, None, false, false, adb)?;
+    let foreground_before = adb.foreground_window()?;
     adb.back()?;
-    let post_layout = observe_after_action(android, Some(&pre_orientation.baseline))?;
-    adb.ensure_foreground()?;
+    let post_observation = observe_after_action(
+        android,
+        Some(&pre_orientation.baseline),
+        stable_frames_required,
+    )?;
+    let post_layout = post_observation.layout.clone();
+    let foreground_after = adb.foreground_window()?;
     let post_orientation = orient_layout(root, &post_layout, None, false, true, adb)?;
+    let action_observation = action_observation_json(
+        &foreground_before,
+        &foreground_after,
+        &pre_orientation.baseline,
+        &post_orientation.baseline,
+        &post_observation,
+        stable_frames_required,
+    );
     if matches!(
         post_orientation.status.as_str(),
         "ambiguous" | "blocked_by_overlay"
@@ -1567,7 +1665,7 @@ fn record_back<AR: CommandRunner, DR: CommandRunner>(
         return Ok(result_with_data(
             &post_orientation.status,
             "fresh observation requires agent recovery",
-            json!({"changed_graph": false, "changed_files": []}),
+            json!({"observation": action_observation, "changed_graph": false, "changed_files": []}),
         ));
     }
     if let (Some(source), Some(dest)) = (
@@ -1603,6 +1701,7 @@ fn record_back<AR: CommandRunner, DR: CommandRunner>(
                     "from": source.slug,
                     "to": dest.slug,
                     "edge": edge.id,
+                    "observation": action_observation,
                     "changed_graph": !paths.is_empty(),
                     "changed_files": changed_files_json(&paths)
                 }),
@@ -1615,6 +1714,7 @@ fn record_back<AR: CommandRunner, DR: CommandRunner>(
         "back executed",
         json!({
             "place": post_orientation.matched_place.map(|place| place.slug),
+            "observation": action_observation,
             "changed_graph": !post_orientation.changed_files.is_empty(),
             "changed_files": changed_files_json(&post_orientation.changed_files)
         }),

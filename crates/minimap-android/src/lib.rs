@@ -310,17 +310,27 @@ impl<R: CommandRunner> Adb<R> {
 }
 
 pub fn foreground_package(output: &str) -> Option<String> {
-    let focus = output
+    let mut focused = None;
+    for line in output
         .lines()
-        .find(|line| line.contains("mCurrentFocus="))?;
-    focus.split_whitespace().find_map(|word| {
-        let (package, _) = word.split_once('/')?;
-        (!package.is_empty()
-            && package
-                .chars()
-                .all(|ch| ch.is_ascii_alphanumeric() || ch == '.' || ch == '_'))
-        .then(|| package.to_string())
-    })
+        .filter(|line| line.contains("mCurrentFocus="))
+    {
+        let package = line.split_whitespace().find_map(|word| {
+            let (package, _) = word.split_once('/')?;
+            (!package.is_empty()
+                && package
+                    .chars()
+                    .all(|ch| ch.is_ascii_alphanumeric() || ch == '.' || ch == '_'))
+            .then(|| package.to_string())
+        });
+        if let Some(package) = package {
+            if focused.as_ref().is_some_and(|current| current != &package) {
+                return None;
+            }
+            focused = Some(package);
+        }
+    }
+    focused
 }
 
 /// Parse `adb shell wm size` output. When `Override size:` is present it wins
@@ -723,6 +733,25 @@ mod tests {
         }
         assert!(parse_layout("[]").is_ok());
         assert!(parse_layout("{\"nodes\": []}").is_ok());
+    }
+
+    #[test]
+    fn foreground_package_requires_one_unique_parseable_focus() {
+        let settings =
+            "  mCurrentFocus=Window{e6abf53 u0 com.android.settings/com.android.settings.Settings}";
+        let launcher =
+            "  mCurrentFocus=Window{e6abf53 u0 com.android.launcher/com.android.launcher.Launcher}";
+
+        assert_eq!(foreground_package("mCurrentFocus=null"), None);
+        assert_eq!(
+            foreground_package(&format!("mCurrentFocus=null\n{settings}")),
+            Some("com.android.settings".into())
+        );
+        assert_eq!(
+            foreground_package(&format!("{settings}\n{settings}")),
+            Some("com.android.settings".into())
+        );
+        assert_eq!(foreground_package(&format!("{settings}\n{launcher}")), None);
     }
 
     #[derive(Default)]

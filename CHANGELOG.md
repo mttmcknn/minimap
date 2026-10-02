@@ -2,6 +2,10 @@
 
 All notable changes to Minimap are documented here.
 
+## 0.2.1 - 2026-10-02
+
+- Fix foreground-app detection on devices with multiple display focus entries, including mirrored foldables. Ignore empty focus entries, accept a single unique focused package, and refuse ambiguous packages before navigation.
+
 ## 0.2.0 - 2026-09-17
 
 Breaking redesign: Minimap is now a lean Android navigation-memory tool. The

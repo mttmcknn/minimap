@@ -429,6 +429,7 @@ fn go_replays_known_selector_edge() {
         .assert()
         .success();
 
+    hold_layout_until_tap(&bin, "home", "search", "200 300");
     let output = minimap(temp.path())
         .env("PATH", prepend_path(&bin))
         .args(["go", "search"])
@@ -496,6 +497,7 @@ fn go_replays_selector_edge_from_fresh_string_geometry_layout() {
         .assert()
         .success();
 
+    hold_layout_until_tap(&bin, "home_geo", "search_geo", "540 2200");
     let output = minimap(temp.path())
         .env("PATH", prepend_path(&bin))
         .args(["go", "search"])
@@ -1666,6 +1668,8 @@ COUNT=$((COUNT + 1))
 printf "%s" "$COUNT" > "$COUNT_FILE"
 ITEM="$(printf '{sequence}' | cut -d ' ' -f "$COUNT")"
 if [ -z "$ITEM" ]; then ITEM="$(printf '{sequence}' | awk '{{print $NF}}')"; fi
+CURRENT_FILE="$(dirname "$0")/android-current"
+if [ -f "$CURRENT_FILE" ]; then ITEM=$(cat "$CURRENT_FILE"); fi
 if [ "$1" = "layout" ]; then
   case "$ITEM" in
     home)
@@ -1736,6 +1740,14 @@ fn write_adb_script(bin: &Path) {
     write_adb_script_with_size(bin, "1080x2400");
 }
 
+/// A replay fixture changes screens only after the correct input, allowing
+/// any number of fresh observations without accidentally navigating the app.
+fn hold_layout_until_tap(bin: &Path, source: &str, destination: &str, point: &str) {
+    fs::write(bin.join("android-current"), source).unwrap();
+    fs::write(bin.join("android-next"), destination).unwrap();
+    fs::write(bin.join("expected-tap"), point).unwrap();
+}
+
 /// Fake `adb` whose `wm size` reports a caller-chosen viewport. Used to record a
 /// geometry edge at one viewport and replay it at another (see the viewport
 /// mismatch test).
@@ -1755,6 +1767,11 @@ if [ "$1" = "shell" ] && [ "$2" = "wm" ] && [ "$3" = "size" ]; then
   exit 0
 fi
 if [ "$1" = "shell" ] && [ "$2" = "input" ]; then
+  BIN="$(dirname "$0")"
+  if [ "$3" = "tap" ] && [ -f "$BIN/expected-tap" ]; then
+    test "$4 $5" = "$(cat "$BIN/expected-tap")" || exit 1
+    cp "$BIN/android-next" "$BIN/android-current"
+  fi
   exit 0
 fi
 exit 2

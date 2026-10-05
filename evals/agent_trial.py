@@ -16,6 +16,7 @@ import time
 
 from paired_navigation import SAMPLES, PairedEval, graph_size, verifies
 from compose_recovery import graph_digest
+from agent_cost import TOKEN_FIELDS, cost_bounds, usage_from_events
 
 BRIDGE_CLIENT = '''#!/usr/bin/env python3
 import json,sys,time,uuid
@@ -82,7 +83,7 @@ def prepare(root, arm, sample, source, seed):
         assert seed and (seed / ".minimap").is_dir(), "Reused arm requires a verified seed"
         shutil.copytree(seed / ".minimap", root / ".minimap")
     common = f"""Navigate the running {sample} Android sample to {spec['target']} and verify these visible requirements: {', '.join(spec['checks'])}.
-The app begins at its home screen. Work only in this isolated directory and use the device bridge below for ALL Android actions. Do not launch or reset apps, inspect other directories, use external tools/services, edit app source, send messages, or change account/system settings. Matching application source, when supplied, is in app-source. You may read it with ordinary local file tools. Do not ask the user questions. Keep routine navigation/recovery quiet. Preserve the intended destination; if blocked, return a truthful result. Alert only for a reproduced product defect corroborated in matching source, with a file/line reference. The controller independently checks the final screen and graph. You have 180 seconds and 32 inputs for the entire task.
+The app begins at its home screen. Work only in this isolated directory and use the device bridge below for ALL Android actions. Do not launch or reset apps, inspect other directories, use external tools/services, edit app source, send messages, change account/system settings, or start/delegate to other agents. Matching application source, when supplied, is in app-source. You may read it with ordinary local file tools. Do not ask the user questions. Keep routine navigation/recovery quiet. Preserve the intended destination; if blocked, return a truthful result. Alert only for a reproduced product defect corroborated in matching source, with a file/line reference. The controller independently checks the final screen and graph. You have 180 seconds and 32 inputs for the entire task.
 
 Call the bridge by running: python3 evalctl.py '<JSON object>'
 Each call must complete before the next. Responses contain exit_code, stdout, and stderr. You may inspect the bridge documentation here, but do not edit the bridge or create device commands outside it. Return the requested final JSON schema after finishing.
@@ -106,20 +107,6 @@ Canonical Minimap skill:
 """
     (root / "PROMPT.md").write_text(common + instructions)
     return common + instructions
-
-
-def usage_from_events(path):
-    totals = {}
-    for line in path.read_text().splitlines():
-        try:
-            event = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if event.get("type") == "turn.completed" and isinstance(event.get("usage"), dict):
-            for key, value in event["usage"].items():
-                if isinstance(value, int):
-                    totals[key] = totals.get(key, 0) + value
-    return totals or None
 
 
 class AgentEval(PairedEval):
@@ -169,7 +156,12 @@ class AgentEval(PairedEval):
         prompt = prepare(root, args.arm, args.sample, args.source, args.seed)
         self.metadata.update({"suite": "controlled-v1-agent", "arm": args.arm, "sample": args.sample,
                               "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(), "deadline_seconds": 180,
-                              "input_limit": 32, "case_id": args.case_id})
+                              "input_limit": 32, "case_id": args.case_id,
+                              "model": args.model, "reasoning_effort": args.reasoning,
+                              "service_tier": args.service_tier,
+                              "ignore_user_config": args.ignore_user_config})
+        self.metadata["api_level"] = self.run("environment", ["adb", "-s", args.serial, "shell", "getprop", "ro.build.version.sdk"]).strip()
+        self.metadata["codex_version"] = self.run("environment", ["codex", "--version"]).strip()
         self.metadata["graph_before"] = graph_digest(root)
         self.run("deployment", ["android", "run", f"--device={args.serial}", f"--apks={args.apk}"])
         self.restart(spec)
@@ -182,7 +174,16 @@ class AgentEval(PairedEval):
         self.agent_deadline = start + 180
         argv = ["codex", "exec", "--json", "--ephemeral", "--sandbox", "workspace-write", "--skip-git-repo-check",
                 "--cd", str(root), "--output-schema", str(root / "result.schema.json"),
-                "--output-last-message", str(root / "answer.json"), "-"]
+                "--output-last-message", str(root / "answer.json")]
+        if args.ignore_user_config:
+            argv.append("--ignore-user-config")
+        if args.model:
+            argv.extend(["--model", args.model])
+        if args.reasoning:
+            argv.extend(["-c", "model_reasoning_effort=" + json.dumps(args.reasoning)])
+        if args.service_tier:
+            argv.extend(["-c", "service_tier=" + json.dumps(args.service_tier)])
+        argv.append("-")
         self.metadata["codex_argv"] = argv
         timed_out = False
         with (root / "events.jsonl").open("w") as events, (root / "agent.stderr").open("w") as errors:
@@ -232,8 +233,10 @@ class AgentEval(PairedEval):
         if answer is not None and (not isinstance(answer, dict) or answer.get("outcome") not in SCHEMA["properties"]["outcome"]["enum"]):
             answer_error = "Agent answer does not satisfy the outcome schema"
         reported = isinstance(answer, dict) and answer.get("outcome") == "completed"
+        usage = usage_from_events(root / "events.jsonl") if not timed_out and process.returncode == 0 else None
         self.metadata["agent_result"] = {"answer": answer, "exit_code": process.returncode, "timed_out": timed_out,
-                                        "elapsed_seconds": elapsed, "usage": usage_from_events(root / "events.jsonl"),
+                                        "elapsed_seconds": elapsed,
+                                        "usage": {key: usage.get(key) for key in TOKEN_FIELDS} if usage is not None else None,
                                         "oracle_reached_target": reached,
                                         "false_success": reported and not reached if reached is not None else None,
                                         "answer_error": answer_error, "oracle_error": oracle_error,
@@ -241,6 +244,14 @@ class AgentEval(PairedEval):
                                         "graph_after": graph_digest(root), "graph": graph_size(root),
                                         "tool_cost": self.measure("agent-tool")}
         self.metadata["graph_unchanged"] = self.metadata["graph_before"] == graph_digest(root)
+        self.metadata["agent_result"]["api_equivalent_cost"] = None
+        if args.prices:
+            prices = json.loads(args.prices.read_text())
+            self.metadata["price_record"] = prices
+            self.metadata["price_record_sha256"] = hashlib.sha256(args.prices.read_bytes()).hexdigest()
+            self.metadata["agent_result"]["api_equivalent_cost"] = cost_bounds(
+                usage, prices, args.model, args.service_tier,
+            )
 
 
 def main():
@@ -255,11 +266,19 @@ def main():
     parser.add_argument("--sample", choices=list(SAMPLES), required=True)
     parser.add_argument("--arm", choices=["raw", "new_graph", "reused_graph"], required=True)
     parser.add_argument("--case-id", default="baseline")
+    parser.add_argument("--model", help="Pin an explicitly selected benchmark model")
+    parser.add_argument("--reasoning", help="Pin the benchmark reasoning setting")
+    parser.add_argument("--service-tier", help="Pin the benchmark service tier for price modeling")
+    parser.add_argument("--prices", type=Path, help="Dated price record for conditional API-equivalent cost bounds")
+    parser.add_argument("--ignore-user-config", action="store_true",
+                        help="Exclude unrelated user-configured integrations; preserves authentication and execution rules")
     parser.add_argument("--startup-seconds", type=float, default=30)
     args = parser.parse_args()
+    if args.ignore_user_config and not all((args.model, args.reasoning, args.service_tier)):
+        parser.error("Controlled config requires an explicit model, reasoning setting, and service tier")
     assert args.serial.startswith("emulator-")
     assert 0 < args.startup_seconds <= 60
-    for name in ["binary", "apk", "source", "seed", "output"]:
+    for name in ["binary", "apk", "source", "seed", "output", "prices"]:
         value = getattr(args, name)
         if value is not None:
             setattr(args, name, value.resolve())

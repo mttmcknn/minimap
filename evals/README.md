@@ -13,6 +13,93 @@ effects, and learning-cost projections with explicit skill-loading overhead.
 They include PNG/SVG exports and portable CSV/JSON data; they do not claim
 measured model usage or billing savings.
 
+## Saved-route performance and AI cost
+
+[PERFORMANCE_V2.md](PERFORMANCE_V2.md) defines the September 22 experiment.
+It compares the known-route Android script, the frozen release, and the frozen
+performance candidate, using identical destinations and independent checks.
+Profiles and development pilots are kept separate from confirmation results.
+Run the two confirmation commands sequentially on a shared host:
+
+```sh
+python3 evals/replay_performance.py \
+  --baseline /absolute/path/to/released/minimap \
+  --candidate /absolute/path/to/candidate/minimap \
+  --apks /absolute/path/to/fixtures/apks \
+  --serial emulator-5556 --stage confirmation --repetitions 10 \
+  --output /absolute/path/to/confirmation-api36
+python3 evals/replay_performance.py \
+  --baseline /absolute/path/to/released/minimap \
+  --candidate /absolute/path/to/candidate/minimap \
+  --apks /absolute/path/to/fixtures/apks \
+  --serial emulator-5554 --stage confirmation --repetitions 10 --order-offset 1 \
+  --output /absolute/path/to/confirmation-api37
+python3 evals/analyze_replay.py \
+  /absolute/path/to/confirmation-api36/results.json \
+  /absolute/path/to/confirmation-api37/results.json \
+  --output /absolute/path/to/confirmation.json
+/tmp/minimap-chart-env/bin/python evals/replay_charts.py \
+  /absolute/path/to/confirmation.json --output /absolute/path/to/charts
+```
+
+Use `--stage pilot --repetitions 1` during development. Add `--profile` with
+`--stage profile` to locate subprocess overhead; these instrumented times
+cannot establish a speed claim. The analyzer rejects mixed binaries, protocols,
+or duplicate assignments. A confirmation claim requires all 180 assignments,
+correct destinations, unchanged graphs, and a lower paired median against both
+controls in every app/API case. Run `controlled_contracts.py` against each
+candidate cohort before publishing.
+
+Keep the host awake for the whole confirmation interval and audit its power
+events and elapsed wall time afterward. On macOS, `caffeinate -i` can hold a
+temporary idle-sleep assertion for the worker process. Suspended-host time can
+be missing from the monotonic subprocess clock, so an uninterrupted timing
+claim also requires a passing host-continuity audit. Retain interrupted runs
+separately instead of pooling them with a fresh cohort.
+
+Use `replay_charts.py --medians-only` for a readable overview alongside the
+full plot. Failed and incomplete cohorts are labeled explicitly in both views.
+Use `--paired` to show each verified matched comparison around a zero-savings
+line; slower candidate trips remain visible. Both members must pass to form a
+pair, and missing pairs remain in the full acceptance gate.
+To count the exact saved navigation text without launching a model:
+
+```sh
+/tmp/minimap-chart-env/bin/python evals/replay_text.py \
+  /absolute/path/to/confirmation.json \
+  --skill /absolute/path/to/frozen/minimap-app-navigation.md \
+  --output /absolute/path/to/tool-text.json
+/tmp/minimap-chart-env/bin/python evals/replay_charts.py \
+  /absolute/path/to/tool-text.json --text-tokens \
+  --output /absolute/path/to/text-charts
+```
+
+The optional `--raw-root` points to an unpacked evidence archive when the
+original logs have moved. This audit verifies report hashes and stream sizes,
+counts stdout and stderr once under both reference encodings, and keeps failed
+attempts in the denominator. Setup, grader output, and skill text stay separate
+from navigation totals. These text counts are not model usage or dollar savings.
+
+The separate 18-trial agent experiment measures full reported input and output,
+including cached input and reasoning when available. `agent_trial.py` accepts
+`--model`, `--reasoning`, `--service-tier`, and `--ignore-user-config` to hold
+settings constant. Pass a dated `--prices` record to estimate API-equivalent
+cost bounds. `agent_cost.py` keeps incomplete usage unknown and avoids counting
+cached input or reasoning twice. These are API price scenarios, never measured
+ChatGPT subscription charges. Agent trials require explicit authorization;
+preparing the experiment does not mean it has run.
+
+After collecting an authorized cohort, `analyze_agent.py --plan PLAN.json
+--runs RUN_DIRECTORY --prices PRICE_RECORD.json --output SUMMARY.json` audits
+the original usage events, prepared prompt, matching app source, starting graph,
+APK, model settings, and CLI version. The plan lists every assignment with its
+ID, sample, repeat, arm, prompt hash, and starting-graph hash; it also pins the
+binary, APK and price hashes, source-file hashes, device/API, model settings,
+and time/input limits. Store each trial under `RUN_DIRECTORY/<id>/results.json`
+with its original `trial/` evidence. Missing assignments remain in the planned
+denominator, and absent usage is never priced as zero. Cost bounds that overlap
+do not prove a saving. None of these analysis commands launches an agent.
+
 ## Controlled baseline suite
 
 [SUITE_V1.md](SUITE_V1.md) defines the hypotheses, control groups, matched trial
